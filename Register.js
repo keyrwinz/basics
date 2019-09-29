@@ -8,13 +8,15 @@ import { Api } from 'services';
 import { Routes, Color, Helper, BasicStyles } from 'common';
 import Header from './Header';
 import config from 'src/config';
-class Login extends Component {
+class Register extends Component {
   //Screen1 Component
   constructor(props){
     super(props);
     this.state = {
       username: null,
+      email: null,
       password: null,
+      confirmPassword: null,
       isLoading: false,
       token: null,
       error: 0
@@ -22,98 +24,15 @@ class Login extends Component {
   }
   
   componentDidMount(){
-    this.getData();
   }
 
-  test = () => {
-    if(config.TEST == true){
-      this.props.navigation.navigate('drawerStack');
-      return true;
-    }
-  }
 
   redirect = (route) => {
     this.props.navigation.navigate(route);
   }
-
-  login = () => {
-    this.test();
-    const { login } = this.props;
-    if(this.state.token != null){
-      this.setState({isLoading: true});
-      Api.getAuthUser(this.state.token, (response) => {
-        login(response, this.state.token);
-        let parameter = {
-          condition: [{
-            value: response.id,
-            clause: '=',
-            column: 'id'
-          }]
-        }
-        Api.request(Routes.accountRetrieve, parameter, userInfo => {
-          this.setState({isLoading: false});
-          if(userInfo.data.length > 0){
-            login(userInfo.data[0], this.state.token);
-            this.props.navigation.navigate('drawerStack');
-          }else{
-            login(null, null)
-          }
-        });
-      })
-    }
-  }
-
-  getData = async () => {
-    try {
-      const token = await AsyncStorage.getItem(Helper.APP_NAME + 'token');
-      if(token != null) {
-        this.setState({token});
-        this.login();
-      }
-    } catch(e) {
-      // error reading value
-    }
-  }
   
   submit(){
-    this.test();
-    const { username, password } = this.state;
-    const { login } = this.props;
-    if((username != null && username != '') && (password != null && password != '')){
-      this.setState({isLoading: true, error: 0});
-      // Login
-      Api.authenticate(username, password, (response) => {
-        if(response.error){
-          this.setState({error: 2, isLoading: false});
-        }
-        if(response.token){
-          const token = response.token;
-          Api.getAuthUser(response.token, (response) => {
-            login(response, token);
-            let parameter = {
-              condition: [{
-                value: response.id,
-                clause: '=',
-                column: 'id'
-              }]
-            }
-            Api.request(Routes.accountRetrieve, parameter, userInfo => {
-              this.setState({isLoading: false});
-              if(userInfo.data.length > 0){
-                login(userInfo.data[0], token);
-                this.props.navigation.navigate('drawerStack');
-              }else{
-                this.setState({error: 2})
-              }
-            });
-            
-          })
-        }
-      })
-      // this.props.navigation.navigate('drawerStack');
-    }else{
-      this.setState({error: 1});
-    }
+    const { username, email, password, confirmPassword } = this.state;
   }
 
   render() {
@@ -121,7 +40,7 @@ class Login extends Component {
     return (
       <ScrollView style={Style.ScrollView}>
         <View style={Style.MainContainer}>
-          <Header params={"Login"}></Header>
+          <Header params={"Register"}></Header>
 
           {error > 0 ? <View style={Style.messageContainer}>
             {error == 1 ? (
@@ -138,11 +57,26 @@ class Login extends Component {
               style={BasicStyles.formControl}
               onChangeText={(username) => this.setState({username})}
               value={this.state.username}
-              placeholder={'Username or Email'}
+              placeholder={'Username'}
+            />
+            
+            <TextInput
+              style={BasicStyles.formControl}
+              onChangeText={(email) => this.setState({email})}
+              value={this.state.username}
+              placeholder={'Email Address'}
             />
             <TextInput
               style={BasicStyles.formControl}
               onChangeText={(password) => this.setState({password})}
+              value={this.state.password}
+              placeholder={'********'}
+              secureTextEntry={true}
+            />
+            
+            <TextInput
+              style={BasicStyles.formControl}
+              onChangeText={(confirmPassword) => this.setState({confirmPassword})}
               value={this.state.password}
               placeholder={'********'}
               secureTextEntry={true}
@@ -152,20 +86,9 @@ class Login extends Component {
               onPress={() => this.submit()}
               underlayColor={Color.gray}>
               <Text style={BasicStyles.textWhite}>
-                Login
+                Register
               </Text>
             </TouchableHighlight>
-
-            
-            <TouchableHighlight
-              style={[BasicStyles.btn, BasicStyles.btnWarning]}
-              onPress={() => this.redirect('forgotPasswordStack')}
-              underlayColor={Color.gray}>
-              <Text style={BasicStyles.textWhite}>
-                Forgot your Password?
-              </Text>
-            </TouchableHighlight>
-            
 
             <View style={{
               height: 1,
@@ -181,14 +104,14 @@ class Login extends Component {
                 paddingTop: 10,
                 paddingBottom: 10,
                 color: Color.gray
-              }}>Don't have an account?</Text>
+              }}>Have an account Already?</Text>
             </View>
             <TouchableHighlight
               style={[BasicStyles.btn, BasicStyles.btnSecondary]}
-              onPress={() => this.redirect('registerStack')}
+              onPress={() => this.redirect('loginStack')}
               underlayColor={Color.gray}>
               <Text style={BasicStyles.textWhite}>
-                Register Now!
+                Login Now!
               </Text>
             </TouchableHighlight>
           </View>
@@ -213,4 +136,4 @@ const mapDispatchToProps = dispatch => {
 export default connect(
   mapStateToProps,
   mapDispatchToProps
-)(Login);
+)(Register);

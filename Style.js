@@ -15,7 +15,6 @@ export default {
     width: width,
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 50,
     marginTop: 100
   },
   LogoSize: {
