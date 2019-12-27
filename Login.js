@@ -4,7 +4,7 @@ import AsyncStorage from '@react-native-community/async-storage';
 import { View , TextInput , Image, TouchableHighlight, Text, ScrollView} from 'react-native';
 import Style from './Style.js';
 import { Spinner } from 'components';
-import { Api } from 'services';
+import Api from 'services/api/index.js';
 import { Routes, Color, Helper, BasicStyles } from 'common';
 import Header from './Header';
 import config from 'src/config';
@@ -36,6 +36,21 @@ class Login extends Component {
     this.props.navigation.navigate(route);
   }
 
+  retrieveUserData = (accountId) => {
+    const { setNotifications, setMessenger } = this.props;
+    let parameter = {
+      account_id: accountId
+    }
+    Api.request(Routes.notificationsRetrieve, parameter, notifications => {
+      setNotifications(notifications.size, notifications.data)
+      Api.request(Routes.messagesRetrieve, parameter, messages => {
+        setMessenger(messages.total_unread_messages, messages.data)
+        this.setState({isLoading: false});
+        this.props.navigation.navigate('drawerStack');
+      });
+    });
+  }
+
   login = () => {
     this.test();
     const { login } = this.props;
@@ -51,10 +66,9 @@ class Login extends Component {
           }]
         }
         Api.request(Routes.accountRetrieve, parameter, userInfo => {
-          this.setState({isLoading: false});
           if(userInfo.data.length > 0){
             login(userInfo.data[0], this.state.token);
-            this.props.navigation.navigate('drawerStack');
+            this.retrieveUserData(userInfo.data[0].id)
           }else{
             login(null, null)
           }
@@ -98,10 +112,9 @@ class Login extends Component {
               }]
             }
             Api.request(Routes.accountRetrieve, parameter, userInfo => {
-              this.setState({isLoading: false});
               if(userInfo.data.length > 0){
                 login(userInfo.data[0], token);
-                this.props.navigation.navigate('drawerStack');
+                this.retrieveUserData(userInfo.data[0].id)
               }else{
                 this.setState({error: 2})
               }
@@ -206,7 +219,9 @@ const mapDispatchToProps = dispatch => {
   const { actions } = require('@redux');
   return {
     login: (user, token) => dispatch(actions.login(user, token)),
-    logout: () => dispatch(actions.logout())
+    logout: () => dispatch(actions.logout()),
+    setNotifications: (unread, notifications) => dispatch(actions.setNotifications(unread, notifications)),
+    setMessenger: (unread, messages) => dispatch(actions.setMessenger(unread, messages))
   };
 };
 
