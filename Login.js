@@ -8,6 +8,7 @@ import Api from 'services/api/index.js';
 import { Routes, Color, Helper, BasicStyles } from 'common';
 import Header from './Header';
 import config from 'src/config';
+import Pusher from 'services/Pusher.js';
 class Login extends Component {
   //Screen1 Component
   constructor(props){
@@ -36,6 +37,35 @@ class Login extends Component {
     this.props.navigation.navigate(route);
   }
 
+  playAudio = () => {
+  }
+
+  managePusherResponse = (response) => {
+    const { user } = this.props.state;
+    const data = response.data;
+    if(user == null){
+      return;
+    }
+    if(response.type == Helper.pusher.notifications){
+      if(user.id == parseInt(data.to)){
+        const { notifications } = this.props.state;
+        const { updateNotifications } = this.props;
+        updateNotifications(1, data);
+        this.playAudio()
+      }
+    }else if(response.type == Helper.pusher.messages){
+      const { messagesOnGroup } = this.props.state;
+      const { updateMessagesOnGroup } = this.props;
+      if(parseInt(data.messenger_group_id) == messagesOnGroup.groupId &&
+        parseInt(data.account_id) != user.id){
+        this.playAudio();
+        updateMessagesOnGroup(data);
+      }
+    }else if(response.type == Helper.pusher.validation){
+      // add validation
+    }
+  }
+
   retrieveUserData = (accountId) => {
     const { setNotifications, setMessenger } = this.props;
     let parameter = {
@@ -46,6 +76,9 @@ class Login extends Component {
       Api.request(Routes.messagesRetrieve, parameter, messages => {
         setMessenger(messages.total_unread_messages, messages.data)
         this.setState({isLoading: false});
+        Pusher.listen(response => {
+          this.managePusherResponse(response)
+        });
         this.props.navigation.navigate('drawerStack');
       });
     });
@@ -223,6 +256,8 @@ const mapDispatchToProps = dispatch => {
     login: (user, token) => dispatch(actions.login(user, token)),
     logout: () => dispatch(actions.logout()),
     setNotifications: (unread, notifications) => dispatch(actions.setNotifications(unread, notifications)),
+    updateNotifications: (unread, notification) => dispatch(actions.updateNotifications(unread, notification)),
+    updateMessagesOnGroup: (message) => dispatch(actions.updateMessagesOnGroup(message)),
     setMessenger: (unread, messages) => dispatch(actions.setMessenger(unread, messages))
   };
 };
