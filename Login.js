@@ -70,6 +70,7 @@ class Login extends Component {
             login(userInfo.data[0], this.state.token);
             this.retrieveUserData(userInfo.data[0].id)
           }else{
+            this.setState({isLoading: false});
             login(null, null)
           }
         });
@@ -116,6 +117,7 @@ class Login extends Component {
                 login(userInfo.data[0], token);
                 this.retrieveUserData(userInfo.data[0].id)
               }else{
+                this.setState({isLoading: false});
                 this.setState({error: 2})
               }
             });
