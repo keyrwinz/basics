@@ -60,6 +60,7 @@ class Login extends Component {
         parseInt(data.account_id) != user.id){
         this.playAudio();
         updateMessagesOnGroup(data);
+        console.log('hi')
       }
     }else if(response.type == Helper.pusher.validation){
       // add validation
@@ -74,6 +75,7 @@ class Login extends Component {
     Api.request(Routes.notificationsRetrieve, parameter, notifications => {
       setNotifications(notifications.size, notifications.data)
       Api.request(Routes.messagesRetrieve, parameter, messages => {
+        console.log('messages', messages);
         setMessenger(messages.total_unread_messages, messages.data)
         this.setState({isLoading: false});
         Pusher.listen(response => {

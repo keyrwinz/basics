@@ -4,7 +4,7 @@ import AsyncStorage from '@react-native-community/async-storage';
 import { View , TextInput , Image, TouchableHighlight, Text, ScrollView} from 'react-native';
 import Style from './Style.js';
 import { Spinner } from 'components';
-import { Api } from 'services';
+import Api from 'services/api/index.js';
 import { Routes, Color, Helper, BasicStyles } from 'common';
 import Header from './Header';
 import config from 'src/config';
@@ -13,19 +13,19 @@ class Register extends Component {
   constructor(props){
     super(props);
     this.state = {
-      username: null,
-      email: null,
-      password: null,
-      confirmPassword: null,
+      username: '',
+      email: '',
+      password: '',
+      confirmPassword: '',
       isLoading: false,
       token: null,
-      error: 0
+      error: 0,
+      errorMessage: null
     };
   }
   
   componentDidMount(){
   }
-
 
   redirect = (route) => {
     this.props.navigation.navigate(route);
@@ -33,24 +33,86 @@ class Register extends Component {
   
   submit(){
     const { username, email, password, confirmPassword } = this.state;
+    if(this.validate() == false){
+      return
+    }
+    let parameter = {
+      username: username,
+      email: email,
+      password: password,
+      config: null,
+      account_type: 'USER',
+      referral_code: null,
+      status: 'ADMIN'
+    }
+    this.setState({isLoading: true})
+    Api.request(Routes.accountCreate, parameter, response => {
+      this.setState({isLoading: false})
+      if(response.error !== null){
+        if(response.error.status === 100){
+          let message = response.error.message
+          if(typeof message.username !== undefined && typeof message.username !== 'undefined'){
+            this.setState({errorMessage: message.username[0]})
+          }else if(typeof message.email !== undefined && typeof message.email !== 'undefined'){
+            this.setState({errorMessage: message.email[0]})
+          }
+        }else if(response.data !== null){
+          if(response.data > 0){
+            this.redirect('loginStack')
+          }
+        }
+      }
+    })
+  }
+
+  validate(){
+    const { username, email, password, confirmPassword } = this.state;
+    if(username.length >= 6 &&
+      email !== null &&
+      password !== null &&
+      password.length >= 6 &
+      password.localeCompare(confirmPassword) === 0 &&
+      Helper.validateEmail(email) === true){
+      return true
+    }else if(Helper.validateEmail(email) === false){
+      this.setState({errorMessage: 'You have entered an invalid email address.'})
+      return false
+    }else if(username.length < 6){
+      this.setState({errorMessage: 'Username must be atleast 6 characters.'})
+      return false
+    }else if(password.length < 6){
+       this.setState({errorMessage: 'Password must be atleast 6 characters'})
+       return false
+    }else if(password.localeCompare(confirmPassword) !== 0){
+       this.setState({errorMessage: 'Password did not matched'})
+       return false
+    }else{ 
+      this.setState({errorMessage: 'Please fill in all required fields.'})
+      return false
+    }
   }
 
   render() {
-    const { isLoading, error } = this.state;
+    const { isLoading, errorMessage } = this.state;
     return (
       <ScrollView style={Style.ScrollView}>
         <View style={Style.MainContainer}>
           <Header params={"Register"}></Header>
-
-          {error > 0 ? <View style={Style.messageContainer}>
-            {error == 1 ? (
-              <Text style={Style.messageText}>Please fill up the required fields.</Text>
-            ) : null}
-
-            {error == 2 ? (
-              <Text style={Style.messageText}>Username and password didn't matched.</Text>
-            ) : null}
-          </View> : null}
+          {
+            errorMessage != null && (
+              <View style={{
+                flexDirection: 'row',
+                  paddingTop: 10,
+                  paddingBottom: 10,
+              }}>
+                <Text style={[Style.messageText, {
+                  fontWeight: 'bold'
+                }]}>Oops! </Text>
+                <Text style={Style.messageText}>{errorMessage}</Text>
+              </View>
+            )
+          }
+          
           
           <View style={Style.TextContainer}>
             <TextInput
@@ -63,8 +125,9 @@ class Register extends Component {
             <TextInput
               style={BasicStyles.formControl}
               onChangeText={(email) => this.setState({email})}
-              value={this.state.username}
+              value={this.state.email}
               placeholder={'Email Address'}
+              keyboardType={'email-address'}
             />
             <TextInput
               style={BasicStyles.formControl}
@@ -77,7 +140,7 @@ class Register extends Component {
             <TextInput
               style={BasicStyles.formControl}
               onChangeText={(confirmPassword) => this.setState({confirmPassword})}
-              value={this.state.password}
+              value={this.state.confirmPassword}
               placeholder={'********'}
               secureTextEntry={true}
             />
