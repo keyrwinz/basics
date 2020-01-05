@@ -179,7 +179,7 @@ class Login extends Component {
             ) : null}
 
             {error == 2 ? (
-              <Text style={Style.messageText}>Username and password didn't matched.</Text>
+              <Text style={Style.messageText}>Username and password didn't match.</Text>
             ) : null}
           </View> : null}
           

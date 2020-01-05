@@ -81,10 +81,10 @@ class Register extends Component {
       this.setState({errorMessage: 'Username must be atleast 6 characters.'})
       return false
     }else if(password.length < 6){
-       this.setState({errorMessage: 'Password must be atleast 6 characters'})
+       this.setState({errorMessage: 'Password must be atleast 6 characters.'})
        return false
     }else if(password.localeCompare(confirmPassword) !== 0){
-       this.setState({errorMessage: 'Password did not matched'})
+       this.setState({errorMessage: 'Password did not match.'})
        return false
     }else{ 
       this.setState({errorMessage: 'Please fill in all required fields.'})
