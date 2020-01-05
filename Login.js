@@ -63,7 +63,11 @@ class Login extends Component {
         console.log('hi')
       }
     }else if(response.type == Helper.pusher.validation){
-      // add validation
+      const { setMessengerGroup } = this.props;
+      const { messengerGroup } = this.props.state;
+      if(messengerGroup != null && messengerGroup.id == data.id){
+        setMessengerGroup(data);
+      }
     }
   }
 
@@ -260,7 +264,8 @@ const mapDispatchToProps = dispatch => {
     setNotifications: (unread, notifications) => dispatch(actions.setNotifications(unread, notifications)),
     updateNotifications: (unread, notification) => dispatch(actions.updateNotifications(unread, notification)),
     updateMessagesOnGroup: (message) => dispatch(actions.updateMessagesOnGroup(message)),
-    setMessenger: (unread, messages) => dispatch(actions.setMessenger(unread, messages))
+    setMessenger: (unread, messages) => dispatch(actions.setMessenger(unread, messages)),
+    setMessengerGroup: (messengerGroup) => dispatch(actions.setMessengerGroup(messengerGroup))
   };
 };
 
