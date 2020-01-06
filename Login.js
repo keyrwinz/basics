@@ -60,13 +60,17 @@ class Login extends Component {
         parseInt(data.account_id) != user.id){
         this.playAudio();
         updateMessagesOnGroup(data);
-        console.log('hi')
       }
     }else if(response.type == Helper.pusher.validation){
-      const { setMessengerGroup } = this.props;
+      const { setMessengerGroup, setMessagesOnGroup } = this.props;
       const { messengerGroup } = this.props.state;
       if(messengerGroup != null && messengerGroup.id == data.id){
+        this.playAudio()
         setMessengerGroup(data);
+        setMessagesOnGroup({
+          groupId: data.id,
+          messages: data.messages
+        })
       }
     }
   }
@@ -85,6 +89,7 @@ class Login extends Component {
         Pusher.listen(response => {
           this.managePusherResponse(response)
         });
+        // this.props.navigation.replace('loginScreen')
         this.props.navigation.navigate('drawerStack');
       });
     });
@@ -265,7 +270,8 @@ const mapDispatchToProps = dispatch => {
     updateNotifications: (unread, notification) => dispatch(actions.updateNotifications(unread, notification)),
     updateMessagesOnGroup: (message) => dispatch(actions.updateMessagesOnGroup(message)),
     setMessenger: (unread, messages) => dispatch(actions.setMessenger(unread, messages)),
-    setMessengerGroup: (messengerGroup) => dispatch(actions.setMessengerGroup(messengerGroup))
+    setMessengerGroup: (messengerGroup) => dispatch(actions.setMessengerGroup(messengerGroup)),
+    setMessagesOnGroup: (messagesOnGroup) => dispatch(actions.setMessagesOnGroup(messagesOnGroup))
   };
 };
 
