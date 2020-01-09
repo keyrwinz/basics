@@ -8,15 +8,21 @@ import { Api } from 'services';
 import { Routes, Color, Helper, BasicStyles } from 'common';
 import Header from './Header';
 import config from 'src/config';
+import OtpModal from 'components/Modal/Otp.js';
 class ForgotPassword extends Component {
   //Screen1 Component
   constructor(props){
     super(props);
     this.state = {
-      username: null,
+      email: null,
       isLoading: false,
       token: null,
-      error: 0
+      errorMessage: null,
+      changeStep: 0,
+      password: null,
+      confirmPassword: null,
+      isOtpModal: false,
+      blockedFlag: true,
     };
   }
 
@@ -24,54 +30,176 @@ class ForgotPassword extends Component {
     this.props.navigation.navigate(route);
   }
   
-  submit(){
-    const { username } = this.state;
+
+
+  updateOtp = () => {
+    const { email } = this.state;
+    let parameter = {
+      email: email
+    }
+    // Api.request(Routes.notificationSettingOtp, parameter, response => {
+    //   this.setState({otpData: response})
+    //   this.props.onLoading(false);
+    //   if(response.error == null){
+    //     this.setState({blockedFlag: false, errorMessage: null})
+    //   }else{
+    //     this.setState({blockedFlag: true})
+    //     this.setState({errorMessage: response.error})
+    //   }
+    //   setTimeout(() => {
+    //     this.setState({isOtpModal: true})
+    //   }, 500)
+    // });
+    this.setState({
+      errorMessage: 'OTP is Temporarily disabled.'
+    })
+    setTimeout(() => {
+      this.setState({isOtpModal: true})
+    }, 100)
   }
 
+  submit(){
+    const { email } = this.state;
+    if(email === null){
+      this.setState({errorMessage: 'Email address is required.'})
+      return false
+    }
+    if(Helper.validateEmail(email) === false){
+      this.setState({errorMessage: 'You have entered an invalid email address.'})
+      return false
+    }
+    this.updateOtp()
+  }
+
+  resetPassword = () => {
+    const { password, confirmPassword } = this.state;
+    if(password == null || password == '' || confirmPassword == null || confirmPassword == ''){
+      this.setState({errorMessage: 'Please fill up the required fields.'})
+      return false
+    }
+    if(password.length < 6){
+       this.setState({errorMessage: 'Password must be atleast 6 characters.'})
+       return false
+    }
+    if(password.localeCompare(confirmPassword) !== 0){
+      this.setState({errorMessage: 'Password did not match.'})
+      return false
+    }
+
+    // update here
+  }
+
+  _changePassword = () => {
+    return (
+      <View>
+        <TextInput
+          style={BasicStyles.formControl}
+          onChangeText={(password) => this.setState({password})}
+          value={this.state.password}
+          placeholder={'New password'}
+          secureTextEntry={true}
+        />
+
+        <TextInput
+          style={BasicStyles.formControl}
+          onChangeText={(confirmPassword) => this.setState({confirmPassword})}
+          value={this.state.confirmPassword}
+          placeholder={'Confirm new password'}
+          secureTextEntry={true}
+        />
+
+        <TouchableHighlight
+          style={[BasicStyles.btn, BasicStyles.btnPrimary]}
+          onPress={() => this.resetPassword()}
+          underlayColor={Color.gray}>
+          <Text style={BasicStyles.textWhite}>
+            Reset
+          </Text>
+        </TouchableHighlight>
+      </View>
+    );    
+  }
+
+  _sendRequest = () => {
+    return (
+      <View>
+        <TextInput
+          style={BasicStyles.formControl}
+          onChangeText={(email) => this.setState({email})}
+          value={this.state.email}
+          placeholder={'Email Address'}
+          keyboardType={'email-address'}
+        />
+
+        <TouchableHighlight
+          style={[BasicStyles.btn, BasicStyles.btnPrimary]}
+          onPress={() => this.submit()}
+          underlayColor={Color.gray}>
+          <Text style={BasicStyles.textWhite}>
+            Request change
+          </Text>
+        </TouchableHighlight>
+      </View>
+    );
+  }
   render() {
-    const { isLoading, error } = this.state;
+    const { isLoading, errorMessage, changeStep } = this.state;
+    const { blockedFlag, isOtpModal  } = this.state;
     return (
       <ScrollView style={Style.ScrollView}>
         <View style={Style.MainContainer}>
-          <Header params={"Request"}></Header>
-
-          {error > 0 ? <View style={Style.messageContainer}>
-            {error == 1 ? (
-              <Text style={Style.messageText}>Please fill up the required fields.</Text>
-            ) : null}
-
-            {error == 2 ? (
-              <Text style={Style.messageText}>Username and password didn't matched.</Text>
-            ) : null}
-          </View> : null}
+          <Header params={"Request change password"}></Header>
+          {
+            errorMessage != null && (
+              <View style={{
+                flexDirection: 'row',
+                  paddingTop: 10,
+                  paddingBottom: 10,
+              }}>
+                <Text style={[Style.messageText, {
+                  fontWeight: 'bold'
+                }]}>Oops! </Text>
+                <Text style={Style.messageText}>{errorMessage}</Text>
+              </View>
+            )
+          }
           
           <View style={Style.TextContainer}>
-            <TextInput
-              style={BasicStyles.formControl}
-              onChangeText={(username) => this.setState({username})}
-              value={this.state.username}
-              placeholder={'Type Username or Email Address'}
-            />
-
-            <TouchableHighlight
-              style={[BasicStyles.btn, BasicStyles.btnPrimary]}
-              onPress={() => this.submit()}
-              underlayColor={Color.gray}>
-              <Text style={BasicStyles.textWhite}>
-                Send a request
-              </Text>
-            </TouchableHighlight>
-            
+            { changeStep == 0 && (this._sendRequest()) }
+            { changeStep == 1 && (this._changePassword()) }
+             <View style={{
+              justifyContent: 'center',
+              alignItems: 'center'
+            }}>
+              <Text style={{
+                paddingTop: 10,
+                paddingBottom: 10,
+                color: Color.gray
+              }}>Have an account Already?</Text>
+            </View>
             <TouchableHighlight
               style={[BasicStyles.btn, BasicStyles.btnSecondary]}
               onPress={() => this.redirect('loginStack')}
               underlayColor={Color.gray}>
               <Text style={BasicStyles.textWhite}>
-                Back
+                Login Now!
               </Text>
             </TouchableHighlight>
           </View>
         </View>
+        <OtpModal
+          visible={isOtpModal}
+          title={blockedFlag == false ? 'Authentication via OTP' : 'Blocked Account'}
+          actionLabel={{
+            yes: 'Authenticate',
+            no: 'Cancel'
+          }}
+          onCancel={() => this.setState({changeStep: 0, isOtpModal: false})}
+          onSuccess={() => this.setState({changeStep: 1, isOtpModal: false})}
+          onResend={() => this.updateOtp()}
+          error={errorMessage}
+          blockedFlag={blockedFlag}
+        ></OtpModal>
 
         {isLoading ? <Spinner mode="overlay"/> : null }
       </ScrollView>

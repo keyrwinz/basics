@@ -133,7 +133,7 @@ class Register extends Component {
               style={BasicStyles.formControl}
               onChangeText={(password) => this.setState({password})}
               value={this.state.password}
-              placeholder={'********'}
+              placeholder={'Password'}
               secureTextEntry={true}
             />
             
@@ -141,7 +141,7 @@ class Register extends Component {
               style={BasicStyles.formControl}
               onChangeText={(confirmPassword) => this.setState({confirmPassword})}
               value={this.state.confirmPassword}
-              placeholder={'********'}
+              placeholder={'Confirm Password'}
               secureTextEntry={true}
             />
             <TouchableHighlight
