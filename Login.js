@@ -4,11 +4,13 @@ import AsyncStorage from '@react-native-community/async-storage';
 import { View , TextInput , Image, TouchableHighlight, Text, ScrollView} from 'react-native';
 import Style from './Style.js';
 import { Spinner } from 'components';
+import CustomError from 'components/Modal/Error.js';
 import Api from 'services/api/index.js';
 import { Routes, Color, Helper, BasicStyles } from 'common';
 import Header from './Header';
 import config from 'src/config';
 import Pusher from 'services/Pusher.js';
+import { Player } from '@react-native-community/audio-toolkit';
 class Login extends Component {
   //Screen1 Component
   constructor(props){
@@ -18,12 +20,15 @@ class Login extends Component {
       password: null,
       isLoading: false,
       token: null,
-      error: 0
+      error: 0,
+      isResponseError: false
     };
+    this.audio = null;
   }
   
   componentDidMount(){
     this.getData();
+    this.audio = new Player('assets/notification.mp3');
   }
 
   test = () => {
@@ -38,6 +43,9 @@ class Login extends Component {
   }
 
   playAudio = () => {
+    if(this.audio){
+      this.audio.play();
+    }
   }
 
   managePusherResponse = (response) => {
@@ -83,7 +91,6 @@ class Login extends Component {
     Api.request(Routes.notificationsRetrieve, parameter, notifications => {
       setNotifications(notifications.size, notifications.data)
       Api.request(Routes.messagesRetrieve, parameter, messages => {
-        console.log('messages', messages);
         setMessenger(messages.total_unread_messages, messages.data)
         this.setState({isLoading: false});
         Pusher.listen(response => {
@@ -91,8 +98,12 @@ class Login extends Component {
         });
         // this.props.navigation.replace('loginScreen')
         this.props.navigation.navigate('drawerStack');
-      });
-    });
+      }, error => {
+        this.setState({isResponseError: true})
+      })
+    }, error => {
+      this.setState({isResponseError: true})
+    })
   }
 
   login = () => {
@@ -117,7 +128,11 @@ class Login extends Component {
             this.setState({isLoading: false});
             login(null, null)
           }
-        });
+        }, error => {
+          this.setState({isResponseError: true})
+        })
+      }, error => {
+        this.setState({isResponseError: true})
       })
     }
   }
@@ -164,10 +179,16 @@ class Login extends Component {
                 this.setState({isLoading: false});
                 this.setState({error: 2})
               }
-            });
+            }, error => {
+              this.setState({isResponseError: true})
+            })
             
+          }, error => {
+            this.setState({isResponseError: true})
           })
         }
+      }, error => {
+        this.setState({isResponseError: true})
       })
       // this.props.navigation.navigate('drawerStack');
     }else{
@@ -176,7 +197,7 @@ class Login extends Component {
   }
 
   render() {
-    const { isLoading, error } = this.state;
+    const { isLoading, error, isResponseError } = this.state;
     return (
       <ScrollView style={Style.ScrollView}>
         <View style={Style.MainContainer}>
@@ -254,6 +275,9 @@ class Login extends Component {
         </View>
 
         {isLoading ? <Spinner mode="overlay"/> : null }
+        {isResponseError ? <CustomError visible={isResponseError} onCLose={() => {
+          this.setState({isResponseError: false, isLoading: false})
+        }}/> : null}
       </ScrollView>
     );
   }
