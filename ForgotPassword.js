@@ -4,8 +4,9 @@ import AsyncStorage from '@react-native-community/async-storage';
 import { View , TextInput , Image, TouchableHighlight, Text, ScrollView} from 'react-native';
 import Style from './Style.js';
 import { Spinner } from 'components';
-import { Api } from 'services';
+import Api from 'services/api/index.js';
 import { Routes, Color, Helper, BasicStyles } from 'common';
+import CustomError from 'components/Modal/Error.js';
 import Header from './Header';
 import config from 'src/config';
 import OtpModal from 'components/Modal/Otp.js';
@@ -30,26 +31,26 @@ class ForgotPassword extends Component {
     this.props.navigation.navigate(route);
   }
   
-
-
   updateOtp = () => {
     const { email } = this.state;
     let parameter = {
       email: email
     }
-    // Api.request(Routes.notificationSettingOtp, parameter, response => {
-    //   this.setState({otpData: response})
-    //   this.props.onLoading(false);
-    //   if(response.error == null){
-    //     this.setState({blockedFlag: false, errorMessage: null})
-    //   }else{
-    //     this.setState({blockedFlag: true})
-    //     this.setState({errorMessage: response.error})
-    //   }
-    //   setTimeout(() => {
-    //     this.setState({isOtpModal: true})
-    //   }, 500)
-    // });
+    Api.request(Routes.notificationSettingOtp, parameter, response => {
+      this.setState({otpData: response})
+      this.props.onLoading(false);
+      if(response.error == null){
+        this.setState({blockedFlag: false, errorMessage: null})
+      }else{
+        this.setState({blockedFlag: true})
+        this.setState({errorMessage: response.error})
+      }
+      setTimeout(() => {
+        this.setState({isOtpModal: true})
+      }, 500)
+    }, error => {
+      this.setState({isResponseError: true})
+    })
     this.setState({
       errorMessage: 'OTP is Temporarily disabled.'
     })
@@ -144,7 +145,7 @@ class ForgotPassword extends Component {
   }
   render() {
     const { isLoading, errorMessage, changeStep } = this.state;
-    const { blockedFlag, isOtpModal  } = this.state;
+    const { blockedFlag, isOtpModal, isResponseError  } = this.state;
     return (
       <ScrollView style={Style.ScrollView}>
         <View style={Style.MainContainer}>
@@ -202,6 +203,9 @@ class ForgotPassword extends Component {
         ></OtpModal>
 
         {isLoading ? <Spinner mode="overlay"/> : null }
+        {isResponseError ? <CustomError visible={isResponseError} onCLose={() => {
+          this.setState({isResponseError: false, isLoading: false})
+        }}/> : null}
       </ScrollView>
     );
   }
@@ -212,8 +216,6 @@ const mapStateToProps = state => ({ state: state });
 const mapDispatchToProps = dispatch => {
   const { actions } = require('@redux');
   return {
-    login: (user, token) => dispatch(actions.login(user, token)),
-    logout: () => dispatch(actions.logout())
   };
 };
 

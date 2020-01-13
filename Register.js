@@ -6,6 +6,7 @@ import Style from './Style.js';
 import { Spinner } from 'components';
 import Api from 'services/api/index.js';
 import { Routes, Color, Helper, BasicStyles } from 'common';
+import CustomError from 'components/Modal/Error.js';
 import Header from './Header';
 import config from 'src/config';
 class Register extends Component {
@@ -20,7 +21,8 @@ class Register extends Component {
       isLoading: false,
       token: null,
       error: 0,
-      errorMessage: null
+      errorMessage: null,
+      isResponseError: false
     };
   }
   
@@ -62,6 +64,8 @@ class Register extends Component {
           }
         }
       }
+    }, error => {
+      this.setState({isResponseError: true})
     })
   }
 
@@ -93,7 +97,7 @@ class Register extends Component {
   }
 
   render() {
-    const { isLoading, errorMessage } = this.state;
+    const { isLoading, errorMessage, isResponseError } = this.state;
     return (
       <ScrollView style={Style.ScrollView}>
         <View style={Style.MainContainer}>
@@ -181,6 +185,9 @@ class Register extends Component {
         </View>
 
         {isLoading ? <Spinner mode="overlay"/> : null }
+        {isResponseError ? <CustomError visible={isResponseError} onCLose={() => {
+          this.setState({isResponseError: false, isLoading: false})
+        }}/> : null}
       </ScrollView>
     );
   }
