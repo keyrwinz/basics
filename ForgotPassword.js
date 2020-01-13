@@ -23,7 +23,10 @@ class ForgotPassword extends Component {
       password: null,
       confirmPassword: null,
       isOtpModal: false,
-      blockedFlag: true,
+      blockedFlag: false,
+      isResponseError: false,
+      responseErrorTitle: null,
+      responseErrorMessage: null
     };
   }
 
@@ -33,30 +36,52 @@ class ForgotPassword extends Component {
   
   updateOtp = () => {
     const { email } = this.state;
+    const { login } = this.props;
     let parameter = {
-      email: email
+      condition: [{
+        value: email,
+        clause: '=',
+        column: 'email'
+      }]
     }
-    Api.request(Routes.notificationSettingOtp, parameter, response => {
-      this.setState({otpData: response})
-      this.props.onLoading(false);
-      if(response.error == null){
-        this.setState({blockedFlag: false, errorMessage: null})
+    Api.request(Routes.accountRetrieve, parameter, userInfo => {
+      console.log('userInfo', userInfo);
+      this.setState({responseErrorTitle: null})
+      this.setState({responseErrorMessage: null})
+      this.setState({isResponseError: false})
+      if(userInfo.data.length > 0){
+        let otpParameter = {
+          account_id: userInfo.data[0].id
+        }
+        login(userInfo.data[0], null);
+        this.setState({responseErrorTitle: null})
+        this.setState({responseErrorMessage: null})
+        this.setState({isResponseError: false})
+        Api.request(Routes.notificationSettingOtp, otpParameter, response => {
+          console.log('otp', response)
+          this.setState({otpData: response})
+          if(response.error == null){
+            this.setState({blockedFlag: false, errorMessage: null})
+          }else{
+            this.setState({blockedFlag: true})
+            this.setState({errorMessage: response.error})
+          }
+          setTimeout(() => {
+            this.setState({isOtpModal: true})
+          }, 500)
+        }, error => {
+          console.log('error', error)
+          this.setState({isResponseError: true})
+        })
       }else{
-        this.setState({blockedFlag: true})
-        this.setState({errorMessage: response.error})
+        this.setState({responseErrorTitle: 'Error!'})
+        this.setState({responseErrorMessage: 'Email address not found!'})
+        this.setState({isResponseError: true})
       }
-      setTimeout(() => {
-        this.setState({isOtpModal: true})
-      }, 500)
     }, error => {
       this.setState({isResponseError: true})
     })
-    this.setState({
-      errorMessage: 'OTP is Temporarily disabled.'
-    })
-    setTimeout(() => {
-      this.setState({isOtpModal: true})
-    }, 100)
+    
   }
 
   submit(){
@@ -145,7 +170,7 @@ class ForgotPassword extends Component {
   }
   render() {
     const { isLoading, errorMessage, changeStep } = this.state;
-    const { blockedFlag, isOtpModal, isResponseError  } = this.state;
+    const { blockedFlag, isOtpModal, isResponseError, responseErrorTitle, responseErrorMessage  } = this.state;
     return (
       <ScrollView style={Style.ScrollView}>
         <View style={Style.MainContainer}>
@@ -205,7 +230,10 @@ class ForgotPassword extends Component {
         {isLoading ? <Spinner mode="overlay"/> : null }
         {isResponseError ? <CustomError visible={isResponseError} onCLose={() => {
           this.setState({isResponseError: false, isLoading: false})
-        }}/> : null}
+        }}
+          title={responseErrorTitle}
+          message={responseErrorMessage}
+        /> : null}
       </ScrollView>
     );
   }
@@ -216,6 +244,7 @@ const mapStateToProps = state => ({ state: state });
 const mapDispatchToProps = dispatch => {
   const { actions } = require('@redux');
   return {
+    login: (user, token) => dispatch(actions.login(user, token))
   };
 };
 
