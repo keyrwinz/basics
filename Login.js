@@ -11,6 +11,7 @@ import Header from './Header';
 import config from 'src/config';
 import Pusher from 'services/Pusher.js';
 import { Player } from '@react-native-community/audio-toolkit';
+import OtpModal from 'components/Modal/Otp.js';
 class Login extends Component {
   //Screen1 Component
   constructor(props){
@@ -21,7 +22,9 @@ class Login extends Component {
       isLoading: false,
       token: null,
       error: 0,
-      isResponseError: false
+      isResponseError: false,
+      isOtpModal: false,
+      blockedFlag: false
     };
     this.audio = null;
   }
@@ -97,7 +100,7 @@ class Login extends Component {
           this.managePusherResponse(response)
         });
         // this.props.navigation.replace('loginScreen')
-        this.props.navigation.navigate('drawerStack');
+        this.checkOtp()
       }, error => {
         this.setState({isResponseError: true})
       })
@@ -149,6 +152,26 @@ class Login extends Component {
     }
   }
   
+  checkOtp = () => {
+    const { user } = this.props.state;
+    if(user.notification_settings != null){
+      let nSettings = user.notification_settings
+      if(parseInt(nSettings.email_otp) == 1 || parseInt(nSettings.sms_otp) == 1){
+        this.setState({
+          isOtpModal: true,
+          blockedFlag: false
+        })
+        return
+      }
+    }
+    this.props.navigation.navigate('drawerStack');
+  }
+
+  onSuccessOtp = () => {
+    this.setState({isOtpModal: false})
+    this.props.navigation.navigate('drawerStack');
+  }
+
   submit(){
     this.test();
     const { username, password } = this.state;
@@ -198,6 +221,7 @@ class Login extends Component {
 
   render() {
     const { isLoading, error, isResponseError } = this.state;
+    const {  blockedFlag, isOtpModal } = this.state;
     return (
       <ScrollView style={Style.ScrollView}>
         <View style={Style.MainContainer}>
@@ -273,6 +297,23 @@ class Login extends Component {
             </TouchableHighlight>
           </View>
         </View>
+
+        <OtpModal
+          visible={isOtpModal}
+          title={blockedFlag == false ? 'Authentication via OTP' : 'Blocked Account'}
+          actionLabel={{
+            yes: 'Authenticate',
+            no: 'Cancel'
+          }}
+          onCancel={() => this.setState({isOtpModal: false})}
+          onSuccess={() => this.onSuccessOtp()}
+          onResend={() => {
+            this.setState({isOtpModal: false})
+            this.submit()
+          }}
+          error={''}
+          blockedFlag={blockedFlag}
+        ></OtpModal>
 
         {isLoading ? <Spinner mode="overlay"/> : null }
         {isResponseError ? <CustomError visible={isResponseError} onCLose={() => {
