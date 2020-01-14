@@ -44,6 +44,7 @@ class ForgotPassword extends Component {
         column: 'email'
       }]
     }
+    this.setState({isLoading: true})
     Api.request(Routes.accountRetrieve, parameter, userInfo => {
       console.log('userInfo', userInfo);
       this.setState({responseErrorTitle: null})
@@ -60,6 +61,7 @@ class ForgotPassword extends Component {
         Api.request(Routes.notificationSettingOtp, otpParameter, response => {
           console.log('otp', response)
           this.setState({otpData: response})
+          this.setState({isLoading: false})
           if(response.error == null){
             this.setState({blockedFlag: false, errorMessage: null})
           }else{
@@ -74,6 +76,7 @@ class ForgotPassword extends Component {
           this.setState({isResponseError: true})
         })
       }else{
+        this.setState({isLoading: false})
         this.setState({responseErrorTitle: 'Error!'})
         this.setState({responseErrorMessage: 'Email address not found!'})
         this.setState({isResponseError: true})
@@ -111,8 +114,23 @@ class ForgotPassword extends Component {
       this.setState({errorMessage: 'Password did not match.'})
       return false
     }
-
-    // update here
+    this.setState({isLoading: true})
+    const { user } = this.props.state;
+    let parameter = {
+      username: user.username,
+      code: user.code,
+      password: this.state.password
+    }
+    console.log('parameter', parameter);
+    this.setState({isResponseError: false})
+    Api.request(Routes.accountUpdate, parameter, response => {
+      this.setState({isLoading: false})
+      this.props.navigation.navigate('loginStack')
+    }, error => {
+      console.log(error)
+      this.setState({isLoading: false})
+      this.setState({isResponseError: true})
+    })
   }
 
   _changePassword = () => {
