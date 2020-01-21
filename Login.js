@@ -6,6 +6,7 @@ import Style from './Style.js';
 import { Spinner } from 'components';
 import CustomError from 'components/Modal/Error.js';
 import Api from 'services/api/index.js';
+import CommonRequest from 'services/CommonRequest.js';
 import { Routes, Color, Helper, BasicStyles } from 'common';
 import Header from './Header';
 import config from 'src/config';
@@ -58,13 +59,16 @@ class Login extends Component {
       return;
     }
     if(response.type == Helper.pusher.notifications){
+      console.log(Helper.pusher.notifications, response);
       if(user.id == parseInt(data.to)){
         const { notifications } = this.props.state;
         const { updateNotifications } = this.props;
+        console.log('notif pusher', data)
         updateNotifications(1, data);
         this.playAudio()
       }
     }else if(response.type == Helper.pusher.messages){
+      console.log(Helper.pusher.messages, response);
       const { messagesOnGroup } = this.props.state;
       const { updateMessagesOnGroup } = this.props;
       if(parseInt(data.messenger_group_id) == messagesOnGroup.groupId &&
@@ -72,16 +76,20 @@ class Login extends Component {
         this.playAudio();
         updateMessagesOnGroup(data);
       }
-    }else if(response.type == Helper.pusher.validation){
-      const { setMessengerGroup, setMessagesOnGroup } = this.props;
+    }else if(response.type == Helper.pusher.messageGroup){
+      console.log(Helper.pusher.messageGroup, response);
+      const { updateMessengerGroup, updateMessagesOnGroupByPayload } = this.props;
       const { messengerGroup } = this.props.state;
-      if(messengerGroup != null && messengerGroup.id == data.id){
-        this.playAudio()
-        setMessengerGroup(data);
-        setMessagesOnGroup({
-          groupId: data.id,
-          messages: data.messages
-        })
+      if(parseInt(data.id) == parseInt(messengerGroup.id)){
+        this.playAudio();
+        updateMessengerGroup(data)
+        if(data.message_update == true){
+          // update messages
+          const { messengerGroup } = this.props.state;
+          CommonRequest.retrieveMessages(messengerGroup, messagesResponse => {
+            updateMessagesOnGroupByPayload(messagesResponse.data)
+          })
+        }
       }
     }
   }
@@ -335,8 +343,10 @@ const mapDispatchToProps = dispatch => {
     updateNotifications: (unread, notification) => dispatch(actions.updateNotifications(unread, notification)),
     updateMessagesOnGroup: (message) => dispatch(actions.updateMessagesOnGroup(message)),
     setMessenger: (unread, messages) => dispatch(actions.setMessenger(unread, messages)),
+    updateMessengerGroup: (messengerGroup) => dispatch(actions.updateMessengerGroup(messengerGroup)),
     setMessengerGroup: (messengerGroup) => dispatch(actions.setMessengerGroup(messengerGroup)),
-    setMessagesOnGroup: (messagesOnGroup) => dispatch(actions.setMessagesOnGroup(messagesOnGroup))
+    setMessagesOnGroup: (messagesOnGroup) => dispatch(actions.setMessagesOnGroup(messagesOnGroup)),
+    updateMessagesOnGroupByPayload: (messages) => dispatch(actions.updateMessagesOnGroupByPayload(messages))
   };
 };
 
