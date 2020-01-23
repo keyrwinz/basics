@@ -40,7 +40,8 @@ export default {
     borderWidth: 1,
     width: width - 40,
     paddingLeft: 10,
-    marginBottom: 20
+    marginBottom: 20,
+    borderRadius: 5
   },
   btnPrimary: {
     height: 50,
@@ -49,6 +50,7 @@ export default {
     marginBottom: 20,
     alignItems: 'center',
     justifyContent: 'center',
+    borderRadius: 5
   },
   btnText: {
     color: Color.white
