@@ -75,6 +75,11 @@ class Login extends Component {
         parseInt(data.account_id) != user.id){
         this.playAudio();
         updateMessagesOnGroup(data);
+      }else{
+        const { setMessenger } = this.props;
+        const { messenger } = this.props.state;
+        var unread = parseInt(messenger.unread) + 1;
+        setMessenger(unread, messenger.messages);
       }
     }else if(response.type == Helper.pusher.messageGroup){
       console.log(Helper.pusher.messageGroup, response);
@@ -90,6 +95,11 @@ class Login extends Component {
             updateMessagesOnGroupByPayload(messagesResponse.data)
           })
         }
+      }else{
+        const { setMessenger } = this.props;
+        const { messenger } = this.props.state;
+        var unread = parseInt(messenger.unread) + 1;
+        setMessenger(unread, messenger.messages);
       }
     }
   }
