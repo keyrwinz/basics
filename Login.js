@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import AsyncStorage from '@react-native-community/async-storage';
 import { View , TextInput , Image, TouchableHighlight, Text, ScrollView} from 'react-native';
+import {NavigationActions} from 'react-navigation';
 import Style from './Style.js';
 import { Spinner } from 'components';
 import CustomError from 'components/Modal/Error.js';
@@ -13,6 +14,7 @@ import config from 'src/config';
 import Pusher from 'services/Pusher.js';
 import { Player } from '@react-native-community/audio-toolkit';
 import OtpModal from 'components/Modal/Otp.js';
+import {Notifications, NotificationAction, NotificationCategory} from 'react-native-notifications';
 class Login extends Component {
   //Screen1 Component
   constructor(props){
@@ -25,15 +27,78 @@ class Login extends Component {
       error: 0,
       isResponseError: false,
       isOtpModal: false,
-      blockedFlag: false
+      blockedFlag: false,
+      notifications: []
     };
     this.audio = null;
+    this.registerNotificationEvents();
   }
   
-  componentDidMount(){
+  async componentDidMount(){
     this.getData();
     this.audio = new Player('assets/notification.mp3');
+    const initialNotification = await Notifications.getInitialNotification();
+    if (initialNotification) {
+      this.setState({notifications: [initialNotification, ...this.state.notifications]});
+    }
   }
+
+  redirectToDrawer = (payload) => {
+    const { user } =  this.props.state;
+    if(user !== null){
+      let route = ''
+      switch(payload){
+        case 'Messenger':
+          route = 'Messenger'
+          break;
+        case 'request':
+          route = 'Requests'
+          const { setSearchParameter } = this.props;
+          let searchParameter = {
+            column: 'id',
+            value: notification.payload_value
+          }
+          setSearchParameter(searchParameter)
+          break;
+        case 'ledger':
+          route = 'Dashboard'
+          break
+      }
+      const navigateAction = NavigationActions.navigate({
+        routeName: route
+      });
+      this.props.navigation.dispatch(navigateAction); 
+    }
+  }
+
+  registerNotificationEvents() {
+    Notifications.events().registerNotificationReceivedForeground((notification, completion) => {
+      this.setState({
+        notifications: [...this.state.notifications, notification]
+      });
+
+      completion({alert: notification.payload.showAlert, sound: true, badge: false});
+    });
+
+    Notifications.events().registerNotificationOpened((notification, completion) => {
+      console.log('notification', notification)
+      this.redirectToDrawer(notification.extra)
+      completion();
+    });
+  }
+
+  requestPermissions() {
+    Notifications.registerRemoteNotifications();
+  }
+
+  sendLocalNotification(title, body, route) {
+    Notifications.postLocalNotification({
+        title: title,
+        body: body,
+        extra: route
+    });
+  }
+
 
   test = () => {
     if(config.TEST == true){
@@ -64,6 +129,7 @@ class Login extends Component {
         const { notifications } = this.props.state;
         const { updateNotifications } = this.props;
         console.log('notif pusher', data)
+        this.sendLocalNotification(data.title, data.description, data.payload)
         updateNotifications(1, data);
         this.playAudio()
       }
@@ -75,7 +141,10 @@ class Login extends Component {
         parseInt(data.account_id) != user.id){
         this.playAudio();
         updateMessagesOnGroup(data);
-      }else{
+        this.sendLocalNotification('Messenger', data.account.username  + 'sent a message: '  + data.message, 'Messenger')
+      }else if(parseInt(data.messenger_group_id) != messagesOnGroup.groupId &&
+        parseInt(data.account_id) != user.id){
+        this.sendLocalNotification('Messenger', data.account.username  + 'sent a message: '  + data.message, 'Messenger')
         const { setMessenger } = this.props;
         const { messenger } = this.props.state;
         var unread = parseInt(messenger.unread) + 1;
@@ -356,7 +425,8 @@ const mapDispatchToProps = dispatch => {
     updateMessengerGroup: (messengerGroup) => dispatch(actions.updateMessengerGroup(messengerGroup)),
     setMessengerGroup: (messengerGroup) => dispatch(actions.setMessengerGroup(messengerGroup)),
     setMessagesOnGroup: (messagesOnGroup) => dispatch(actions.setMessagesOnGroup(messagesOnGroup)),
-    updateMessagesOnGroupByPayload: (messages) => dispatch(actions.updateMessagesOnGroupByPayload(messages))
+    updateMessagesOnGroupByPayload: (messages) => dispatch(actions.updateMessagesOnGroupByPayload(messages)),
+    setSearchParameter: (searchParameter) => dispatch(actions.setSearchParameter(searchParameter)),
   };
 };
 
