@@ -53,7 +53,7 @@ class Login extends Component {
   retrieveSystemNotification = () => {
     let parameter = {
       condition: [{
-        value: Platform.OS + '%',
+        value: '%' + Platform.OS + '%',
         clause: 'like',
         column: 'device'
       }],
@@ -63,7 +63,6 @@ class Login extends Component {
     }
     Api.request(Routes.systemNotificationRetrieve, parameter, response => {
       const { setSystemNotification } = this.props;
-      console.log('response', response)
       if(response.data.length > 0){
         setSystemNotification(response.data[0])
       }else{
@@ -110,8 +109,9 @@ class Login extends Component {
     });
 
     Notifications.events().registerNotificationOpened((notification, completion) => {
-      console.log('notification', notification)
-      this.redirectToDrawer(notification.extra)
+      if(notification.extra != ''){
+        this.redirectToDrawer(notification.extra)
+      }
       completion();
     });
   }
@@ -193,14 +193,14 @@ class Login extends Component {
             updateMessagesOnGroupByPayload(messagesResponse.data)
           })
         }
-      }else if(response.type == Helper.pusher.systemNotification){
-        this.sendLocalNotification(data.title, data.description, '')
       }else{
         const { setMessenger } = this.props;
         const { messenger } = this.props.state;
         var unread = parseInt(messenger.unread) + 1;
         setMessenger(unread, messenger.messages);
       }
+    }else if(response.type == Helper.pusher.systemNotification){
+      this.sendLocalNotification(data.title, data.description, 'requests')
     }
   }
 
