@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import AsyncStorage from '@react-native-community/async-storage';
-import { View , TextInput , Image, TouchableHighlight, Text, ScrollView} from 'react-native';
+import { View , TextInput , Image, TouchableHighlight, Text, ScrollView, Platform} from 'react-native';
 import {NavigationActions} from 'react-navigation';
 import Style from './Style.js';
 import { Spinner } from 'components';
@@ -12,6 +12,7 @@ import { Routes, Color, Helper, BasicStyles } from 'common';
 import Header from './Header';
 import config from 'src/config';
 import Pusher from 'services/Pusher.js';
+import SystemVersion from 'services/System.js';
 import { Player } from '@react-native-community/audio-toolkit';
 import OtpModal from 'components/Modal/Otp.js';
 import {Notifications, NotificationAction, NotificationCategory} from 'react-native-notifications';
@@ -35,12 +36,40 @@ class Login extends Component {
   }
   
   async componentDidMount(){
-    this.getData();
+    this.setState({isLoading: true})
+    SystemVersion.checkVersion(response => {
+      this.setState({isLoading: false})
+      if(response == true){
+        this.getData();
+      }
+    })
     this.audio = new Player('assets/notification.mp3');
     const initialNotification = await Notifications.getInitialNotification();
     if (initialNotification) {
       this.setState({notifications: [initialNotification, ...this.state.notifications]});
     }
+  }
+
+  retrieveSystemNotification = () => {
+    let parameter = {
+      condition: [{
+        value: Platform.OS + '%',
+        clause: 'like',
+        column: 'device'
+      }],
+      sort: {
+        created_at: 'desc'
+      }
+    }
+    Api.request(Routes.systemNotificationRetrieve, parameter, response => {
+      const { setSystemNotification } = this.props;
+      console.log('response', response)
+      if(response.data.length > 0){
+        setSystemNotification(response.data[0])
+      }else{
+        setSystemNotification(null)
+      }
+    });
   }
 
   redirectToDrawer = (payload) => {
@@ -164,6 +193,8 @@ class Login extends Component {
             updateMessagesOnGroupByPayload(messagesResponse.data)
           })
         }
+      }else if(response.type == Helper.pusher.systemNotification){
+        this.sendLocalNotification(data.title, data.description, '')
       }else{
         const { setMessenger } = this.props;
         const { messenger } = this.props.state;
@@ -178,6 +209,7 @@ class Login extends Component {
     let parameter = {
       account_id: accountId
     }
+    this.retrieveSystemNotification();
     Api.request(Routes.notificationsRetrieve, parameter, notifications => {
       setNotifications(notifications.size, notifications.data)
       Api.request(Routes.messagesRetrieve, parameter, messages => {
@@ -427,6 +459,7 @@ const mapDispatchToProps = dispatch => {
     setMessagesOnGroup: (messagesOnGroup) => dispatch(actions.setMessagesOnGroup(messagesOnGroup)),
     updateMessagesOnGroupByPayload: (messages) => dispatch(actions.updateMessagesOnGroupByPayload(messages)),
     setSearchParameter: (searchParameter) => dispatch(actions.setSearchParameter(searchParameter)),
+    setSystemNotification: (systemNotification) => dispatch(actions.setSystemNotification(systemNotification)),
   };
 };
 
