@@ -205,27 +205,32 @@ class Login extends Component {
   }
 
   retrieveUserData = (accountId) => {
-    const { setNotifications, setMessenger } = this.props;
-    let parameter = {
-      account_id: accountId
-    }
-    this.retrieveSystemNotification();
-    Api.request(Routes.notificationsRetrieve, parameter, notifications => {
-      setNotifications(notifications.size, notifications.data)
-      Api.request(Routes.messagesRetrieve, parameter, messages => {
-        setMessenger(messages.total_unread_messages, messages.data)
-        this.setState({isLoading: false});
-        Pusher.listen(response => {
-          this.managePusherResponse(response)
-        });
-        // this.props.navigation.replace('loginScreen')
-        this.checkOtp()
+    if(Helper.retrieveDataFlag == 1){
+      this.setState({isLoading: false});
+      this.props.navigation.navigate('drawerStack');  
+    }else{
+      const { setNotifications, setMessenger } = this.props;
+      let parameter = {
+        account_id: accountId
+      }
+      this.retrieveSystemNotification();
+      Api.request(Routes.notificationsRetrieve, parameter, notifications => {
+        setNotifications(notifications.size, notifications.data)
+        Api.request(Routes.messagesRetrieve, parameter, messages => {
+          setMessenger(messages.total_unread_messages, messages.data)
+          this.setState({isLoading: false});
+          Pusher.listen(response => {
+            this.managePusherResponse(response)
+          });
+          // this.props.navigation.replace('loginScreen')
+          this.checkOtp()
+        }, error => {
+          this.setState({isResponseError: true})
+        })
       }, error => {
         this.setState({isResponseError: true})
       })
-    }, error => {
-      this.setState({isResponseError: true})
-    })
+    }
   }
 
   login = () => {
@@ -242,6 +247,7 @@ class Login extends Component {
             column: 'id'
           }]
         }
+        console.log('parameter', parameter)
         Api.request(Routes.accountRetrieve, parameter, userInfo => {
           if(userInfo.data.length > 0){
             login(userInfo.data[0], this.state.token);
