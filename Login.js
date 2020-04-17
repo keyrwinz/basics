@@ -36,13 +36,15 @@ class Login extends Component {
   }
   
   async componentDidMount(){
-    this.setState({isLoading: true})
-    SystemVersion.checkVersion(response => {
-      this.setState({isLoading: false})
-      if(response == true){
-        this.getData();
-      }
-    })
+    if(config.versionChecker == 'store'){
+      this.setState({isLoading: true})
+      SystemVersion.checkVersion(response => {
+        this.setState({isLoading: false})
+        if(response == true){
+          this.getData();
+        }
+      })
+    }
     this.audio = new Player('assets/notification.mp3');
     const initialNotification = await Notifications.getInitialNotification();
     if (initialNotification) {
