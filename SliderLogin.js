@@ -16,7 +16,7 @@ import SystemVersion from 'services/System.js';
 import { Player } from '@react-native-community/audio-toolkit';
 import OtpModal from 'components/Modal/Otp.js';
 import {Notifications, NotificationAction, NotificationCategory} from 'react-native-notifications';
-class Login extends Component {
+class SliderLogin extends Component {
   //Screen1 Component
   constructor(props){
     super(props);
@@ -478,4 +478,4 @@ const mapDispatchToProps = dispatch => {
 export default connect(
   mapStateToProps,
   mapDispatchToProps
-)(Login);
+)(SliderLogin);
