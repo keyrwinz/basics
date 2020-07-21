@@ -9,6 +9,7 @@ import CustomError from 'components/Modal/Error.js';
 import Api from 'services/api/index.js';
 import CommonRequest from 'services/CommonRequest.js';
 import { Routes, Color, Helper, BasicStyles } from 'common';
+import PasswordWithIcon from 'components/InputField/Password.js';
 import Header from './Header';
 import config from 'src/config';
 import Pusher from 'services/Pusher.js';
@@ -375,13 +376,16 @@ class SliderLogin extends Component {
               value={this.state.username}
               placeholder={'Username or Email'}
             />
-            <TextInput
+            {/*<TextInput
               style={BasicStyles.formControl}
               onChangeText={(password) => this.setState({password})}
               value={this.state.password}
               placeholder={'********'}
               secureTextEntry={true}
-            />
+            />*/}
+            <PasswordWithIcon onTyping={(input) => this.setState({
+              password: input
+            })}/>
             <TouchableHighlight
               style={[BasicStyles.btn, BasicStyles.btnPrimary]}
               onPress={() => this.submit()}

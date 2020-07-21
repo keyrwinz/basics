@@ -5,6 +5,7 @@ import { View , TextInput , Image, TouchableHighlight, Text, ScrollView, Platfor
 import {NavigationActions} from 'react-navigation';
 import Style from './Style.js';
 import { Spinner } from 'components';
+import PasswordWithIcon from 'components/InputField/Password.js';
 import CustomError from 'components/Modal/Error.js';
 import Api from 'services/api/index.js';
 import CommonRequest from 'services/CommonRequest.js';
@@ -375,13 +376,14 @@ class Login extends Component {
               value={this.state.username}
               placeholder={'Username or Email'}
             />
-            <TextInput
+            { /*<TextInput
               style={BasicStyles.formControl}
               onChangeText={(password) => this.setState({password})}
               value={this.state.password}
               placeholder={'********'}
               secureTextEntry={true}
-            />
+            />*/}
+            <PasswordWithIcon />
             <TouchableHighlight
               style={[BasicStyles.btn, BasicStyles.btnPrimary]}
               onPress={() => this.submit()}

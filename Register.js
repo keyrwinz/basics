@@ -7,6 +7,7 @@ import { Spinner } from 'components';
 import Api from 'services/api/index.js';
 import { Routes, Color, Helper, BasicStyles } from 'common';
 import CustomError from 'components/Modal/Error.js';
+import PasswordWithIcon from 'components/InputField/Password.js';
 import Header from './Header';
 import config from 'src/config';
 class Register extends Component {
@@ -133,7 +134,18 @@ class Register extends Component {
               placeholder={'Email Address'}
               keyboardType={'email-address'}
             />
-            <TextInput
+            <PasswordWithIcon onTyping={(input) => this.setState({
+              password: input
+            })}
+            placeholder={'Password'}/>
+
+
+            <PasswordWithIcon onTyping={(input) => this.setState({
+              confirmPassword: input
+            })}
+            placeholder={'Confirm Password'}
+            />
+            {/*<TextInput
               style={BasicStyles.formControl}
               onChangeText={(password) => this.setState({password})}
               value={this.state.password}
@@ -148,6 +160,7 @@ class Register extends Component {
               placeholder={'Confirm Password'}
               secureTextEntry={true}
             />
+          */}
             <TouchableHighlight
               style={[BasicStyles.btn, BasicStyles.btnPrimary]}
               onPress={() => this.submit()}
