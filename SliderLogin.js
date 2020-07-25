@@ -354,6 +354,7 @@ class SliderLogin extends Component {
   render() {
     const { isLoading, error, isResponseError } = this.state;
     const {  blockedFlag, isOtpModal } = this.state;
+    const { theme } = this.props.state;
     return (
       <ScrollView style={Style.ScrollView}>
         <View style={Style.MainContainer}>
@@ -387,7 +388,9 @@ class SliderLogin extends Component {
               password: input
             })}/>
             <TouchableHighlight
-              style={[BasicStyles.btn, BasicStyles.btnPrimary]}
+              style={[BasicStyles.btn, {
+                backgroundColor: theme ? theme.primary : Color.primary
+              }]}
               onPress={() => this.submit()}
               underlayColor={Color.gray}>
               <Text style={BasicStyles.textWhite}>
@@ -423,7 +426,9 @@ class SliderLogin extends Component {
               }}>Don't have an account?</Text>
             </View>
             <TouchableHighlight
-              style={[BasicStyles.btn, BasicStyles.btnSecondary]}
+              style={[BasicStyles.btn, BasicStyles.btnSecondary, {
+                backgroundColor: theme ? theme.secondary : Color.secondary
+              }]}
               onPress={() => this.redirect('registerStack')}
               underlayColor={Color.gray}>
               <Text style={BasicStyles.textWhite}>
