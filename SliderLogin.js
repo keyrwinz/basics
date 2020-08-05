@@ -242,7 +242,7 @@ class SliderLogin extends Component {
 
   login = () => {
     this.test();
-    const { login } = this.props;
+    const { login, retrieveCart } = this.props;
     if(this.state.token != null){
       this.setState({isLoading: true});
       Api.getAuthUser(this.state.token, (response) => {
@@ -259,6 +259,13 @@ class SliderLogin extends Component {
           if(userInfo.data.length > 0){
             login(userInfo.data[0], this.state.token);
             this.retrieveUserData(userInfo.data[0].id)
+            const { cart } = userInfo.data[0]
+            if (cart) {
+              const items = JSON.parse(cart.items)
+              retrieveCart(items)
+            } else {
+              retrieveCart([])
+            }
           }else{
             this.setState({isLoading: false});
             login(null, null)
@@ -307,7 +314,7 @@ class SliderLogin extends Component {
   submit(){
     this.test();
     const { username, password } = this.state;
-    const { login } = this.props;
+    const { login, retrieveCart } = this.props;
     if((username != null && username != '') && (password != null && password != '')){
       this.setState({isLoading: true, error: 0});
       // Login
@@ -330,6 +337,14 @@ class SliderLogin extends Component {
               if(userInfo.data.length > 0){
                 login(userInfo.data[0], token);
                 this.retrieveUserData(userInfo.data[0].id)
+                // retrieve cart
+                const { cart } = userInfo.data[0]
+                if (cart) {
+                  const items = JSON.parse(cart.items)
+                  retrieveCart(items)
+                } else {
+                  retrieveCart([])
+                }
               }else{
                 this.setState({isLoading: false});
                 this.setState({error: 2})
@@ -337,7 +352,6 @@ class SliderLogin extends Component {
             }, error => {
               this.setState({isResponseError: true})
             })
-            
           }, error => {
             this.setState({isResponseError: true})
           })
@@ -476,6 +490,7 @@ const mapDispatchToProps = dispatch => {
     updateMessagesOnGroupByPayload: (messages) => dispatch(actions.updateMessagesOnGroupByPayload(messages)),
     setSearchParameter: (searchParameter) => dispatch(actions.setSearchParameter(searchParameter)),
     setSystemNotification: (systemNotification) => dispatch(actions.setSystemNotification(systemNotification)),
+    retrieveCart: (items) => dispatch(actions.retrieveCart(items))
   };
 };
 
