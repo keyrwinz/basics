@@ -134,6 +134,7 @@ class ForgotPassword extends Component {
   }
 
   _changePassword = () => {
+    const { theme } = this.props.state;
     return (
       <View>
         <TextInput
@@ -153,7 +154,9 @@ class ForgotPassword extends Component {
         />
 
         <TouchableHighlight
-          style={[BasicStyles.btn, BasicStyles.btnPrimary]}
+          style={[BasicStyles.btn, {
+            backgroundColor: theme ? theme.primary : Color.primary
+          }]}
           onPress={() => this.resetPassword()}
           underlayColor={Color.gray}>
           <Text style={BasicStyles.textWhite}>
@@ -165,6 +168,7 @@ class ForgotPassword extends Component {
   }
 
   _sendRequest = () => {
+    const { theme } = this.props.state;
     return (
       <View>
         <TextInput
@@ -176,7 +180,9 @@ class ForgotPassword extends Component {
         />
 
         <TouchableHighlight
-          style={[BasicStyles.btn, BasicStyles.btnPrimary]}
+          style={[BasicStyles.btn, {
+            backgroundColor: theme ? theme.primary : Color.primary
+          }]}
           onPress={() => this.submit()}
           underlayColor={Color.gray}>
           <Text style={BasicStyles.textWhite}>
@@ -188,6 +194,7 @@ class ForgotPassword extends Component {
   }
   render() {
     const { isLoading, errorMessage, changeStep } = this.state;
+    const { theme } = this.props.state;
     const { blockedFlag, isOtpModal, isResponseError, responseErrorTitle, responseErrorMessage  } = this.state;
     return (
       <ScrollView style={Style.ScrollView}>
@@ -222,7 +229,9 @@ class ForgotPassword extends Component {
               }}>Have an account Already?</Text>
             </View>
             <TouchableHighlight
-              style={[BasicStyles.btn, BasicStyles.btnSecondary]}
+              style={[BasicStyles.btn, {
+                backgroundColor: theme ? theme.secondary : Color.secondary
+              }]}
               onPress={() => this.redirect('loginStack')}
               underlayColor={Color.gray}>
               <Text style={BasicStyles.textWhite}>

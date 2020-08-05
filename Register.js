@@ -99,6 +99,7 @@ class Register extends Component {
 
   render() {
     const { isLoading, errorMessage, isResponseError } = this.state;
+    const { theme } = this.props.state;
     return (
       <ScrollView style={Style.ScrollView}>
         <View style={Style.MainContainer}>
@@ -162,7 +163,9 @@ class Register extends Component {
             />
           */}
             <TouchableHighlight
-              style={[BasicStyles.btn, BasicStyles.btnPrimary]}
+              style={[BasicStyles.btn, {
+                backgroundColor: theme ? theme.primary : Color.primary
+              }]}
               onPress={() => this.submit()}
               underlayColor={Color.gray}>
               <Text style={BasicStyles.textWhite}>
@@ -187,7 +190,9 @@ class Register extends Component {
               }}>Have an account Already?</Text>
             </View>
             <TouchableHighlight
-              style={[BasicStyles.btn, BasicStyles.btnSecondary]}
+              style={[BasicStyles.btn, {
+                backgroundColor: theme ? theme.secondary : Color.secondary
+              }]}
               onPress={() => this.redirect('loginStack')}
               underlayColor={Color.gray}>
               <Text style={BasicStyles.textWhite}>
