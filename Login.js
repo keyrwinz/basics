@@ -343,6 +343,7 @@ class Login extends Component {
           })
         }
       }, error => {
+        console.log('error', error)
         this.setState({isResponseError: true})
       })
       // this.props.navigation.navigate('drawerStack');
