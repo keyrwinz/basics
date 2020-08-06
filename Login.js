@@ -384,7 +384,9 @@ class Login extends Component {
               placeholder={'********'}
               secureTextEntry={true}
             />*/}
-            <PasswordWithIcon />
+            <PasswordWithIcon onTyping={(input) => this.setState({
+              password: input
+            })}/>
             <TouchableHighlight
               style={[BasicStyles.btn, BasicStyles.btnPrimary]}
               onPress={() => this.submit()}
