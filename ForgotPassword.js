@@ -26,12 +26,36 @@ class ForgotPassword extends Component {
       blockedFlag: false,
       isResponseError: false,
       responseErrorTitle: null,
-      responseErrorMessage: null
+      responseErrorMessage: null,
+      successMessage: null
     };
   }
 
   redirect = (route) => {
     this.props.navigation.navigate(route);
+  }
+
+  requestReset = () => {
+    const { email } = this.state;
+    if(email === null){
+      this.setState({errorMessage: 'Email address is required.'})
+      return false
+    }
+    if(Helper.validateEmail(email) === false){
+      this.setState({errorMessage: 'You have entered an invalid email address.'})
+      return false
+    }
+    let parameter = {
+      email: email
+    }
+    Api.request(config.IS_DEV + '/accounts/request_reset', parameter, userInfo => {
+      this.setState({
+        successMessage: 'Successfully sent! Please check your e-mail address to continue.',
+        errorMessage: null
+      })
+    }, error => {
+      //
+    })
   }
   
   updateOtp = () => {
@@ -88,15 +112,6 @@ class ForgotPassword extends Component {
   }
 
   submit(){
-    const { email } = this.state;
-    if(email === null){
-      this.setState({errorMessage: 'Email address is required.'})
-      return false
-    }
-    if(Helper.validateEmail(email) === false){
-      this.setState({errorMessage: 'You have entered an invalid email address.'})
-      return false
-    }
     this.updateOtp()
   }
 
@@ -183,7 +198,7 @@ class ForgotPassword extends Component {
           style={[BasicStyles.btn, {
             backgroundColor: theme ? theme.primary : Color.primary
           }]}
-          onPress={() => this.submit()}
+          onPress={() => this.requestReset()}
           underlayColor={Color.gray}>
           <Text style={BasicStyles.textWhite}>
             Request change
@@ -193,7 +208,7 @@ class ForgotPassword extends Component {
     );
   }
   render() {
-    const { isLoading, errorMessage, changeStep } = this.state;
+    const { isLoading, errorMessage, changeStep, successMessage } = this.state;
     const { theme } = this.props.state;
     const { blockedFlag, isOtpModal, isResponseError, responseErrorTitle, responseErrorMessage  } = this.state;
     return (
@@ -211,6 +226,21 @@ class ForgotPassword extends Component {
                   fontWeight: 'bold'
                 }]}>Oops! </Text>
                 <Text style={Style.messageText}>{errorMessage}</Text>
+              </View>
+            )
+          }
+          {
+            successMessage != null && (
+              <View style={{
+                flexDirection: 'row',
+                  paddingTop: 10,
+                  paddingBottom: 10,
+                  paddingLeft: 10,
+                  paddingRight: 10
+              }}>
+                <Text style={[Style.messageText, {
+                  color: Color.black
+                }]}>{successMessage}</Text>
               </View>
             )
           }
