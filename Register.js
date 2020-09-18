@@ -35,7 +35,7 @@ class Register extends Component {
   }
   
   submit(){
-    const { username, email, password, confirmPassword } = this.state;
+    const { username, email, password } = this.state;
     if(this.validate() == false){
       return
     }
@@ -73,22 +73,22 @@ class Register extends Component {
   validate(){
     const { username, email, password, confirmPassword } = this.state;
     if(username.length >= 6 &&
-      email !== null &&
-      password !== null &&
+      email !== '' &&
+      password !== '' &&
       password.length >= 6 &
       password.localeCompare(confirmPassword) === 0 &&
       Helper.validateEmail(email) === true){
       return true
-    }else if(Helper.validateEmail(email) === false){
+    }else if(email !== '' && Helper.validateEmail(email) === false){
       this.setState({errorMessage: 'You have entered an invalid email address.'})
       return false
-    }else if(username.length < 6){
+    }else if(username !== '' && username.length < 6){
       this.setState({errorMessage: 'Username must be atleast 6 characters.'})
       return false
-    }else if(password.length < 6){
+    }else if(password !== '' && password.length < 6){
        this.setState({errorMessage: 'Password must be atleast 6 characters.'})
        return false
-    }else if(password.localeCompare(confirmPassword) !== 0){
+    }else if(password !== '' && password.localeCompare(confirmPassword) !== 0){
        this.setState({errorMessage: 'Password did not match.'})
        return false
     }else{ 
