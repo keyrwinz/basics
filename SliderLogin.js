@@ -16,7 +16,8 @@ import Pusher from 'services/Pusher.js';
 import SystemVersion from 'services/System.js';
 import { Player } from '@react-native-community/audio-toolkit';
 import OtpModal from 'components/Modal/Otp.js';
-import {Notifications, NotificationAction, NotificationCategory} from 'react-native-notifications';
+import {Notifications} from 'react-native-notifications';
+import { store } from '../../../App';
 class SliderLogin extends Component {
   //Screen1 Component
   constructor(props){
@@ -49,10 +50,15 @@ class SliderLogin extends Component {
       this.getData(); 
     }
     this.audio = new Player('assets/notification.mp3');
+    this.requestPermissions()
     const initialNotification = await Notifications.getInitialNotification();
     if (initialNotification) {
       this.setState({notifications: [initialNotification, ...this.state.notifications]});
     }
+  }
+
+  componentWillUnmount() {
+    console.log('SLIDER LOGIN WILL UNMOUNT WITH DATA', this.props.state )
   }
 
   retrieveSystemNotification = () => {
@@ -83,9 +89,9 @@ class SliderLogin extends Component {
     if(user !== null){
       let route = ''
       switch(payload){
-        case 'Messenger':
-          route = 'Messenger'
-          break;
+        // case 'Messenger':
+        //   route = 'Messenger'
+        //   break;
         case 'request':
           route = 'Requests'
           const { setSearchParameter } = this.props;
@@ -129,12 +135,11 @@ class SliderLogin extends Component {
 
   sendLocalNotification(title, body, route) {
     Notifications.postLocalNotification({
-        title: title,
-        body: body,
-        extra: route
+      title: title,
+      body: body,
+      extra: route
     });
   }
-
 
   test = () => {
     if(config.TEST == true){
@@ -154,6 +159,11 @@ class SliderLogin extends Component {
   }
 
   managePusherResponse = (response) => {
+    const { messagesOnGroup } = store.getState()
+    console.log('Received new event')
+    console.log('Redux state on SliderLogin', this.props.state)
+    console.log('Redux state on Store', store.getState())
+
     const { user } = this.props.state;
     const data = response.data;
     if(user == null){
@@ -170,22 +180,21 @@ class SliderLogin extends Component {
         this.playAudio()
       }
     }else if(response.type == Helper.pusher.messages){
-      console.log(Helper.pusher.messages, response);
-      const { messagesOnGroup } = this.props.state;
+      this.playAudio();
       const { updateMessagesOnGroup } = this.props;
-      if(parseInt(data.messenger_group_id) == messagesOnGroup.groupId &&
-        parseInt(data.account_id) != user.id){
+      // console.log(Helper.pusher.messages, response);  
+      if (parseInt(data.messenger_group_id) == messagesOnGroup.groupId && parseInt(data.account_id) != user.id) {
         this.playAudio();
         updateMessagesOnGroup(data);
         this.sendLocalNotification('Messenger', data.account.username  + 'sent a message: '  + data.message, 'Messenger')
-      }else if(parseInt(data.messenger_group_id) != messagesOnGroup.groupId &&
-        parseInt(data.account_id) != user.id){
-        this.sendLocalNotification('Messenger', data.account.username  + 'sent a message: '  + data.message, 'Messenger')
-        const { setMessenger } = this.props;
-        const { messenger } = this.props.state;
-        var unread = parseInt(messenger.unread) + 1;
-        setMessenger(unread, messenger.messages);
       }
+      // else if (parseInt(data.messenger_group_id) != messagesOnGroup.groupId && parseInt(data.account_id) != user.id) {
+      //   this.sendLocalNotification('Messenger', data.account.username  + 'sent a message: '  + data.message, 'Messenger')
+      //   const { setMessenger } = this.props;
+      //   const { messenger } = this.props.state;
+      //   var unread = parseInt(messenger.unread) + 1;
+      //   setMessenger(unread, messenger.messages);
+      // }
     }else if(response.type == Helper.pusher.messageGroup){
       console.log(Helper.pusher.messageGroup, response);
       const { updateMessengerGroup, updateMessagesOnGroupByPayload } = this.props;
@@ -213,6 +222,10 @@ class SliderLogin extends Component {
 
   retrieveUserData = (accountId) => {
     if(Helper.retrieveDataFlag == 1){
+      console.log('Initializing pusher...')
+      Pusher.listen(response => {
+        this.managePusherResponse(response)
+      });
       this.setState({isLoading: false});
       this.props.navigation.navigate('drawerStack');  
     }else{
@@ -254,7 +267,7 @@ class SliderLogin extends Component {
             column: 'id'
           }]
         }
-        console.log('parameter', parameter)
+
         Api.request(Routes.accountRetrieve, parameter, userInfo => {
           if(userInfo.data.length > 0){
             login(userInfo.data[0], this.state.token);
