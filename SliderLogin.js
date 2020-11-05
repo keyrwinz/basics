@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import AsyncStorage from '@react-native-community/async-storage';
-import { View , TextInput , Image, TouchableHighlight, Text, ScrollView, Platform} from 'react-native';
+import { View , TextInput , Image, TouchableHighlight, Text, ScrollView, Platform, Alert } from 'react-native';
 import {NavigationActions} from 'react-navigation';
 import Style from './Style.js';
 import { Spinner } from 'components';
@@ -217,6 +217,33 @@ class SliderLogin extends Component {
       }
     }else if(response.type == Helper.pusher.systemNotification){
       this.sendLocalNotification(data.title, data.description, 'requests')
+    } else if(response.type == Helper.pusher.rider) {
+      const { user } = this.props.state;
+      if (response.data.hasOwnProperty('assigned_rider') && response.data.account_id === user.id) {
+        Alert.alert(
+          `Hello ${user.username}! We found you a rider!`,
+          `Order number: ${response.data.order_number}`,
+          [
+            {
+              text: "View", onPress: () => {
+                const navigateAction = NavigationActions.navigate({
+                  routeName: 'MyOrders',
+                  params: response
+                });
+                this.props.navigation.dispatch(navigateAction); 
+              }
+            },
+            { text: "Cancel" }
+          ],
+          { cancelable: true }
+        );
+        this.sendLocalNotification(
+          `Hi there ${user.username}!`,
+          `We found you a rider! with order number: ${response.data.order_number}`,
+          'MyOrders',
+        )
+        this.playAudio()
+      }
     }
   }
 
