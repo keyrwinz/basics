@@ -37,6 +37,7 @@ class Login extends Component {
   }
   
   async componentDidMount(){
+    this.getTheme()
     if(config.versionChecker == 'store'){
       this.setState({isLoading: true})
       SystemVersion.checkVersion(response => {
@@ -52,6 +53,26 @@ class Login extends Component {
     const initialNotification = await Notifications.getInitialNotification();
     if (initialNotification) {
       this.setState({notifications: [initialNotification, ...this.state.notifications]});
+    }
+  }
+
+  getTheme = async () => {
+    try {
+      const primary = await AsyncStorage.getItem(Helper.APP_NAME + 'primary');
+      const secondary = await AsyncStorage.getItem(Helper.APP_NAME + 'secondary');
+      const tertiary = await AsyncStorage.getItem(Helper.APP_NAME + 'tertiary');
+      const fourth = await AsyncStorage.getItem(Helper.APP_NAME + 'fourth');
+      if(primary != null && secondary != null && tertiary != null) {
+        const { setTheme } = this.props;
+        setTheme({
+          primary: primary,
+          secondary: secondary,
+          tertiary: tertiary,
+          fourth: fourth
+        })
+      }
+    } catch (e) {
+      console.log(e)
     }
   }
 
@@ -355,6 +376,7 @@ class Login extends Component {
   render() {
     const { isLoading, error, isResponseError } = this.state;
     const {  blockedFlag, isOtpModal } = this.state;
+    const { theme } = this.props.state;
     return (
       <ScrollView style={Style.ScrollView}>
         <View style={Style.MainContainer}>
@@ -388,7 +410,9 @@ class Login extends Component {
               password: input
             })}/>
             <TouchableHighlight
-              style={[BasicStyles.btn, BasicStyles.btnPrimary]}
+              style={[BasicStyles.btn, {
+                backgroundColor: theme ? theme.primary : Color.primary
+              }]}
               onPress={() => this.submit()}
               underlayColor={Color.gray}>
               <Text style={BasicStyles.textWhite}>
@@ -424,7 +448,9 @@ class Login extends Component {
               }}>Don't have an account?</Text>
             </View>
             <TouchableHighlight
-              style={[BasicStyles.btn, BasicStyles.btnSecondary]}
+              style={[BasicStyles.btn, {
+                backgroundColor: theme ? theme.secondary : Color.secondary
+              }]}
               onPress={() => this.redirect('registerStack')}
               underlayColor={Color.gray}>
               <Text style={BasicStyles.textWhite}>
@@ -467,6 +493,7 @@ const mapDispatchToProps = dispatch => {
   return {
     login: (user, token) => dispatch(actions.login(user, token)),
     logout: () => dispatch(actions.logout()),
+    setTheme: (theme) => dispatch(actions.setTheme(theme)),
     setNotifications: (unread, notifications) => dispatch(actions.setNotifications(unread, notifications)),
     updateNotifications: (unread, notification) => dispatch(actions.updateNotifications(unread, notification)),
     updateMessagesOnGroup: (message) => dispatch(actions.updateMessagesOnGroup(message)),
