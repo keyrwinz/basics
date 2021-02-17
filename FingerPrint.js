@@ -47,9 +47,14 @@ class BiometricPopup extends Component {
  
   authCurrent() {
     FingerprintScanner
-      .authenticate({ title: 'Log in with Biometrics' })
+      .authenticate({ title: 'Log in with FingerPrint' , description: "Scan your finger print on your device to continue", cancelButton: "CANCEL"})
       .then((res) => {
         this.props.onAuthenticate();
+        this.props.handlePopupDismissedLegacy();
+      })
+      .catch(error => {
+        console.log("------------------------", error);
+        this.props.handlePopupDismissedLegacy();
       });
   }
  
@@ -62,7 +67,6 @@ class BiometricPopup extends Component {
         Alert.alert('Fingerprint Authentication', 'Authenticated successfully');
       })
       .catch((error) => {
-        console.log("------------------------", error);
         this.setState({ errorMessageLegacy: error.message, biometricLegacy: error.biometric });
         this.description.shake();
       });

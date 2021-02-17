@@ -509,7 +509,7 @@ class Login extends Component {
               this.state.showFingerPrint == true ? 
               <View>
                   <TouchableOpacity
-                    style={Style.fingerprint}
+                    style={Style.fingerprints}
                     onPress={() => this.redirect('fingerPrintStack')}
                   >
                       <FontAwesomeIcon icon={faFingerprint} size={40} style={{color:Color.primary, display:'flex', marginLeft:'auto', marginRight:'auto'}}/>
