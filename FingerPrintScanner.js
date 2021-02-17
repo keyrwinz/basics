@@ -52,12 +52,14 @@ class FingerprintScan extends Component {
     this.props.navigation.navigate(route);
   }
 
-  handleFingerprintShowed = () => {
-    this.setState({ popupShowed: true });
+  handleFingerprintShowed = async() => {
+    await this.setState({ popupShowed: true });
+    console.log("?????????????????", this.state.popupShowed);
   };
 
-  handleFingerprintDismissed = () => {
-    this.setState({ popupShowed: false });
+  handleFingerprintDismissed = async() => {
+    await this.setState({ popupShowed: false });
+    console.log("<<<<<<<<<<<<<<<", this.state.popupShowed);
   };
 
   componentWillUnmount() {
@@ -428,13 +430,14 @@ class FingerprintScan extends Component {
 
                 <Header params={"Login"}></Header>
 
-                <TouchableOpacity
-                style={styles.fingerprint}
-                onPress={this.handleFingerprintShowed}
-                disabled={!!errorMessage}
-                >
-                    <FontAwesomeIcon icon={faFingerprint} size={60} style={{color:Color.primary}}/>
-                </TouchableOpacity>
+                  <TouchableOpacity
+                      style={styles.fingerprint}
+                      onPress={this.handleFingerprintShowed}
+                      disabled={!!errorMessage}
+                  >
+                      <FontAwesomeIcon icon={faFingerprint} size={60} style={{color:Color.primary}}/>
+                  </TouchableOpacity>
+                  <Text>Tap the icon</Text>
 
                 {errorMessage && (
                 <Text style={styles.errorMessage}>
@@ -446,12 +449,13 @@ class FingerprintScan extends Component {
                 onPress={() => this.redirect('loginStack')}
                 disabled={!!errorMessage}
                 >
-                    <Text>Return to Login</Text>
+                    <Text style={{marginTop: 200}}>Return to Login</Text>
                 </TouchableOpacity>
                 {popupShowed && (
                 <FingerprintPopup
                     style={styles.popup}
-                    handlePopupDismissed={this.handleFingerprintDismissed}
+                    handlePopupDismissed={() => this.handleFingerprintDismissed()}
+                    handlePopupDismissedLegacy={() => this.handleFingerprintDismissed()}
                     onAuthenticate={() => this.submit()}
                 />
                 )}

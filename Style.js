@@ -121,6 +121,13 @@ export default {
   fingerprint: {
     padding: 20,
     marginVertical: 5,
+    justifyContent:'center',
+    textAlign: 'center',
+    flex: 1
+  },
+  fingerprints: {
+    padding: 20,
+    marginVertical: 5,
   },
   errorMessage: {
     color: '#ea3d13',
