@@ -44,9 +44,23 @@ class Login extends Component {
     this.registerNotificationEvents();
   }
   
+  // async componentDidUpdate(){
+  //   console.log("[Update]");
+    
+  // }
+  async storageChecker(){
+    console.log("[Not Empty storage]", await AsyncStorage.getItem('username') != null &&  await AsyncStorage.getItem('password') != null);
+    if((await AsyncStorage.getItem('username') != null && await AsyncStorage.getItem('password') != null)){
+      await this.setState({showFingerPrint: true})
+      await this.setState({notEmpty: true})
+    }else{
+      await this.setState({notEmpty: false})
+      await this.setState({showFingerPrint: false})
+    }
+  }
+
   async componentDidMount(){
     this.getTheme()
-    console.log("[Not Empty storage]", await AsyncStorage.getItem('username') != null &&  await AsyncStorage.getItem('password') != null);
     if((await AsyncStorage.getItem('username') != null && await AsyncStorage.getItem('password') != null)){
       await this.setState({showFingerPrint: true})
       await this.setState({notEmpty: true})
@@ -70,6 +84,14 @@ class Login extends Component {
     if (initialNotification) {
       this.setState({notifications: [initialNotification, ...this.state.notifications]});
     }
+    console.log("[navigation]", this.props.navigation);
+    this.infocus = this.props.navigation.addListener('didfocus', () => {
+      this.storageChecker()
+    })
+  }
+
+  componentWillUnmount(){
+    this.infocus.remove()
   }
 
   getTheme = async () => {
@@ -249,9 +271,6 @@ class Login extends Component {
   }
 
   retrieveUserData = (accountId) => {
-    // this.setState({isConfirmed: true})
-    // this.setState({visible: false})
-    // setTimeout(() => {
       if(Helper.retrieveDataFlag == 1){
         this.setState({isLoading: false});
         this.props.navigation.navigate('drawerStack');  
@@ -278,7 +297,6 @@ class Login extends Component {
           this.setState({isResponseError: true})
         })
       }
-    // }, 20000)
    
   }
 
@@ -354,7 +372,7 @@ class Login extends Component {
       console.log(username, password);
       await AsyncStorage.setItem('username', username)
       await AsyncStorage.setItem('password', password)
-      await this.setState({showFingerPrint: true})
+      this.setState({showFingerPrint: true})
   }
 
   async cancel(){
