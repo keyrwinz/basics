@@ -43,8 +43,11 @@ class Login extends Component {
     this.audio = null;
   }
   
-  async componentDidMount(){
-    this.getTheme()
+  // async componentDidUpdate(){
+  //   console.log("[Update]");
+    
+  // }
+  async storageChecker(){
     console.log("[Not Empty storage]", await AsyncStorage.getItem('username') != null &&  await AsyncStorage.getItem('password') != null);
     if((await AsyncStorage.getItem('username') != null && await AsyncStorage.getItem('password') != null)){
       await this.setState({showFingerPrint: true})
@@ -53,8 +56,19 @@ class Login extends Component {
       await this.setState({notEmpty: false})
       await this.setState({showFingerPrint: false})
     }
+  }
+
+  async componentDidMount(){
+    this.getTheme()
+    if((await AsyncStorage.getItem('username') != null && await AsyncStorage.getItem('password') != null)){
+      await this.setState({showFingerPrint: true})
+      await this.setState({notEmpty: true})
+    }else{
+      await this.setState({notEmpty: false})
+      await this.setState({showFingerPrint: false})
+    }
     if(config.versionChecker == 'store'){
-      this.setState({isLoading: true})
+      this.setState({isLoading: fase})
       SystemVersion.checkVersion(response => {
         this.setState({isLoading: false})
         if(response == true){
@@ -69,6 +83,14 @@ class Login extends Component {
     if (initialNotification) {
       this.setState({notifications: [initialNotification, ...this.state.notifications]});
     }
+    console.log("[navigation]", this.props.navigation);
+    this.infocus = this.props.navigation.addListener('didfocus', () => {
+      this.storageChecker()
+    })
+  }
+
+  componentWillUnmount(){
+    this.infocus.remove()
   }
 
   getTheme = async () => {
@@ -176,7 +198,7 @@ class Login extends Component {
       console.log(username, password);
       await AsyncStorage.setItem('username', username)
       await AsyncStorage.setItem('password', password)
-      await this.setState({showFingerPrint: true})
+      this.setState({showFingerPrint: true})
   }
 
   async cancel(){
@@ -227,8 +249,13 @@ class Login extends Component {
                 column: 'id'
               }]
             }
-            this.openModal(username, password);
+            if(this.state.notEmpty == true){
+              console.log("[notEmpty]", this.state.notEmpty);
+            }else{
+              this.openModal(username, password);
+            }
             this.redirect('drawerStack')
+            this.setState({isLoading: false, error: 0});
           }, error => {
             this.setState({isResponseError: true})
           })
