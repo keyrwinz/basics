@@ -89,9 +89,9 @@ class Login extends Component {
     })
   }
 
-  componentWillUnmount(){
-    this.infocus.remove()
-  }
+  // componentWillUnmount(){
+  //   this.infocus.remove()
+  // }
 
   getTheme = async () => {
     try {
@@ -151,6 +151,7 @@ class Login extends Component {
       this.setState({isLoading: true});
       Api.getAuthUser(this.state.token, (response) => {
         login(response, this.state.token);
+        this.setState({isLoading: false});
         this.redirect('drawerStack')
       }, error => {
         this.setState({isResponseError: true})
@@ -161,7 +162,7 @@ class Login extends Component {
   getData = async () => {
     try {
       const token = await AsyncStorage.getItem(Helper.APP_NAME + 'token');
-      if(token != null) {
+      if(token != null && token != '') {
         this.setState({token});
         this.login();
       }
@@ -249,13 +250,14 @@ class Login extends Component {
                 column: 'id'
               }]
             }
+            this.setState({isLoading: false, error: 0});
             if(this.state.notEmpty == true){
               console.log("[notEmpty]", this.state.notEmpty);
             }else{
               this.openModal(username, password);
             }
             this.redirect('drawerStack')
-            this.setState({isLoading: false, error: 0});
+            
           }, error => {
             this.setState({isResponseError: true})
           })
