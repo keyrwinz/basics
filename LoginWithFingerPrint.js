@@ -203,7 +203,6 @@ class Login extends Component {
         Api.request(Routes.accountRetrieve, parameter, userInfo => {
           if(userInfo.data.length > 0){
             login(userInfo.data[0], this.state.token);
-            this.redirect('drawerStack')
           }else{
             this.setState({isLoading: false});
             login(null, null)
@@ -211,6 +210,7 @@ class Login extends Component {
         }, error => {
           this.setState({isResponseError: true})
         })
+        this.redirect('drawerStack')
       }, error => {
         this.setState({isResponseError: true})
       })
@@ -303,7 +303,6 @@ class Login extends Component {
               this.setState({isResponseError: true})
             })
             this.redirect('drawerStack')
-            
           }, error => {
             this.setState({isResponseError: true})
           })
