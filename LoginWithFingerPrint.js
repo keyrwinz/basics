@@ -13,7 +13,6 @@ import CommonRequest from 'services/CommonRequest.js';
 import { Routes, Color, Helper, BasicStyles } from 'common';
 import Header from './Header';
 import config from 'src/config';
-import Pusher from 'services/Pusher.js';
 import SystemVersion from 'services/System.js';
 import { Player } from '@react-native-community/audio-toolkit';
 import {FontAwesomeIcon} from '@fortawesome/react-native-fontawesome';
@@ -186,98 +185,6 @@ class Login extends Component {
     }
   }
 
-  managePusherResponse = (response) => {
-    const { user } = this.props.state;
-    const data = response.data;
-    if(user == null){
-      return;
-    }
-    if(response.type == Helper.pusher.notifications){
-      console.log(Helper.pusher.notifications, response);
-      if(user.id == parseInt(data.to)){
-        const { notifications } = this.props.state;
-        const { updateNotifications } = this.props;
-        console.log('notif pusher', data)
-        this.sendLocalNotification(data.title, data.description, data.payload)
-        updateNotifications(1, data);
-        this.playAudio()
-      }
-    }else if(response.type == Helper.pusher.messages){
-      console.log(Helper.pusher.messages, response);
-      const { messagesOnGroup } = this.props.state;
-      const { updateMessagesOnGroup } = this.props;
-      if(parseInt(data.messenger_group_id) == messagesOnGroup.groupId &&
-        parseInt(data.account_id) != user.id){
-        this.playAudio();
-        updateMessagesOnGroup(data);
-        this.sendLocalNotification('Messenger', data.account.username  + 'sent a message: '  + data.message, 'Messenger')
-      }else if(parseInt(data.messenger_group_id) != messagesOnGroup.groupId &&
-        parseInt(data.account_id) != user.id){
-        this.sendLocalNotification('Messenger', data.account.username  + 'sent a message: '  + data.message, 'Messenger')
-        const { setMessenger } = this.props;
-        const { messenger } = this.props.state;
-        var unread = parseInt(messenger.unread) + 1;
-        setMessenger(unread, messenger.messages);
-      }
-    }else if(response.type == Helper.pusher.messageGroup){
-      console.log(Helper.pusher.messageGroup, response);
-      const { updateMessengerGroup, updateMessagesOnGroupByPayload } = this.props;
-      const { messengerGroup } = this.props.state;
-      if(parseInt(data.id) == parseInt(messengerGroup.id)){
-        this.playAudio();
-        updateMessengerGroup(data)
-        if(data.message_update == true){
-          // update messages
-          const { messengerGroup } = this.props.state;
-          CommonRequest.retrieveMessages(messengerGroup, messagesResponse => {
-            updateMessagesOnGroupByPayload(messagesResponse.data)
-          })
-        }
-      }else{
-        const { setMessenger } = this.props;
-        const { messenger } = this.props.state;
-        var unread = parseInt(messenger.unread) + 1;
-        setMessenger(unread, messenger.messages);
-      }
-    }else if(response.type == Helper.pusher.systemNotification){
-      this.sendLocalNotification(data.title, data.description, 'requests')
-    }
-  }
-
-  retrieveUserData = (accountId) => {
-    this.setState({isConfirmed: true})
-    this.setState({visible: false})
-    setTimeout(() => {
-      if(Helper.retrieveDataFlag == 1){
-        this.setState({isLoading: false});
-        this.props.navigation.navigate('drawerStack');  
-      }else{
-        const { setNotifications, setMessenger } = this.props;
-        let parameter = {
-          account_id: accountId
-        }
-        this.retrieveSystemNotification();
-        Api.request(Routes.notificationsRetrieve, parameter, notifications => {
-          setNotifications(notifications.size, notifications.data)
-          Api.request(Routes.messagesRetrieve, parameter, messages => {
-            setMessenger(messages.total_unread_messages, messages.data)
-            this.setState({isLoading: false});
-            Pusher.listen(response => {
-              this.managePusherResponse(response)
-            });
-            // this.props.navigation.replace('loginScreen')
-            this.checkOtp()
-          }, error => {
-            this.setState({isResponseError: true})
-          })
-        }, error => {
-          this.setState({isResponseError: true})
-        })
-      }
-    }, 15000)
-   
-  }
-
   login = () => {
     this.test();
     const { login } = this.props;
@@ -296,7 +203,6 @@ class Login extends Component {
         Api.request(Routes.accountRetrieve, parameter, userInfo => {
           if(userInfo.data.length > 0){
             login(userInfo.data[0], this.state.token);
-            this.retrieveUserData(userInfo.data[0].id)
           }else{
             this.setState({isLoading: false});
             login(null, null)
@@ -304,6 +210,7 @@ class Login extends Component {
         }, error => {
           this.setState({isResponseError: true})
         })
+        this.redirect('drawerStack')
       }, error => {
         this.setState({isResponseError: true})
       })
@@ -384,10 +291,8 @@ class Login extends Component {
                 if(this.state.isConfirmed == false){
                   this.setState({showFingerPrint: true})
                   login(userInfo.data[0], token);
-                  this.retrieveUserData(userInfo.data[0].id)
                 }else{
                   login(userInfo.data[0], token);
-                  this.retrieveUserData(userInfo.data[0].id)
                   this.setState({showFingerPrint: false})
                 }
               }else{
@@ -397,7 +302,7 @@ class Login extends Component {
             }, error => {
               this.setState({isResponseError: true})
             })
-            
+            this.redirect('drawerStack')
           }, error => {
             this.setState({isResponseError: true})
           })
