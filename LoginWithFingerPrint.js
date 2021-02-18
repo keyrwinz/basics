@@ -13,12 +13,14 @@ import CommonRequest from 'services/CommonRequest.js';
 import { Routes, Color, Helper, BasicStyles } from 'common';
 import Header from './Header';
 import config from 'src/config';
+import Pusher from 'services/Pusher.js';
 import SystemVersion from 'services/System.js';
 import { Player } from '@react-native-community/audio-toolkit';
 import {FontAwesomeIcon} from '@fortawesome/react-native-fontawesome';
 import OtpModal from 'components/Modal/Otp.js';
 import {Notifications, NotificationAction, NotificationCategory} from 'react-native-notifications';
 import { faFingerprint } from '@fortawesome/free-solid-svg-icons';
+import { Alert } from 'react-native';
 class Login extends Component {
   //Screen1 Component
   constructor(props){
@@ -35,6 +37,7 @@ class Login extends Component {
       notifications: [],
       visible: false,
       showFingerPrint: false,
+      notEmpty: false,
       isConfirmed: false,
     };
     this.audio = null;
@@ -43,11 +46,13 @@ class Login extends Component {
   
   async componentDidMount(){
     this.getTheme()
-    console.log(await AsyncStorage.getItem('username') != null &&  await AsyncStorage.getItem('password') != null);
+    console.log("[Not Empty storage]", await AsyncStorage.getItem('username') != null &&  await AsyncStorage.getItem('password') != null);
     if((await AsyncStorage.getItem('username') != null && await AsyncStorage.getItem('password') != null)){
-      this.setState({showFingerPrint: true})
+      await this.setState({showFingerPrint: true})
+      await this.setState({notEmpty: true})
     }else{
-      this.setState({showFingerPrint: false})
+      await this.setState({notEmpty: false})
+      await this.setState({showFingerPrint: false})
     }
     if(config.versionChecker == 'store'){
       this.setState({isLoading: true})
@@ -185,6 +190,98 @@ class Login extends Component {
     }
   }
 
+  managePusherResponse = (response) => {
+    const { user } = this.props.state;
+    const data = response.data;
+    if(user == null){
+      return;
+    }
+    if(response.type == Helper.pusher.notifications){
+      console.log(Helper.pusher.notifications, response);
+      if(user.id == parseInt(data.to)){
+        const { notifications } = this.props.state;
+        const { updateNotifications } = this.props;
+        console.log('notif pusher', data)
+        this.sendLocalNotification(data.title, data.description, data.payload)
+        updateNotifications(1, data);
+        this.playAudio()
+      }
+    }else if(response.type == Helper.pusher.messages){
+      console.log(Helper.pusher.messages, response);
+      const { messagesOnGroup } = this.props.state;
+      const { updateMessagesOnGroup } = this.props;
+      if(parseInt(data.messenger_group_id) == messagesOnGroup.groupId &&
+        parseInt(data.account_id) != user.id){
+        this.playAudio();
+        updateMessagesOnGroup(data);
+        this.sendLocalNotification('Messenger', data.account.username  + 'sent a message: '  + data.message, 'Messenger')
+      }else if(parseInt(data.messenger_group_id) != messagesOnGroup.groupId &&
+        parseInt(data.account_id) != user.id){
+        this.sendLocalNotification('Messenger', data.account.username  + 'sent a message: '  + data.message, 'Messenger')
+        const { setMessenger } = this.props;
+        const { messenger } = this.props.state;
+        var unread = parseInt(messenger.unread) + 1;
+        setMessenger(unread, messenger.messages);
+      }
+    }else if(response.type == Helper.pusher.messageGroup){
+      console.log(Helper.pusher.messageGroup, response);
+      const { updateMessengerGroup, updateMessagesOnGroupByPayload } = this.props;
+      const { messengerGroup } = this.props.state;
+      if(parseInt(data.id) == parseInt(messengerGroup.id)){
+        this.playAudio();
+        updateMessengerGroup(data)
+        if(data.message_update == true){
+          // update messages
+          const { messengerGroup } = this.props.state;
+          CommonRequest.retrieveMessages(messengerGroup, messagesResponse => {
+            updateMessagesOnGroupByPayload(messagesResponse.data)
+          })
+        }
+      }else{
+        const { setMessenger } = this.props;
+        const { messenger } = this.props.state;
+        var unread = parseInt(messenger.unread) + 1;
+        setMessenger(unread, messenger.messages);
+      }
+    }else if(response.type == Helper.pusher.systemNotification){
+      this.sendLocalNotification(data.title, data.description, 'requests')
+    }
+  }
+
+  retrieveUserData = (accountId) => {
+    // this.setState({isConfirmed: true})
+    // this.setState({visible: false})
+    // setTimeout(() => {
+      if(Helper.retrieveDataFlag == 1){
+        this.setState({isLoading: false});
+        this.props.navigation.navigate('drawerStack');  
+      }else{
+        const { setNotifications, setMessenger } = this.props;
+        let parameter = {
+          account_id: accountId
+        }
+        this.retrieveSystemNotification();
+        Api.request(Routes.notificationsRetrieve, parameter, notifications => {
+          setNotifications(notifications.size, notifications.data)
+          Api.request(Routes.messagesRetrieve, parameter, messages => {
+            setMessenger(messages.total_unread_messages, messages.data)
+            this.setState({isLoading: false});
+            Pusher.listen(response => {
+              this.managePusherResponse(response)
+            });
+            // this.props.navigation.replace('loginScreen')
+            this.checkOtp()
+          }, error => {
+            this.setState({isResponseError: true})
+          })
+        }, error => {
+          this.setState({isResponseError: true})
+        })
+      }
+    // }, 20000)
+   
+  }
+
   login = () => {
     this.test();
     const { login } = this.props;
@@ -203,6 +300,7 @@ class Login extends Component {
         Api.request(Routes.accountRetrieve, parameter, userInfo => {
           if(userInfo.data.length > 0){
             login(userInfo.data[0], this.state.token);
+            this.retrieveUserData(userInfo.data[0].id)
           }else{
             this.setState({isLoading: false});
             login(null, null)
@@ -210,7 +308,6 @@ class Login extends Component {
         }, error => {
           this.setState({isResponseError: true})
         })
-        this.redirect('drawerStack')
       }, error => {
         this.setState({isResponseError: true})
       })
@@ -220,7 +317,7 @@ class Login extends Component {
   getData = async () => {
     try {
       const token = await AsyncStorage.getItem(Helper.APP_NAME + 'token');
-      if(token != null && token != '') {
+      if(token != null) {
         this.setState({token});
         this.login();
       }
@@ -249,12 +346,38 @@ class Login extends Component {
     this.props.navigation.navigate('drawerStack');
   }
 
-  async openModal(username, password){
-      this.setState({isConfirmed: true})
+  accountRetrieve(parameter){
+    
+  }
+
+  async confirm(username, password){
       console.log(username, password);
       await AsyncStorage.setItem('username', username)
       await AsyncStorage.setItem('password', password)
-      this.setState({showFingerPrint: false})
+      await this.setState({showFingerPrint: true})
+  }
+
+  async cancel(){
+    await this.setState({showFingerPrint: false})
+  }
+
+  openModal(username, password){
+    Alert.alert(
+      "Finger Print",
+      "Allow access to your finger print?",
+      [
+        {
+          text: "Cancel", 
+          onPress: () => this.cancel(),
+          style: "cancel"
+        },
+        {
+          text: "Allow",
+          onPress: () => this.confirm(username, password)
+        }
+      ],
+      {cancelable: false}
+    )
   }
 
   submit(){
@@ -271,8 +394,8 @@ class Login extends Component {
         }
         if(response.token){
           const token = response.token;
-          this.setState({showFingerPrint: true})
-          this.setState({visible: true})
+          // this.setState({showFingerPrint: true})
+          // this.setState({visible: true})
           Api.getAuthUser(response.token, (response) => {
             login(response, token);
             let parameter = {
@@ -282,15 +405,22 @@ class Login extends Component {
                 column: 'id'
               }]
             }
+            if(this.state.notEmpty == true){
+              console.log("[notEmpty]", this.state.notEmpty);
+            }else{
+              this.openModal(username, password);
+            }
             Api.request(Routes.accountRetrieve, parameter, userInfo => {
               if(userInfo.data.length > 0){
-                if(this.state.isConfirmed == false){
-                  this.setState({showFingerPrint: true})
+                // if(this.state.isConfirmed == false){
+                  // this.setState({showFingerPrint: true})
                   login(userInfo.data[0], token);
-                }else{
-                  login(userInfo.data[0], token);
-                  this.setState({showFingerPrint: false})
-                }
+                  this.retrieveUserData(userInfo.data[0].id)
+                // }else{
+                //   login(userInfo.data[0], token);
+                //   this.retrieveUserData(userInfo.data[0].id)
+                //   this.setState({showFingerPrint: false})
+                // }
               }else{
                 this.setState({isLoading: false});
                 this.setState({error: 2})
@@ -298,7 +428,7 @@ class Login extends Component {
             }, error => {
               this.setState({isResponseError: true})
             })
-            this.redirect('drawerStack')
+            
           }, error => {
             this.setState({isResponseError: true})
           })
@@ -361,14 +491,14 @@ class Login extends Component {
               </Text>
             </TouchableHighlight>
 
-            <Confirm visible={this.state.visible} message={'Do you want to enable finger print scanning for easier login?'}
+            {/* <Confirm visible={this.state.visible} message={'Do you want to enable finger print scanning for easier login?'}
                 onConfirm={() => {
                     this.openModal(this.state.username, this.state.password)
                 }}
                 onCLose={() => {
                     this.setState({visible: false})
                 }}
-            />
+            /> */}
             
             <TouchableHighlight
               style={[BasicStyles.btn, BasicStyles.btnWarning]}
