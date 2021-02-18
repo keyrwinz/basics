@@ -220,7 +220,7 @@ class Login extends Component {
   getData = async () => {
     try {
       const token = await AsyncStorage.getItem(Helper.APP_NAME + 'token');
-      if(token != null) {
+      if(token != null && token != '') {
         this.setState({token});
         this.login();
       }
@@ -247,10 +247,6 @@ class Login extends Component {
   onSuccessOtp = () => {
     this.setState({isOtpModal: false})
     this.props.navigation.navigate('drawerStack');
-  }
-
-  accountRetrieve(parameter){
-    
   }
 
   async openModal(username, password){
