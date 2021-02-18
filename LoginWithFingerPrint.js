@@ -274,7 +274,7 @@ class Login extends Component {
           this.setState({isResponseError: true})
         })
       }
-    }, 20000)
+    }, 15000)
    
   }
 
