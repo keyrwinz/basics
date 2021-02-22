@@ -83,7 +83,6 @@ class Login extends Component {
     if (initialNotification) {
       this.setState({notifications: [initialNotification, ...this.state.notifications]});
     }
-    console.log("[navigation]", this.props.navigation);
     this.infocus = this.props.navigation.addListener('didfocus', () => {
       this.storageChecker()
     })
@@ -152,7 +151,9 @@ class Login extends Component {
       Api.getAuthUser(this.state.token, (response) => {
         login(response, this.state.token);
         this.setState({isLoading: false});
-        this.redirect('drawerStack')
+        if(response.username){
+          this.redirect('drawerStack')
+        }
       }, error => {
         this.setState({isResponseError: true})
       })
@@ -256,7 +257,9 @@ class Login extends Component {
             }else{
               this.openModal(username, password);
             }
-            this.redirect('drawerStack')
+            if(response.username){
+              this.redirect('drawerStack')
+            }
             
           }, error => {
             this.setState({isResponseError: true})
