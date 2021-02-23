@@ -14,12 +14,12 @@ import { Routes, Color, Helper, BasicStyles } from 'common';
 import Header from './Header';
 import config from 'src/config';
 import Pusher from 'services/Pusher.js';
-import SystemVersion from 'services/System.js';
 import { Player } from '@react-native-community/audio-toolkit';
 import {FontAwesomeIcon} from '@fortawesome/react-native-fontawesome';
 import OtpModal from 'components/Modal/Otp.js';
-import {Notifications, NotificationAction, NotificationCategory} from 'react-native-notifications';
 import { faFingerprint } from '@fortawesome/free-solid-svg-icons';
+import { fcmService } from 'services/broadcasting/FCMService';
+import { localNotificationService } from 'services/broadcasting/LocalNotificationService';
 import { Alert } from 'react-native';
 class Login extends Component {
   //Screen1 Component
@@ -59,7 +59,6 @@ class Login extends Component {
   }
 
   async componentDidMount(){
-    this.getTheme()
     if((await AsyncStorage.getItem('username') != null && await AsyncStorage.getItem('password') != null)){
       await this.setState({showFingerPrint: true})
       await this.setState({notEmpty: true})
@@ -67,61 +66,10 @@ class Login extends Component {
       await this.setState({notEmpty: false})
       await this.setState({showFingerPrint: false})
     }
-    if(config.versionChecker == 'store'){
-      this.setState({isLoading: fase})
-      SystemVersion.checkVersion(response => {
-        this.setState({isLoading: false})
-        if(response == true){
-          this.getData();
-        }
-      })
-    }else{
-      this.getData(); 
-    }
-    this.audio = new Player('assets/notification.mp3');
-    const initialNotification = await Notifications.getInitialNotification();
-    if (initialNotification) {
-      this.setState({notifications: [initialNotification, ...this.state.notifications]});
-    }
+
     this.infocus = this.props.navigation.addListener('didfocus', () => {
       this.storageChecker()
     })
-  }
-
-  // componentWillUnmount(){
-  //   this.infocus.remove()
-  // }
-
-  getTheme = async () => {
-    try {
-      const primary = await AsyncStorage.getItem(Helper.APP_NAME + 'primary');
-      const secondary = await AsyncStorage.getItem(Helper.APP_NAME + 'secondary');
-      const tertiary = await AsyncStorage.getItem(Helper.APP_NAME + 'tertiary');
-      const fourth = await AsyncStorage.getItem(Helper.APP_NAME + 'fourth');
-      if(primary != null && secondary != null && tertiary != null) {
-        const { setTheme } = this.props;
-        setTheme({
-          primary: primary,
-          secondary: secondary,
-          tertiary: tertiary,
-          fourth: fourth
-        })
-      }
-    } catch (e) {
-      console.log(e)
-    }
-  }
-
-  requestPermissions() {
-    Notifications.registerRemoteNotifications();
-  }
-
-  sendLocalNotification(title, body, route) {
-    Notifications.postLocalNotification({
-        title: title,
-        body: body,
-        extra: route
-    });
   }
 
 
@@ -143,6 +91,74 @@ class Login extends Component {
   }
 
 
+  firebaseNotification(){
+    const { user } = this.props.state;
+    if(user == null){
+      return
+    }
+    fcmService.registerAppWithFCM()
+    fcmService.register(this.onRegister, this.onNotification, this.onOpenNotification)
+    localNotificationService.configure(this.onOpenNotification, 'Payhiram')
+    fcmService.subscribeTopic('Message')
+    // return () => {
+    //   console.log("[App] unRegister")
+    //   fcmService.unRegister()
+    //   localNotificationService.unRegister()
+    // }
+  }
+
+  onRegister = (token) => {
+    console.log("[App] onRegister", token)
+  }
+
+  onOpenNotification = (notify) => {
+    // console.log("[App] onOpenNotification", notify)
+  }
+
+  onNotification = (notify) => {
+    const { user } = this.props.state;
+    // console.log("[App] onNotification", notify)
+    let { data } = notify
+    if(user == null || data == null){
+      return
+    }
+    switch(data.topic){
+      case 'message': {
+          const { messengerGroup } = this.props.state;
+          let members = JSON.parse(data.members)
+          console.log('members', members)
+          if(messengerGroup == null && members.indexOf(user.id) > -1){
+            console.log('[messengerGroup] on empty', data)
+            const { setUnReadMessages } = this.props;
+            setUnReadMessages(data)
+            return
+          }
+          if(parseInt(data.messenger_group_id) === messengerGroup.id && members.indexOf(user.id) > -1){
+            if(parseInt(data.account_id) != user.id){
+              const { updateMessagesOnGroup } = this.props;
+              updateMessagesOnGroup(data); 
+            }
+            return
+          }
+        }
+        break
+    }
+
+    // const options = {
+    //   soundName: 'default',
+    //   playSound: true
+    // }
+
+    // localNotificationService.showNotification(
+    //   0,
+    //   notify.title,
+    //   notify.body,
+    //   notify,
+    //   options,
+    //   "test"
+    // )
+  }
+
   login = () => {
     this.test();
     const { login } = this.props;
@@ -152,6 +168,7 @@ class Login extends Component {
         login(response, this.state.token);
         this.setState({isLoading: false});
         if(response.username){
+          this.firebaseNotification()
           this.redirect('drawerStack')
         }
       }, error => {
@@ -258,6 +275,7 @@ class Login extends Component {
               this.openModal(username, password);
             }
             if(response.username){
+              this.firebaseNotification()
               this.redirect('drawerStack')
             }
             
@@ -426,6 +444,7 @@ const mapDispatchToProps = dispatch => {
     login: (user, token) => dispatch(actions.login(user, token)),
     logout: () => dispatch(actions.logout()),
     setTheme: (theme) => dispatch(actions.setTheme(theme)),
+    setUnReadMessages: (messages) => dispatch(actions.setUnReadMessages(messages)),
     setNotifications: (unread, notifications) => dispatch(actions.setNotifications(unread, notifications)),
     updateNotifications: (unread, notification) => dispatch(actions.updateNotifications(unread, notification)),
     updateMessagesOnGroup: (message) => dispatch(actions.updateMessagesOnGroup(message)),
