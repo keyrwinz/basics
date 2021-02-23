@@ -100,6 +100,7 @@ class Login extends Component {
     fcmService.register(this.onRegister, this.onNotification, this.onOpenNotification)
     localNotificationService.configure(this.onOpenNotification, 'Payhiram')
     fcmService.subscribeTopic('Message')
+    fcmService.subscribeTopic('Notifications')
     // return () => {
     //   console.log("[App] unRegister")
     //   fcmService.unRegister()
@@ -122,7 +123,7 @@ class Login extends Component {
     if(user == null || data == null){
       return
     }
-    switch(data.topic){
+    switch(data.topic.toLowerCase()){
       case 'message': {
           const { messengerGroup } = this.props.state;
           let members = JSON.parse(data.members)
@@ -139,6 +140,14 @@ class Login extends Component {
               updateMessagesOnGroup(data); 
             }
             return
+          }
+        }
+        break
+      case 'notifications': {
+          if(parseInt(data.to) == user.id){
+            console.log("[Notifications] data", data)
+            const { updateNotifications } = this.props;
+            updateNotifications(1, data)
           }
         }
         break
