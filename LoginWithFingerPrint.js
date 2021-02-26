@@ -20,6 +20,7 @@ import OtpModal from 'components/Modal/Otp.js';
 import { faFingerprint } from '@fortawesome/free-solid-svg-icons';
 import { fcmService } from 'services/broadcasting/FCMService';
 import { localNotificationService } from 'services/broadcasting/LocalNotificationService';
+import FingerPrintScanner from './FingerPrintScanner'
 import { Alert } from 'react-native';
 class Login extends Component {
   //Screen1 Component
@@ -397,24 +398,7 @@ class Login extends Component {
             </TouchableHighlight>
             {
               this.state.showFingerPrint == true ? 
-              <View>
-                  <TouchableOpacity
-                    style={Style.fingerprints}
-                    onPress={() => this.redirect('fingerPrintStack')}
-                  >
-                      <FontAwesomeIcon icon={faFingerprint} size={40} style={{color:Color.primary, display:'flex', marginLeft:'auto', marginRight:'auto'}}/>
-                  </TouchableOpacity>
-                  <View style={{
-                    justifyContent: 'center',
-                    alignItems: 'center'
-                  }}>
-                    <Text style={{
-                      paddingTop: 10,
-                      paddingBottom: 10,
-                      color: Color.gray
-                    }}>Login with Finger Print?</Text>
-                  </View>
-              </View> : null
+              <FingerPrintScanner navigate={() => this.redirect('drawerStack')}/> : null
             }
           </View>
         </View>
