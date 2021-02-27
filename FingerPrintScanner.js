@@ -27,6 +27,8 @@ import {Notifications, NotificationAction, NotificationCategory} from 'react-nat
 import Header from './Header';
 import OtpModal from 'components/Modal/Otp.js';
 import { ScrollView } from 'react-native-gesture-handler';
+import { fcmService } from 'services/broadcasting/FCMService';
+import { localNotificationService } from 'services/broadcasting/LocalNotificationService';
 
 class FingerprintScan extends Component {
 
@@ -81,7 +83,6 @@ class FingerprintScan extends Component {
   }
 
   async componentDidMount(){
-    this.getTheme()
     AppState.addEventListener('change', this.handleAppStateChange);
     // Get initial fingerprint enrolled
     this.detectFingerprintAvailable();
@@ -107,40 +108,8 @@ class FingerprintScan extends Component {
     }
   }
 
-  getTheme = async () => {
-    try {
-      const primary = await AsyncStorage.getItem(Helper.APP_NAME + 'primary');
-      const secondary = await AsyncStorage.getItem(Helper.APP_NAME + 'secondary');
-      const tertiary = await AsyncStorage.getItem(Helper.APP_NAME + 'tertiary');
-      const fourth = await AsyncStorage.getItem(Helper.APP_NAME + 'fourth');
-      if(primary != null && secondary != null && tertiary != null) {
-        const { setTheme } = this.props;
-        setTheme({
-          primary: primary,
-          secondary: secondary,
-          tertiary: tertiary,
-          fourth: fourth
-        })
-      }
-    } catch (e) {
-      console.log(e)
-    }
-  }
-
-  requestPermissions() {
-    Notifications.registerRemoteNotifications();
-  }
-
-  sendLocalNotification(title, body, route) {
-    Notifications.postLocalNotification({
-        title: title,
-        body: body,
-        extra: route
-    });
-  }
-
-
   redirect = (route) => {
+    console.log("[router]", this.props.navigation);
     this.props.navigation.navigate(route);
   }
 
@@ -150,6 +119,64 @@ class FingerprintScan extends Component {
     }
   }
 
+  firebaseNotification(){
+    const { user } = this.props.state;
+    if(user == null){
+      return
+    }
+    fcmService.registerAppWithFCM()
+    fcmService.register(this.onRegister, this.onNotification, this.onOpenNotification)
+    localNotificationService.configure(this.onOpenNotification, 'Payhiram')
+    fcmService.subscribeTopic('Message')
+    fcmService.subscribeTopic('Notifications')
+  }
+
+  onRegister = (token) => {
+    console.log("[App] onRegister", token)
+  }
+
+  onOpenNotification = (notify) => {
+  }
+
+  onNotification = (notify) => {
+    const { user } = this.props.state;
+    let { data } = notify
+    if(user == null || data == null){
+      return
+    }
+    switch(data.topic.toLowerCase()){
+      case 'message': {
+          const { messengerGroup } = this.props.state;
+          let members = JSON.parse(data.members)
+          console.log('members', members)
+          if(messengerGroup == null && members.indexOf(user.id) > -1){
+            console.log('[messengerGroup] on empty', data)
+            const { setUnReadMessages } = this.props;
+            setUnReadMessages(data)
+            return
+          }
+          if(parseInt(data.messenger_group_id) === messengerGroup.id && members.indexOf(user.id) > -1){
+            if(parseInt(data.account_id) != user.id){
+              const { updateMessagesOnGroup } = this.props;
+              updateMessagesOnGroup(data); 
+            }
+            return
+          }
+        }
+        break
+      case 'notifications': {
+          if(parseInt(data.to) == user.id){
+            console.log("[Notifications] data", data)
+            const { updateNotifications } = this.props;
+            updateNotifications(1, data)
+          }
+        }
+        break
+    }
+  }
+
+
+
   login = () => {
     const { login } = this.props;
     if(this.state.token != null){
@@ -157,6 +184,10 @@ class FingerprintScan extends Component {
       Api.getAuthUser(this.state.token, (response) => {
         login(response, this.state.token);
         this.setState({isLoading: false});
+        if(response.username){
+          this.firebaseNotification()
+          this.props.navigate()
+        }
       }, error => {
         this.setState({isResponseError: true})
       })
@@ -187,12 +218,12 @@ class FingerprintScan extends Component {
         return
       }
     }
-    this.props.navigation.navigate('drawerStack');
+    this.props.navigate()
   }
 
   onSuccessOtp = () => {
     this.setState({isOtpModal: false})
-    this.props.navigation.navigate('drawerStack');
+    this.props.navigate()
   }
 
   submit(){
@@ -219,9 +250,13 @@ class FingerprintScan extends Component {
                 column: 'id'
               }]
             }
-            this.redirect('drawerStack')
+            if(response.username){
+              this.firebaseNotification()
+              this.props.navigate()
+            }
             this.setState({isLoading: false, error: 0});  
           }, error => {
+            console.log("[ERROR]", error);
             this.setState({isResponseError: true})
           })
         }
@@ -232,6 +267,7 @@ class FingerprintScan extends Component {
       })
       // this.props.navigation.navigate('drawerStack');
     }else{
+      console.log("[ERROR]");
       this.setState({error: 1});
     }
   }
@@ -245,8 +281,6 @@ class FingerprintScan extends Component {
         <ScrollView>
             <View style={styles.MainContainer}>
 
-                <Header params={"Login"}></Header>
-
                   <TouchableOpacity
                       style={styles.fingerprint}
                       onPress={this.handleFingerprintShowed}
@@ -254,20 +288,13 @@ class FingerprintScan extends Component {
                   >
                       <FontAwesomeIcon icon={faFingerprint} size={60} style={{color:Color.primary}}/>
                   </TouchableOpacity>
-                  <Text>Tap the icon</Text>
+                  <Text style={{marginBottom: 20}}>Login with Finger Print (Tap the icon)</Text>
 
                 {errorMessage && (
                 <Text style={styles.errorMessage}>
                     {errorMessage} {biometric}
                 </Text>
                 )}
-                <TouchableOpacity
-                style={styles.fingerprint}
-                onPress={() => this.redirect('loginStack')}
-                disabled={!!errorMessage}
-                >
-                    <Text style={{marginTop: 200}}>Return to Login</Text>
-                </TouchableOpacity>
                 {popupShowed && (
                 <FingerprintPopup
                     style={styles.popup}
@@ -311,6 +338,7 @@ const mapDispatchToProps = dispatch => {
     login: (user, token) => dispatch(actions.login(user, token)),
     logout: () => dispatch(actions.logout()),
     setTheme: (theme) => dispatch(actions.setTheme(theme)),
+    setUnReadMessages: (messages) => dispatch(actions.setUnReadMessages(messages)),
     setNotifications: (unread, notifications) => dispatch(actions.setNotifications(unread, notifications)),
     updateNotifications: (unread, notification) => dispatch(actions.updateNotifications(unread, notification)),
     updateMessagesOnGroup: (message) => dispatch(actions.updateMessagesOnGroup(message)),
