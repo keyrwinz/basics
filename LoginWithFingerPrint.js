@@ -309,7 +309,9 @@ class Login extends Component {
     const {  blockedFlag, isOtpModal } = this.state;
     const { theme } = this.props.state;
     return (
-      <ScrollView style={Style.ScrollView}>
+      <ScrollView
+        style={Style.ScrollView}
+        showsVerticalScrollIndicator={false}>
         <View style={Style.MainContainer}>
           <Header params={"Login"}></Header>
 
@@ -396,13 +398,13 @@ class Login extends Component {
                 Register Now!
               </Text>
             </TouchableHighlight>
-            {
-              this.state.showFingerPrint == true ? 
-              <FingerPrintScanner navigate={() => this.redirect('drawerStack')}/> : null
-            }
           </View>
         </View>
-
+        {
+          this.state.showFingerPrint == true && (
+            <FingerPrintScanner navigate={() => this.redirect('drawerStack')}/>
+          )
+        }
         <OtpModal
           visible={isOtpModal}
           title={blockedFlag == false ? 'Authentication via OTP' : 'Blocked Account'}

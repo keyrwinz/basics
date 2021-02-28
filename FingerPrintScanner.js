@@ -288,7 +288,7 @@ class FingerprintScan extends Component {
                   >
                       <FontAwesomeIcon icon={faFingerprint} size={60} style={{color:Color.primary}}/>
                   </TouchableOpacity>
-                  <Text style={{marginBottom: 20}}>Login with Finger Print (Tap the icon)</Text>
+                  <Text style={{marginBottom: 20}}>Login with Finger Print</Text>
 
                 {errorMessage && (
                 <Text style={styles.errorMessage}>
