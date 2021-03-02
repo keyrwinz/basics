@@ -285,12 +285,13 @@ class FingerprintScan extends Component {
         <TouchableOpacity
           style={{
             ...styles.fingerprint,
-            alignItems: 'center'
+            alignItems: 'center',
+            marginBottom: 20
           }}
           onPress={this.handleFingerprintShowed}
           disabled={!!errorMessage}
         >
-          <FontAwesomeIcon icon={faFingerprint} size={60} style={{color:Color.primary}}/>
+          <FontAwesomeIcon icon={faFingerprint} size={50} style={{color:Color.primary}}/>
         </TouchableOpacity>
           {
             errorMessage && (
