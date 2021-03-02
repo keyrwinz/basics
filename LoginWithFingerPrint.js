@@ -102,11 +102,34 @@ class Login extends Component {
     localNotificationService.configure(this.onOpenNotification, 'Payhiram')
     fcmService.subscribeTopic('Message')
     fcmService.subscribeTopic('Notifications')
+    this.retrieveNotification()
     // return () => {
     //   console.log("[App] unRegister")
     //   fcmService.unRegister()
     //   localNotificationService.unRegister()
     // }
+  }
+
+  retrieveNotification = () => {
+    const { setNotifications } = this.props;
+    const { user } = this.props.state;
+    if(user == null){
+      return
+    }
+    let parameter = {
+      condition: [{
+        value: user.id,
+        clause: '=',
+        column: 'to'
+      }],
+      limit: 10,
+      offset: 0
+    }
+    Api.request(Routes.notificationsRetrieve, parameter, notifications => {
+      console.log("[RESTRIEVE]", notifications.data)
+      setNotifications(notifications.size, notifications.data)
+    }, error => {
+    })
   }
 
   onRegister = (token) => {
@@ -449,7 +472,7 @@ const mapDispatchToProps = dispatch => {
     setMessagesOnGroup: (messagesOnGroup) => dispatch(actions.setMessagesOnGroup(messagesOnGroup)),
     updateMessagesOnGroupByPayload: (messages) => dispatch(actions.updateMessagesOnGroupByPayload(messages)),
     setSearchParameter: (searchParameter) => dispatch(actions.setSearchParameter(searchParameter)),
-    setSystemNotification: (systemNotification) => dispatch(actions.setSystemNotification(systemNotification)),
+    setSystemNotification: (systemNotification) => dispatch(actions.setSystemNotification(systemNotification))
   };
 };
 
