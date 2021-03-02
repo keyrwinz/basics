@@ -10,6 +10,7 @@ import CustomError from 'components/Modal/Error.js';
 import PasswordWithIcon from 'components/InputField/Password.js';
 import Header from './Header';
 import config from 'src/config';
+import Button from 'components/Form/Button';
 class Register extends Component {
   //Screen1 Component
   constructor(props){
@@ -101,7 +102,9 @@ class Register extends Component {
     const { isLoading, errorMessage, isResponseError } = this.state;
     const { theme } = this.props.state;
     return (
-      <ScrollView style={Style.ScrollView}>
+      <ScrollView
+        style={Style.ScrollView}
+        showsVerticalScrollIndicator={false}>
         <View style={Style.MainContainer}>
           <Header params={"Register"}></Header>
           {
@@ -111,10 +114,15 @@ class Register extends Component {
                   paddingTop: 10,
                   paddingBottom: 10,
               }}>
-                <Text style={[Style.messageText, {
+                <Text style={{
+                  ...Style.messageText,
+                  fontSize: BasicStyles.standardFontSize,
                   fontWeight: 'bold'
-                }]}>Oops! </Text>
-                <Text style={Style.messageText}>{errorMessage}</Text>
+                }}>Oops! </Text>
+                <Text style={{
+                  ...Style.messageText,
+                  fontSize: BasicStyles.standardFontSize
+                }}>{errorMessage}</Text>
               </View>
             )
           }
@@ -122,14 +130,20 @@ class Register extends Component {
           
           <View style={Style.TextContainer}>
             <TextInput
-              style={BasicStyles.formControl}
+              style={{
+                ...BasicStyles.standardFormControl,
+                marginBottom: 20
+              }}
               onChangeText={(username) => this.setState({username})}
               value={this.state.username}
               placeholder={'Username'}
             />
             
             <TextInput
-              style={BasicStyles.formControl}
+              style={{
+                ...BasicStyles.standardFormControl,
+                marginBottom: 20
+              }}
               onChangeText={(email) => this.setState({email})}
               value={this.state.email}
               placeholder={'Email Address'}
@@ -140,38 +154,26 @@ class Register extends Component {
             })}
             placeholder={'Password'}/>
 
-
-            <PasswordWithIcon onTyping={(input) => this.setState({
-              confirmPassword: input
-            })}
-            placeholder={'Confirm Password'}
-            />
-            {/*<TextInput
-              style={BasicStyles.formControl}
-              onChangeText={(password) => this.setState({password})}
-              value={this.state.password}
-              placeholder={'Password'}
-              secureTextEntry={true}
-            />
-            
-            <TextInput
-              style={BasicStyles.formControl}
-              onChangeText={(confirmPassword) => this.setState({confirmPassword})}
-              value={this.state.confirmPassword}
+            <View style={{
+              marginTop: 20,
+              marginBottom: 20
+            }}>
+              <PasswordWithIcon onTyping={(input) => this.setState({
+                confirmPassword: input
+              })}
               placeholder={'Confirm Password'}
-              secureTextEntry={true}
+              />
+            </View>
+
+            <Button
+              onClick={() => this.submit()}
+              title={'Register'}
+              style={{
+                backgroundColor: theme ? theme.primary : Color.primary,
+                width: '100%',
+                marginBottom: 20
+              }}
             />
-          */}
-            <TouchableHighlight
-              style={[BasicStyles.btn, {
-                backgroundColor: theme ? theme.primary : Color.primary
-              }]}
-              onPress={() => this.submit()}
-              underlayColor={Color.gray}>
-              <Text style={BasicStyles.textWhite}>
-                Register
-              </Text>
-            </TouchableHighlight>
 
             <View style={{
               height: 1,
@@ -189,16 +191,17 @@ class Register extends Component {
                 color: Color.gray
               }}>Have an account Already?</Text>
             </View>
-            <TouchableHighlight
-              style={[BasicStyles.btn, {
-                backgroundColor: theme ? theme.secondary : Color.secondary
-              }]}
-              onPress={() => this.redirect('loginStack')}
-              underlayColor={Color.gray}>
-              <Text style={BasicStyles.textWhite}>
-                Login Now!
-              </Text>
-            </TouchableHighlight>
+
+            <Button
+              onClick={() => this.redirect('loginStack')}
+              title={'Login Now!'}
+              style={{
+                backgroundColor: theme ? theme.secondary : Color.secondary,
+                width: '100%',
+                marginBottom: 100
+              }}
+            />
+
           </View>
         </View>
 

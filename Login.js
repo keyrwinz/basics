@@ -17,6 +17,7 @@ import SystemVersion from 'services/System.js';
 import { Player } from '@react-native-community/audio-toolkit';
 import OtpModal from 'components/Modal/Otp.js';
 import {Notifications, NotificationAction, NotificationCategory} from 'react-native-notifications';
+import Button from 'components/Form/Button';
 class Login extends Component {
   //Screen1 Component
   constructor(props){
@@ -378,23 +379,35 @@ class Login extends Component {
     const {  blockedFlag, isOtpModal } = this.state;
     const { theme } = this.props.state;
     return (
-      <ScrollView style={Style.ScrollView}>
+      <ScrollView style={Style.ScrollView}
+        showsVerticalScrollIndicator={false}>
         <View style={Style.MainContainer}>
           <Header params={"Login"}></Header>
 
-          {error > 0 ? <View style={Style.messageContainer}>
+          {error > 0 ? <View style={{
+            ...Style.messageContainer
+          }}>
             {error == 1 ? (
-              <Text style={Style.messageText}>Please fill up the required fields.</Text>
+              <Text style={{
+                ...Style.messageText,
+                fontSize: BasicStyles.standardFontSize
+              }}>Please fill up the required fields.</Text>
             ) : null}
 
             {error == 2 ? (
-              <Text style={Style.messageText}>Username and password didn't match.</Text>
+              <Text style={{
+                ...Style.messageText,
+                fontSize: BasicStyles.standardFontSize
+              }}>Username and password didn't match.</Text>
             ) : null}
           </View> : null}
           
           <View style={Style.TextContainer}>
             <TextInput
-              style={BasicStyles.formControl}
+              style={{
+                ...BasicStyles.standardFormControl,
+                marginBottom: 20
+              }}
               onChangeText={(username) => this.setState({username})}
               value={this.state.username}
               placeholder={'Username or Email'}
@@ -409,26 +422,29 @@ class Login extends Component {
             <PasswordWithIcon onTyping={(input) => this.setState({
               password: input
             })}/>
-            <TouchableHighlight
-              style={[BasicStyles.btn, {
-                backgroundColor: theme ? theme.primary : Color.primary
-              }]}
-              onPress={() => this.submit()}
-              underlayColor={Color.gray}>
-              <Text style={BasicStyles.textWhite}>
-                Login
-              </Text>
-            </TouchableHighlight>
+            
+
+            <Button
+              onClick={() => this.submit()}
+              title={'Login'}
+              style={{
+                backgroundColor: theme ? theme.primary : Color.primary,
+                width: '100%',
+                marginBottom: 20,
+                marginTop: 20
+              }}
+            />
 
             
-            <TouchableHighlight
-              style={[BasicStyles.btn, BasicStyles.btnWarning]}
-              onPress={() => this.redirect('forgotPasswordStack')}
-              underlayColor={Color.gray}>
-              <Text style={BasicStyles.textWhite}>
-                Forgot your Password?
-              </Text>
-            </TouchableHighlight>
+            <Button
+              onClick={() => this.redirect('forgotPasswordStack')}
+              title={'Forgot your Password?'}
+              style={{
+                backgroundColor: Color.warning,
+                width: '100%',
+                marginBottom: 20
+              }}
+            />
             
 
             <View style={{
@@ -447,16 +463,16 @@ class Login extends Component {
                 color: Color.gray
               }}>Don't have an account?</Text>
             </View>
-            <TouchableHighlight
-              style={[BasicStyles.btn, {
-                backgroundColor: theme ? theme.secondary : Color.secondary
-              }]}
-              onPress={() => this.redirect('registerStack')}
-              underlayColor={Color.gray}>
-              <Text style={BasicStyles.textWhite}>
-                Register Now!
-              </Text>
-            </TouchableHighlight>
+            
+            <Button
+              onClick={() => this.redirect('registerStack')}
+              title={'Register Now!'}
+              style={{
+                backgroundColor: theme ? theme.secondary : Color.secondary,
+                width: '100%',
+                marginBottom: 100
+              }}
+            />
           </View>
         </View>
 

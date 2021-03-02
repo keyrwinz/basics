@@ -22,6 +22,7 @@ import { fcmService } from 'services/broadcasting/FCMService';
 import { localNotificationService } from 'services/broadcasting/LocalNotificationService';
 import FingerPrintScanner from './FingerPrintScanner'
 import { Alert } from 'react-native';
+import Button from 'components/Form/Button';
 class Login extends Component {
   //Screen1 Component
   constructor(props){
@@ -335,46 +336,67 @@ class Login extends Component {
       <ScrollView
         style={Style.ScrollView}
         showsVerticalScrollIndicator={false}>
-        <View style={Style.MainContainer}>
+        <View style={{
+          flex: 1
+        }}>
           <Header params={"Login"}></Header>
 
-          {error > 0 ? <View style={Style.messageContainer}>
+          {error > 0 ? <View style={{
+            ...Style.messageContainer
+          }}>
             {error == 1 ? (
-              <Text style={Style.messageText}>Please fill up the required fields.</Text>
+              <Text style={{
+                ...Style.messageText,
+                fontSize: BasicStyles.standardFontSize
+              }}>Please fill up the required fields.</Text>
             ) : null}
 
             {error == 2 ? (
-              <Text style={Style.messageText}>Username and password didn't match.</Text>
+              <Text style={{
+                ...Style.messageText,
+                fontSize: BasicStyles.standardFontSize
+              }}>Username and password didn't match.</Text>
             ) : null}
           </View> : null}
           
           <View style={Style.TextContainer}>
             <TextInput
-              style={BasicStyles.formControl}
+              style={{
+                ...BasicStyles.standardFormControl,
+                marginBottom: 20
+              }}
               onChangeText={(username) => this.setState({username})}
               value={this.state.username}
               placeholder={'Username or Email'}
             />
-            { /*<TextInput
-              style={BasicStyles.formControl}
-              onChangeText={(password) => this.setState({password})}
-              value={this.state.password}
-              placeholder={'********'}
-              secureTextEntry={true}
-            />*/}
-            <PasswordWithIcon onTyping={(input) => this.setState({
-              password: input
-            })}/>
-            <TouchableHighlight
-              style={[BasicStyles.btn, {
-                backgroundColor: theme ? theme.primary : Color.primary
-              }]}
-              onPress={() => this.submit()}
-              underlayColor={Color.gray}>
-              <Text style={BasicStyles.textWhite}>
-                Login
-              </Text>
-            </TouchableHighlight>
+
+            <PasswordWithIcon
+              onTyping={(input) => this.setState({
+                password: input
+              })}
+              />
+
+
+            <View style={{
+              width: '100%',
+              marginTop: 20
+            }}>
+            {
+              this.state.showFingerPrint == true && (
+                <FingerPrintScanner navigate={() => this.redirect('drawerStack')}/>
+              )
+            }
+            </View>
+
+            <Button
+              onClick={() => this.submit()}
+              title={'Login'}
+              style={{
+                backgroundColor: theme ? theme.primary : Color.primary,
+                width: '100%',
+                marginBottom: 20
+              }}
+            />
 
             {/* <Confirm visible={this.state.visible} message={'Do you want to enable finger print scanning for easier login?'}
                 onConfirm={() => {
@@ -384,16 +406,16 @@ class Login extends Component {
                     this.setState({visible: false})
                 }}
             /> */}
-            
-            <TouchableHighlight
-              style={[BasicStyles.btn, BasicStyles.btnWarning]}
-              onPress={() => this.redirect('forgotPasswordStack')}
-              underlayColor={Color.gray}>
-              <Text style={BasicStyles.textWhite}>
-                Forgot your Password?
-              </Text>
-            </TouchableHighlight>
-            
+
+            <Button
+              onClick={() => this.redirect('forgotPasswordStack')}
+              title={'Forgot your Password?'}
+              style={{
+                backgroundColor: Color.warning,
+                width: '100%',
+                marginBottom: 20
+              }}
+            />
               
             <View style={{
               height: 1,
@@ -411,23 +433,20 @@ class Login extends Component {
                 color: Color.gray
               }}>Don't have an account?</Text>
             </View>
-            <TouchableHighlight
-              style={[BasicStyles.btn, {
-                backgroundColor: theme ? theme.secondary : Color.secondary
-              }]}
-              onPress={() => this.redirect('registerStack')}
-              underlayColor={Color.gray}>
-              <Text style={BasicStyles.textWhite}>
-                Register Now!
-              </Text>
-            </TouchableHighlight>
+
+            <Button
+              onClick={() => this.redirect('registerStack')}
+              title={'Register Now!'}
+              style={{
+                backgroundColor: theme ? theme.secondary : Color.secondary,
+                width: '100%',
+                marginBottom: 100
+              }}
+            />
+
           </View>
         </View>
-        {
-          this.state.showFingerPrint == true && (
-            <FingerPrintScanner navigate={() => this.redirect('drawerStack')}/>
-          )
-        }
+
         <OtpModal
           visible={isOtpModal}
           title={blockedFlag == false ? 'Authentication via OTP' : 'Blocked Account'}

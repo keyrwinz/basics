@@ -1,4 +1,4 @@
-import { Color } from 'common';
+import { Color, BasicStyles } from 'common';
 import { Dimensions } from 'react-native';
 const width = Math.round(Dimensions.get('window').width);
 export default {
@@ -22,7 +22,9 @@ export default {
     width: 100
   },
   TextContainer: {
-    flex: 1
+    width: '90%',
+    marginLeft: '5%',
+    marginRight: '5%'
   },
   messageContainer: {
     height: 50,
@@ -119,11 +121,10 @@ export default {
     marginBottom: 30,
   },
   fingerprint: {
-    padding: 20,
     marginVertical: 5,
     justifyContent:'center',
     textAlign: 'center',
-    flex: 1
+    width: '100%'
   },
   fingerprints: {
     padding: 20,
@@ -131,10 +132,12 @@ export default {
   },
   errorMessage: {
     color: '#ea3d13',
-    fontSize: 16,
     textAlign: 'center',
     marginHorizontal: 10,
-    marginTop: 30,
+    fontSize: BasicStyles.standardFontSize,
+    paddingTop: 10,
+    paddingBottom: 10,
+    width: '100%'
   },
   popup: {
     width: width * 0.8,

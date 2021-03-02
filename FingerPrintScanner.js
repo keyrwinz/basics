@@ -278,55 +278,46 @@ class FingerprintScan extends Component {
     const {  blockedFlag, isOtpModal } = this.state;
     const { theme } = this.props.state;
     return (
-        <ScrollView>
-            <View style={styles.MainContainer}>
-
-                  <TouchableOpacity
-                      style={styles.fingerprint}
-                      onPress={this.handleFingerprintShowed}
-                      disabled={!!errorMessage}
-                  >
-                      <FontAwesomeIcon icon={faFingerprint} size={60} style={{color:Color.primary}}/>
-                  </TouchableOpacity>
-                  <Text style={{marginBottom: 20}}>Login with Finger Print</Text>
-
-                {errorMessage && (
-                <Text style={styles.errorMessage}>
-                    {errorMessage} {biometric}
-                </Text>
-                )}
-                {popupShowed && (
-                <FingerprintPopup
-                    style={styles.popup}
-                    handlePopupDismissed={() => this.handleFingerprintDismissed()}
-                    handlePopupDismissedLegacy={() => this.handleFingerprintDismissed()}
-                    onAuthenticate={() => this.submit()}
-                />
-                )}
-            </View>
-
-            <OtpModal
-                visible={isOtpModal}
-                title={blockedFlag == false ? 'Authentication via OTP' : 'Blocked Account'}
-                actionLabel={{
-                    yes: 'Authenticate',
-                    no: 'Cancel'
-                }}
-                onCancel={() => this.setState({isOtpModal: false})}
-                onSuccess={() => this.onSuccessOtp()}
-                onResend={() => {
-                    this.setState({isOtpModal: false})
-                    this.submit()
-                }}
-                error={''}
-                blockedFlag={blockedFlag}
-            ></OtpModal>
-
-            {isLoading ? <Spinner mode="overlay"/> : null }
-            {isResponseError ? <CustomError visible={isResponseError} onCLose={() => {
-            this.setState({isResponseError: false, isLoading: false})
-            }}/> : null}
-      </ScrollView>
+      <View style={{
+        width: '100%',
+        flex: 1
+      }}>
+        <TouchableOpacity
+          style={{
+            ...styles.fingerprint,
+            alignItems: 'center'
+          }}
+          onPress={this.handleFingerprintShowed}
+          disabled={!!errorMessage}
+        >
+          <FontAwesomeIcon icon={faFingerprint} size={60} style={{color:Color.primary}}/>
+        </TouchableOpacity>
+          {
+            errorMessage && (
+            <Text style={{
+              color: Color.danger,
+              fontSize: BasicStyles.standardFontSize,
+              paddingBottom: 10,
+              paddingTop: 10,
+              width: '90%',
+              textAlign: 'center',
+              marginLeft: '5%',
+              marginRight: '5%'
+            }}>
+                {errorMessage} {biometric}
+            </Text>
+            )
+          }
+          {
+            popupShowed && (
+            <FingerprintPopup
+              style={styles.popup}
+              handlePopupDismissed={() => this.handleFingerprintDismissed()}
+              handlePopupDismissedLegacy={() => this.handleFingerprintDismissed()}
+              onAuthenticate={() => this.submit()}
+            />)
+          }
+      </View>
     );
   }
 }
@@ -335,20 +326,6 @@ const mapStateToProps = state => ({ state: state });
 const mapDispatchToProps = dispatch => {
   const { actions } = require('@redux');
   return {
-    login: (user, token) => dispatch(actions.login(user, token)),
-    logout: () => dispatch(actions.logout()),
-    setTheme: (theme) => dispatch(actions.setTheme(theme)),
-    setUnReadMessages: (messages) => dispatch(actions.setUnReadMessages(messages)),
-    setNotifications: (unread, notifications) => dispatch(actions.setNotifications(unread, notifications)),
-    updateNotifications: (unread, notification) => dispatch(actions.updateNotifications(unread, notification)),
-    updateMessagesOnGroup: (message) => dispatch(actions.updateMessagesOnGroup(message)),
-    setMessenger: (unread, messages) => dispatch(actions.setMessenger(unread, messages)),
-    updateMessengerGroup: (messengerGroup) => dispatch(actions.updateMessengerGroup(messengerGroup)),
-    setMessengerGroup: (messengerGroup) => dispatch(actions.setMessengerGroup(messengerGroup)),
-    setMessagesOnGroup: (messagesOnGroup) => dispatch(actions.setMessagesOnGroup(messagesOnGroup)),
-    updateMessagesOnGroupByPayload: (messages) => dispatch(actions.updateMessagesOnGroupByPayload(messages)),
-    setSearchParameter: (searchParameter) => dispatch(actions.setSearchParameter(searchParameter)),
-    setSystemNotification: (systemNotification) => dispatch(actions.setSystemNotification(systemNotification)),
   };
 };
 
