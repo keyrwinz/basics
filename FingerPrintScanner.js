@@ -175,31 +175,12 @@ class FingerprintScan extends Component {
     }
   }
 
-
-
-  login = () => {
-    const { login } = this.props;
-    if(this.state.token != null){
-      this.setState({isLoading: true});
-      Api.getAuthUser(this.state.token, (response) => {
-        login(response, this.state.token);
-        this.setState({isLoading: false});
-        if(response.username){
-          this.firebaseNotification()
-          this.props.navigate()
-        }
-      }, error => {
-        this.setState({isResponseError: true})
-      })
-    }
-  }
-
   getData = async () => {
     try {
       const token = await AsyncStorage.getItem(Helper.APP_NAME + 'token');
       if(token != null) {
         this.setState({token});
-        this.login();
+        this.props.login();
       }
     } catch(e) {
       // error reading value
@@ -226,51 +207,6 @@ class FingerprintScan extends Component {
     this.props.navigate()
   }
 
-  submit(){
-    const { username, password } = this.state;
-    const { login } = this.props;
-    if((username != null && username != '') && (password != null && password != '')){
-      this.setState({isLoading: true, error: 0});
-      // Login
-      console.log(username, password);
-      Api.authenticate(username, password, (response) => {
-        if(response.error){
-          this.setState({error: 2, isLoading: false});
-        }
-        if(response.token){
-          const token = response.token;
-          this.setState({showFingerPrint: true})
-          this.setState({visible: true})
-          Api.getAuthUser(response.token, (response) => {
-            login(response, token);
-            let parameter = {
-              condition: [{
-                value: response.id,
-                clause: '=',
-                column: 'id'
-              }]
-            }
-            if(response.username){
-              this.firebaseNotification()
-              this.props.navigate()
-            }
-            this.setState({isLoading: false, error: 0});  
-          }, error => {
-            console.log("[ERROR]", error);
-            this.setState({isResponseError: true})
-          })
-        }
-      }, error => {
-        console.log('error', error)
-        this.setState({isResponseError: true})
-        this.setState({showFingerPrint: false})
-      })
-      // this.props.navigation.navigate('drawerStack');
-    }else{
-      console.log("[ERROR]");
-      this.setState({error: 1});
-    }
-  }
 
   render() {
     const { errorMessage, biometric, popupShowed } = this.state;
@@ -315,7 +251,7 @@ class FingerprintScan extends Component {
               style={styles.popup}
               handlePopupDismissed={() => this.handleFingerprintDismissed()}
               handlePopupDismissedLegacy={() => this.handleFingerprintDismissed()}
-              onAuthenticate={() => this.submit()}
+              onAuthenticate={() => this.props.onSubmit()}
             />)
           }
       </View>

@@ -64,6 +64,8 @@ class Login extends Component {
     if((await AsyncStorage.getItem('username') != null && await AsyncStorage.getItem('password') != null)){
       await this.setState({showFingerPrint: true})
       await this.setState({notEmpty: true})
+      await this.setState({username: await AsyncStorage.getItem('username')})
+      await this.setState({password: await AsyncStorage.getItem('password')})
     }else{
       await this.setState({notEmpty: false})
       await this.setState({showFingerPrint: false})
@@ -383,7 +385,7 @@ class Login extends Component {
             }}>
             {
               this.state.showFingerPrint == true && (
-                <FingerPrintScanner navigate={() => this.redirect('drawerStack')}/>
+                <FingerPrintScanner navigate={() => this.redirect('drawerStack')} login={() => this.login()} onSubmit={()=>this.submit()}/>
               )
             }
             </View>
