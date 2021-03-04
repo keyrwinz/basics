@@ -105,6 +105,7 @@ class Login extends Component {
     localNotificationService.configure(this.onOpenNotification, 'Payhiram')
     fcmService.subscribeTopic('Message')
     fcmService.subscribeTopic('Notifications')
+    fcmService.subscribeTopic('Requests')
     this.retrieveNotification()
     // return () => {
     //   console.log("[App] unRegister")
@@ -175,6 +176,34 @@ class Login extends Component {
             console.log("[Notifications] data", data)
             const { updateNotifications } = this.props;
             updateNotifications(1, data)
+          }
+        }
+        break
+      case 'requests': {
+          let unReadRequests = this.props.state.unReadRequests
+          if(data.target == 'public'){
+            console.log("[Public Requests]", data)
+            unReadRequests.push(data)
+            const { setUnReadRequests } = this.props;
+            setUnReadRequests($unReadRequests);
+          }else if(data.target == 'partner'){
+            const { user } = this.props.state;
+            if(user == null){
+              return
+            }else{
+              console.log("[Partner Requests]", data.scope)
+              console.log("[Partner Requests] user", user.scope_location)
+              if(user.scope_location.includes(data.scope)){
+                console.log("[Partner Requests] added", data)
+                unReadRequests.push(data)
+                const { setUnReadRequests } = this.props;
+                setUnReadRequests($unReadRequests);
+              }else{
+                console.log("[Partner Requests] Empty")
+              }
+            }
+          }else if(data.target == 'circle'){
+            //
           }
         }
         break
@@ -484,6 +513,7 @@ const mapDispatchToProps = dispatch => {
     logout: () => dispatch(actions.logout()),
     setTheme: (theme) => dispatch(actions.setTheme(theme)),
     setUnReadMessages: (messages) => dispatch(actions.setUnReadMessages(messages)),
+    setUnReadRequests: (requests) => dispatch(actions.setUnReadRequests(requests)),
     setNotifications: (unread, notifications) => dispatch(actions.setNotifications(unread, notifications)),
     updateNotifications: (unread, notification) => dispatch(actions.updateNotifications(unread, notification)),
     updateMessagesOnGroup: (message) => dispatch(actions.updateMessagesOnGroup(message)),
