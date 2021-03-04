@@ -3,7 +3,6 @@ import { Dimensions } from 'react-native';
 const width = Math.round(Dimensions.get('window').width);
 export default {
   ScrollView: {
-    padding: 10
   },
   MainContainer: {
     flex: 1,
@@ -25,6 +24,11 @@ export default {
     width: '90%',
     marginLeft: '5%',
     marginRight: '5%'
+  },
+  TextContainerRounded: {
+    width: '70%',
+    marginLeft: '15%',
+    marginRight: '15%'
   },
   messageContainer: {
     height: 50,
