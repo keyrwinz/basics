@@ -3,7 +3,7 @@ import { connect } from 'react-redux';
 import AsyncStorage from '@react-native-community/async-storage';
 import { View , TextInput , Image, TouchableHighlight, Text, ScrollView, Platform, TouchableOpacity} from 'react-native';
 import {NavigationActions} from 'react-navigation';
-import Style from './Style.js';
+import Style from './../Style.js';
 import { Spinner } from 'components';
 import PasswordWithIcon from 'components/InputField/Password.js';
 import CustomError from 'components/Modal/Error.js';
@@ -11,7 +11,7 @@ import Confirm from 'components/Modal/ConfirmationModal.js'
 import Api from 'services/api/index.js';
 import CommonRequest from 'services/CommonRequest.js';
 import { Routes, Color, Helper, BasicStyles } from 'common';
-import Header from './HeaderWithoutName';
+import Header from './../HeaderWithoutName';
 import config from 'src/config';
 import Pusher from 'services/Pusher.js';
 import { Player } from '@react-native-community/audio-toolkit';
@@ -20,7 +20,7 @@ import OtpModal from 'components/Modal/Otp.js';
 import { faFingerprint } from '@fortawesome/free-solid-svg-icons';
 import { fcmService } from 'services/broadcasting/FCMService';
 import { localNotificationService } from 'services/broadcasting/LocalNotificationService';
-import FingerPrintScanner from './FingerPrintScanner'
+import FingerPrintScanner from './../FingerPrintScanner'
 import { Alert } from 'react-native';
 import Button from 'components/Form/Button';
 class Login extends Component {
