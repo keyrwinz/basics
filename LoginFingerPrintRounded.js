@@ -383,7 +383,7 @@ class Login extends Component {
             ...BasicStyles.loginShadow
           }}>
             <Text style={{
-              widht: '100%',
+              width: '100%',
               textAlign: 'center',
               paddingBottom: 20,
               fontSize: BasicStyles.standardFontSize,
@@ -476,7 +476,7 @@ class Login extends Component {
                   this.redirect('forgotPasswordStack')
                 }}>
                   <Text style={{
-                    widht: '100%',
+                    width: '100%',
                     textAlign: 'center',
                     paddingBottom: 20,
                     fontSize: BasicStyles.standardFontSize,
@@ -487,7 +487,7 @@ class Login extends Component {
                 
 
               <Text style={{
-                widht: '100%',
+                width: '100%',
                 textAlign: 'center',
                 paddingBottom: 10,
                 fontSize: BasicStyles.standardFontSize,
