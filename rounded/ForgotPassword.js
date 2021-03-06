@@ -1,16 +1,18 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import AsyncStorage from '@react-native-community/async-storage';
-import { View , TextInput , Image, TouchableHighlight, Text, ScrollView} from 'react-native';
+import { View , TextInput , Image, TouchableHighlight, Text, ScrollView, Dimensions} from 'react-native';
 import Style from './../Style.js';
 import { Spinner } from 'components';
 import Api from 'services/api/index.js';
 import { Routes, Color, Helper, BasicStyles } from 'common';
 import CustomError from 'components/Modal/Error.js';
-import Header from './../Header';
+import Header from './../HeaderWithoutName';
 import config from 'src/config';
 import OtpModal from 'components/Modal/Otp.js';
 import Button from 'components/Form/Button';
+const width = Math.round(Dimensions.get('window').width);
+const height = Math.round(Dimensions.get('window').height);
 class ForgotPassword extends Component {
   //Screen1 Component
   constructor(props){
@@ -179,7 +181,7 @@ class ForgotPassword extends Component {
           onClick={() => this.resetPassword()}
           title={'Reset'}
           style={{
-            backgroundColor: theme ? theme.primary : Color.primary,
+            backgroundColor: theme ? theme.secondary : Color.secondary,
             width: '100%',
             marginBottom: 10
           }}
@@ -207,7 +209,7 @@ class ForgotPassword extends Component {
           onClick={() => this.requestReset()}
           title={'Request change'}
           style={{
-            backgroundColor: theme ? theme.primary : Color.primary,
+            backgroundColor: theme ? theme.secondary : Color.secondary,
             width: '100%',
             marginBottom: 10
           }}
@@ -220,65 +222,89 @@ class ForgotPassword extends Component {
     const { theme } = this.props.state;
     const { blockedFlag, isOtpModal, isResponseError, responseErrorTitle, responseErrorMessage  } = this.state;
     return (
-      <ScrollView style={Style.ScrollView}>
-        <View style={Style.MainContainer}>
+      <ScrollView style={{
+        backgroundColor: theme ? theme.primary : Color.primary
+      }}
+      showsVerticalScrollIndicator={false}>
+        <View style={{
+          flex: 1
+        }}>
           <Header params={"Request change password"}></Header>
-          {
-            errorMessage != null && (
-              <View style={{
-                flexDirection: 'row',
-                  paddingTop: 10,
-                  paddingBottom: 10,
-              }}>
-                <Text style={{
-                  ...Style.messageText,
-                  fontSize: BasicStyles.standardFontSize,
-                  fontWeight: 'bold'
-                }}>Oops! </Text>
-                <Text style={{
-                  ...Style.messageText,
-                  fontSize: BasicStyles.standardFontSize}}>{errorMessage}</Text>
-              </View>
-            )
-          }
-          {
-            successMessage != null && (
-              <View style={{
-                flexDirection: 'row',
-                  paddingTop: 10,
-                  paddingBottom: 10,
-                  paddingLeft: 10,
-                  paddingRight: 10
-              }}>
-                <Text style={[Style.messageText, {
-                  color: Color.black
-                }]}>{successMessage}</Text>
-              </View>
-            )
-          }
-          
-          <View style={Style.TextContainer}>
-            { changeStep == 0 && (this._sendRequest()) }
-            { changeStep == 1 && (this._changePassword()) }
-             <View style={{
-              justifyContent: 'center',
-              alignItems: 'center'
+            <View style={{
+              backgroundColor: Color.white,
+              width: '100%',
+              height: height,
+              paddingTop: 50,
+              marginTop: 10,
+              borderTopLeftRadius: 60,
+              borderTopRightRadius: 60,
+              ...BasicStyles.loginShadow
             }}>
               <Text style={{
-                paddingTop: 10,
-                paddingBottom: 10,
-                color: Color.gray
-              }}>Have an account Already?</Text>
-            </View>
-            <Button
-              onClick={() => this.redirect('loginStack')}
-              title={'Login Now!'}
-              style={{
-                backgroundColor: theme ? theme.secondary : Color.secondary,
                 width: '100%',
-                marginBottom: 100
-              }}
-            />
+                textAlign: 'center',
+                paddingBottom: 20,
+                fontSize: BasicStyles.standardFontSize,
+                fontWeight: 'bold',
+                color: theme ? theme.primary : Color.primary
+              }}>Request change password to {Helper.APP_NAME_BASIC}</Text>
+            {
+              errorMessage != null && (
+                <View style={{
+                  flexDirection: 'row',
+                    paddingTop: 10,
+                    paddingBottom: 10,
+                }}>
+                  <Text style={{
+                    ...Style.messageText,
+                    fontSize: BasicStyles.standardFontSize,
+                    fontWeight: 'bold'
+                  }}>Oops! </Text>
+                  <Text style={{
+                    ...Style.messageText,
+                    fontSize: BasicStyles.standardFontSize}}>{errorMessage}</Text>
+                </View>
+              )
+            }
+            {
+              successMessage != null && (
+                <View style={{
+                  flexDirection: 'row',
+                    paddingTop: 10,
+                    paddingBottom: 10,
+                    paddingLeft: 10,
+                    paddingRight: 10
+                }}>
+                  <Text style={[Style.messageText, {
+                    color: Color.black
+                  }]}>{successMessage}</Text>
+                </View>
+              )
+            }
+            
+            <View style={Style.TextContainerRounded}>
+              { changeStep == 0 && (this._sendRequest()) }
+              { changeStep == 1 && (this._changePassword()) }
+               <View style={{
+                justifyContent: 'center',
+                alignItems: 'center'
+              }}>
+                <Text style={{
+                  paddingTop: 10,
+                  paddingBottom: 10,
+                  color: Color.gray
+                }}>Have an account Already?</Text>
+              </View>
+              <Button
+                onClick={() => this.redirect('loginStack')}
+                title={'Login Now!'}
+                style={{
+                  backgroundColor: Color.warning,
+                  width: '100%',
+                  marginBottom: 100
+                }}
+              />
+            </View>
           </View>
         </View>
         <OtpModal

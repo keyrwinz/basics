@@ -376,7 +376,7 @@ class Login extends Component {
           <View style={{
             backgroundColor: Color.white,
             width: '100%',
-            paddingTop: 20,
+            paddingTop: 50,
             marginTop: 10,
             borderTopLeftRadius: 60,
             borderTopRightRadius: 60,
