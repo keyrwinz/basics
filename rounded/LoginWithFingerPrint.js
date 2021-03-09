@@ -207,6 +207,23 @@ class Login extends Component {
           }
         }
         break
+      case 'update-request': {
+          const { requests, request } = this.props.state;
+          if(request != null && request.code == data.code){
+            const { setRequest } = this.props;
+            setRequest({
+              ...request,
+              status: data.status
+            })
+            return
+          }
+          if(requests.length > 0){
+            const { setUpdateRequests } = this.props;
+            setUpdateRequests(data)
+            return
+          }
+        }
+        break
     }
 
     // const options = {
@@ -558,6 +575,8 @@ const mapDispatchToProps = dispatch => {
     setTheme: (theme) => dispatch(actions.setTheme(theme)),
     setUnReadMessages: (messages) => dispatch(actions.setUnReadMessages(messages)),
     setUnReadRequests: (requests) => dispatch(actions.setUnReadRequests(requests)),
+    updateRequests: (request) => dispatch(actions.updateRequests(request)),
+    setRequest: (request) => dispatch(actions.setRequest(request)),
     setNotifications: (unread, notifications) => dispatch(actions.setNotifications(unread, notifications)),
     updateNotifications: (unread, notification) => dispatch(actions.updateNotifications(unread, notification)),
     updateMessagesOnGroup: (message) => dispatch(actions.updateMessagesOnGroup(message)),
