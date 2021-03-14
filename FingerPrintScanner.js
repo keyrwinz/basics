@@ -215,8 +215,7 @@ class FingerprintScan extends Component {
     const { theme } = this.props.state;
     return (
       <View style={{
-        width: '100%',
-        flex: 1
+        width: '100%'
       }}>
         <TouchableOpacity
           style={{

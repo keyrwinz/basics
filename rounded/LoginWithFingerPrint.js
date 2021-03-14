@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import AsyncStorage from '@react-native-community/async-storage';
-import { View , TextInput , Image, TouchableHighlight, Text, ScrollView, Platform, TouchableOpacity} from 'react-native';
+import { View , TextInput , Image, TouchableHighlight, Text, ScrollView, Platform, TouchableOpacity, Dimensions} from 'react-native';
 import {NavigationActions} from 'react-navigation';
 import Style from './../Style.js';
 import { Spinner } from 'components';
@@ -23,6 +23,7 @@ import { localNotificationService } from 'services/broadcasting/LocalNotificatio
 import FingerPrintScanner from './../FingerPrintScanner'
 import { Alert } from 'react-native';
 import Button from 'components/Form/Button';
+const height = Math.round(Dimensions.get('window').height);
 class Login extends Component {
   //Screen1 Component
   constructor(props){
@@ -397,6 +398,7 @@ class Login extends Component {
             marginTop: 10,
             borderTopLeftRadius: 60,
             borderTopRightRadius: 60,
+            height: height,
             ...BasicStyles.loginShadow
           }}>
             <Text style={{
@@ -449,7 +451,8 @@ class Login extends Component {
 
               <View style={{
                 width: '100%',
-                marginTop: 20
+                marginTop: 20,
+                minHeight: 50
               }}>
               {
                 this.state.showFingerPrint == true && (
