@@ -55,6 +55,7 @@ class FingerprintScan extends Component {
   }
 
   handleFingerprintShowed = async() => {
+    this.handleOnPress()
     await this.setState({ popupShowed: true });
     console.log("?????????????????", this.state.popupShowed);
   };
@@ -83,6 +84,9 @@ class FingerprintScan extends Component {
   }
 
   async componentDidMount(){
+  }
+
+  async handleOnPress(){
     AppState.addEventListener('change', this.handleAppStateChange);
     // Get initial fingerprint enrolled
     this.detectFingerprintAvailable();
