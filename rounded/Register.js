@@ -136,6 +136,7 @@ class Register extends Component {
                       flexDirection: 'row',
                         paddingTop: 10,
                         paddingBottom: 10,
+                        paddingLeft: '20%'
                     }}>
                       <Text style={{
                         ...Style.messageText,
