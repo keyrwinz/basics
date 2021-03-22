@@ -32,7 +32,7 @@ export default {
   },
   messageContainer: {
     height: 50,
-    width: width - 40,
+    width: '100%',
     alignItems: 'center',
     justifyContent: 'center',
     color: Color.danger
