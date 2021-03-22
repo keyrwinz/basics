@@ -366,6 +366,7 @@ class Login extends Component {
     return (
       <ScrollView
         style={{
+          // backgroundColor: '#4f0862'
           backgroundColor: theme ? theme.primary : Color.primary
         }}
         showsVerticalScrollIndicator={false}>
