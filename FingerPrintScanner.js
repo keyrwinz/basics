@@ -55,6 +55,10 @@ class FingerprintScan extends Component {
   }
 
   handleFingerprintShowed = async() => {
+    let username = await AsyncStorage.getItem('username');
+    let password = await AsyncStorage.getItem('password');
+    this.setState({username: username})
+    this.setState({password: password})
     this.handleOnPress()
     await this.setState({ popupShowed: true });
     console.log("?????????????????", this.state.popupShowed);
@@ -84,6 +88,10 @@ class FingerprintScan extends Component {
   }
 
   async componentDidMount(){
+    let username = await AsyncStorage.getItem('username');
+    let password = await AsyncStorage.getItem('password');
+    this.setState({username: username})
+    this.setState({password: password})
   }
 
   async handleOnPress(){
@@ -211,9 +219,14 @@ class FingerprintScan extends Component {
     this.props.navigate()
   }
 
+  handleSubmit = () => {
+    const { username, password } = this.state;
+    this.props.onSubmit(username, password)
+  }
+
 
   render() {
-    const { errorMessage, biometric, popupShowed } = this.state;
+    const { errorMessage, biometric, popupShowed, username, password } = this.state;
     const { isLoading, error, isResponseError } = this.state;
     const {  blockedFlag, isOtpModal } = this.state;
     const { theme } = this.props.state;
@@ -254,7 +267,7 @@ class FingerprintScan extends Component {
               style={styles.popup}
               handlePopupDismissed={() => this.handleFingerprintDismissed()}
               handlePopupDismissedLegacy={() => this.handleFingerprintDismissed()}
-              onAuthenticate={() => this.props.onSubmit()}
+              onAuthenticate={this.handleSubmit}
             />)
           }
       </View>
