@@ -64,10 +64,11 @@ class Login extends Component {
   async componentDidMount(){
     if((await AsyncStorage.getItem('username') != null && await AsyncStorage.getItem('password') != null)){
       await this.setState({showFingerPrint: true})
+      await this.setState({notEmpty: true})
     }
   }
 
-  async onPressFingerPrint(){
+  async onPressFingerPrint(username, password){
     if((await AsyncStorage.getItem('username') != null && await AsyncStorage.getItem('password') != null)){
       await this.setState({showFingerPrint: true})
       await this.setState({notEmpty: true})
@@ -331,7 +332,34 @@ class Login extends Component {
       {cancelable: false}
     )
   }
-
+  handleFingerPrintSubmit(username, password){
+    const { login } = this.props;
+    this.setState({isLoading: true, error: 0});
+      Api.authenticate(username, password, (response) => {
+        if(response.error){
+          this.setState({error: 2, isLoading: false});
+        }
+        if(response.token){
+          const token = response.token;
+          Api.getAuthUser(response.token, (response) => {
+            login(response, token);
+            this.setState({isLoading: false, error: 0});
+            if(response.username){
+              this.firebaseNotification()
+              this.redirect('drawerStack')
+            }
+            
+          }, error => {
+            console.log("[ERROR]", error);
+            this.setState({isResponseError: true, isLoading: false})
+          })
+        }
+      }, error => {
+        console.log('error', error)
+        this.setState({isResponseError: true, isLoading: false})
+        this.setState({showFingerPrint: false})
+      })
+  }
   submit(){
     this.test();
     const { username, password } = this.state;
@@ -353,6 +381,7 @@ class Login extends Component {
           const token = response.token;
           Api.getAuthUser(response.token, (response) => {
             login(response, token);
+            console.log("[NOT_EMPTY]", this.state.notEmpty)
             this.setState({isLoading: false, error: 0});
             if(this.state.notEmpty == true){
               console.log("[notEmpty]", this.state.notEmpty);
@@ -460,7 +489,7 @@ class Login extends Component {
                 }}>
                 {
                   this.state.showFingerPrint == true && (
-                    <FingerPrintScanner navigate={() => this.redirect('drawerStack')} login={() => this.onPressFingerPrint()} onSubmit={()=>this.onPressFingerPrint()}/>
+                    <FingerPrintScanner navigate={() => this.redirect('drawerStack')} login={() => this.onPressFingerPrint(null, null)} onSubmit={(username, password)=>this.handleFingerPrintSubmit(username, password)}/>
                   )
                 }
                 </View>
