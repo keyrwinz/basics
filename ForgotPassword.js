@@ -257,7 +257,7 @@ class ForgotPassword extends Component {
             )
           }
           
-          <View style={Style.TextContainer}>
+          <View style={{...Style.TextContainer, ...BasicStyles.standardLoginContainer}}>
             { changeStep == 0 && (this._sendRequest()) }
             { changeStep == 1 && (this._changePassword()) }
              <View style={{
