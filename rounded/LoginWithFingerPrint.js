@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import AsyncStorage from '@react-native-community/async-storage';
-import { View , TextInput , Image, TouchableHighlight, Text, ScrollView, Platform, TouchableOpacity, Dimensions, SafeAreaView} from 'react-native';
+import { View , TextInput , Image, TouchableHighlight, Text, ScrollView, Platform, TouchableOpacity, Dimensions, SafeAreaView, Linking} from 'react-native';
 import {NavigationActions} from 'react-navigation';
 import Style from './../Style.js';
 import { Spinner } from 'components';
@@ -61,10 +61,53 @@ class Login extends Component {
     }
   }
 
+  onFocusFunction = () => {
+    Linking.getInitialURL().then(url => {
+      this.navigate(url);
+    });
+    Linking.addEventListener('url', this.handleOpenURL);
+  }
+  
   async componentDidMount(){
+    this.focusListener = this.props.navigation.addListener('didFocus', () => {
+      this.onFocusFunction()
+    })
     if((await AsyncStorage.getItem('username') != null && await AsyncStorage.getItem('password') != null)){
       await this.setState({showFingerPrint: true})
       await this.setState({notEmpty: true})
+    }
+
+    Linking.getInitialURL().then(url => {
+      this.navigate(url);
+    });
+    Linking.addEventListener('url', this.handleOpenURL);
+  }
+
+  componentWillUnmount() {
+    this.focusListener.remove()
+    Linking.removeEventListener('url', this.handleOpenURL);
+  }
+  
+  
+  handleOpenURL = (event) => { // D
+    this.navigate(event.url);
+  }
+  navigate = (url) => { // E
+    // console.log(':::TESTING::: ', url)
+    const { navigate } = this.props.navigation;
+    // https://payhiram.ph/profile/10DRLWEMCGUX9AT3PJ8BOV72IZQ5SYN6
+    if(url !== null){
+      const route = url.replace(/.*?:\/\//g, '');
+      const routeName = route.split('/')[0];
+      if (routeName === 'payhiram.ph')
+      {
+        // console.log('/.....1stIF.......')
+        if(route.split('/')[1] === 'profile') {
+          // console.log('/.....2ndIF.......')
+          const {setDeepLinkRoute} = this.props;
+          setDeepLinkRoute(route);
+        }
+      };
     }
   }
 
@@ -624,7 +667,8 @@ const mapDispatchToProps = dispatch => {
     setMessagesOnGroup: (messagesOnGroup) => dispatch(actions.setMessagesOnGroup(messagesOnGroup)),
     updateMessagesOnGroupByPayload: (messages) => dispatch(actions.updateMessagesOnGroupByPayload(messages)),
     setSearchParameter: (searchParameter) => dispatch(actions.setSearchParameter(searchParameter)),
-    setSystemNotification: (systemNotification) => dispatch(actions.setSystemNotification(systemNotification))
+    setSystemNotification: (systemNotification) => dispatch(actions.setSystemNotification(systemNotification)),
+    setDeepLinkRoute: (deepLinkRoute) => dispatch(actions.setDeepLinkRoute(deepLinkRoute)),
   };
 };
 
