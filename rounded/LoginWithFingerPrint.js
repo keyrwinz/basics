@@ -577,7 +577,8 @@ class Login extends Component {
                       paddingBottom: 20,
                       fontSize: BasicStyles.standardFontSize,
                       fontWeight: 'bold',
-                      color: theme ? theme.primary : Color.primary
+                      color: theme ? theme.primary : Color.primary,
+                      textDecorationLine: 'underline'
                     }}>Forgot your Password?</Text>
                  </TouchableOpacity>
                   
