@@ -157,6 +157,7 @@ class Login extends Component {
     fcmService.subscribeTopic('Message')
     fcmService.subscribeTopic('Notifications')
     fcmService.subscribeTopic('Requests')
+    fcmService.subscribeTopic('Payments-' + user.id)
     this.retrieveNotification()
     // return () => {
     //   console.log("[App] unRegister")
@@ -202,6 +203,7 @@ class Login extends Component {
     if(user == null || data == null){
       return
     }
+    console.log('notification-data', data)
     switch(data.topic.toLowerCase()){
       case 'message': {
           const { messengerGroup } = this.props.state;
@@ -272,6 +274,16 @@ class Login extends Component {
             const { setUpdateRequests } = this.props;
             setUpdateRequests(data)
             return
+          }
+        }
+        break
+      case `payments-${user.id}`: {
+          const { setAcceptPayment } = this.props;
+          console.log(data)
+          if(data.code == user.code){
+            setAcceptPayment(data)
+          }else{
+            setAcceptPayment(null)
           }
         }
         break
@@ -670,6 +682,7 @@ const mapDispatchToProps = dispatch => {
     setSearchParameter: (searchParameter) => dispatch(actions.setSearchParameter(searchParameter)),
     setSystemNotification: (systemNotification) => dispatch(actions.setSystemNotification(systemNotification)),
     setDeepLinkRoute: (deepLinkRoute) => dispatch(actions.setDeepLinkRoute(deepLinkRoute)),
+    setAcceptPayment: (acceptPayment) => dispatch(actions.setAcceptPayment(acceptPayment))
   };
 };
 
