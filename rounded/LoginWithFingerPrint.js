@@ -281,12 +281,9 @@ class Login extends Component {
       case 'payments': {
           const { setAcceptPayment } = this.props;
           let topicId = topic.length > 1 ? topic[1] : null
-          if(topicId && topicId == user.id){
-            if(data.code == user.code){
-              setAcceptPayment(data)
-            }else{
-              setAcceptPayment(null)
-            }
+          console.log('[payments]', data)
+          if(topicId && parseInt(topicId) == user.id){
+            setAcceptPayment(data)
           }else{
 
           }
