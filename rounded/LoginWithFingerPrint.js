@@ -204,7 +204,8 @@ class Login extends Component {
       return
     }
     console.log('notification-data', data)
-    switch(data.topic.toLowerCase()){
+    let topic = data.topic.split('-')
+    switch(topic[0].toLowerCase()){
       case 'message': {
           const { messengerGroup } = this.props.state;
           let members = JSON.parse(data.members)
@@ -277,14 +278,16 @@ class Login extends Component {
           }
         }
         break
-      case `payments-${user.id}`: {
+      case 'payments': {
           const { setAcceptPayment } = this.props;
+          let topicId = topic.length > 1 ? topic[1] : null
           console.log('[payments]', data)
-          if(data.code == user.code){
+          if(topicId && parseInt(topicId) == user.id){
             setAcceptPayment(data)
           }else{
-            setAcceptPayment(null)
+
           }
+          
         }
         break
     }
