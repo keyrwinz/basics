@@ -279,7 +279,7 @@ class Login extends Component {
         break
       case `payments-${user.id}`: {
           const { setAcceptPayment } = this.props;
-          console.log(data)
+          console.log('[payments]', data)
           if(data.code == user.code){
             setAcceptPayment(data)
           }else{
