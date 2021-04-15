@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import AsyncStorage from '@react-native-community/async-storage';
-import { View , TextInput , Image, TouchableHighlight, Text, ScrollView, Platform, TouchableOpacity, Dimensions, SafeAreaView} from 'react-native';
+import { View , TextInput , Image, TouchableHighlight, Text, ScrollView, Platform, TouchableOpacity, Dimensions, SafeAreaView, Linking} from 'react-native';
 import {NavigationActions} from 'react-navigation';
 import Style from './../Style.js';
 import { Spinner } from 'components';
@@ -61,12 +61,56 @@ class Login extends Component {
     }
   }
 
+  onFocusFunction = () => {
+    Linking.getInitialURL().then(url => {
+      this.navigate(url);
+    });
+    Linking.addEventListener('url', this.handleOpenURL);
+  }
+  
   async componentDidMount(){
+    this.focusListener = this.props.navigation.addListener('didFocus', () => {
+      this.onFocusFunction()
+    })
     if((await AsyncStorage.getItem('username') != null && await AsyncStorage.getItem('password') != null)){
       await this.setState({showFingerPrint: true})
       await this.setState({notEmpty: true})
     }
+
     this.getData();
+
+    Linking.getInitialURL().then(url => {
+      this.navigate(url);
+    });
+    Linking.addEventListener('url', this.handleOpenURL);
+  }
+
+  componentWillUnmount() {
+    this.focusListener.remove()
+    Linking.removeEventListener('url', this.handleOpenURL);
+  }
+  
+  
+  handleOpenURL = (event) => { // D
+    this.navigate(event.url);
+  }
+  navigate = (url) => { // E
+    // console.log(':::TESTING::: ', url)
+    const { navigate } = this.props.navigation;
+    // https://payhiram.ph/profile/10DRLWEMCGUX9AT3PJ8BOV72IZQ5SYN6
+    if(url !== null){
+      const route = url.replace(/.*?:\/\//g, '');
+      const routeName = route.split('/')[0];
+      if (routeName === 'payhiram.ph')
+      {
+        // console.log('/.....1stIF.......')
+        if(route.split('/')[1] === 'profile') {
+          // console.log('/.....2ndIF.......')
+          const {setDeepLinkRoute} = this.props;
+          setDeepLinkRoute(route);
+        }
+      };
+    }
   }
 
   async onPressFingerPrint(username, password){
@@ -115,6 +159,8 @@ class Login extends Component {
     fcmService.subscribeTopic('Message')
     fcmService.subscribeTopic('Notifications')
     fcmService.subscribeTopic('Requests')
+    fcmService.subscribeTopic('Payments-' + user.id)
+    fcmService.subscribeTopic('Comments-' + user.id)
     this.retrieveNotification()
     // return () => {
     //   console.log("[App] unRegister")
@@ -160,7 +206,9 @@ class Login extends Component {
     if(user == null || data == null){
       return
     }
-    switch(data.topic.toLowerCase()){
+    console.log('notification-data', data)
+    let topic = data.topic.split('-')
+    switch(topic[0].toLowerCase()){
       case 'message': {
           const { messengerGroup } = this.props.state;
           let members = JSON.parse(data.members)
@@ -233,6 +281,30 @@ class Login extends Component {
           }
         }
         break
+      case 'payments': {
+        const { setAcceptPayment } = this.props;
+        let topicId = topic.length > 1 ? topic[1] : null
+        console.log('[payments]', data)
+        if(topicId && parseInt(topicId) == user.id){
+          setAcceptPayment(data)
+        }else{
+
+        }
+        
+      }
+      break
+      case 'comments': {
+        const { setComments } = this.props;
+        let topicId = topic.length > 1 ? topic[1] : null
+        console.log('[comments]', data)
+        if(topicId && parseInt(topicId) == user.id){
+          setComments(data)
+        }else{
+
+        }
+        
+      }
+      break
     }
 
     // const options = {
@@ -535,7 +607,8 @@ class Login extends Component {
                       paddingBottom: 20,
                       fontSize: BasicStyles.standardFontSize,
                       fontWeight: 'bold',
-                      color: theme ? theme.primary : Color.primary
+                      color: theme ? theme.primary : Color.primary,
+                      textDecorationLine: 'underline'
                     }}>Forgot your Password?</Text>
                  </TouchableOpacity>
                   
@@ -625,7 +698,10 @@ const mapDispatchToProps = dispatch => {
     setMessagesOnGroup: (messagesOnGroup) => dispatch(actions.setMessagesOnGroup(messagesOnGroup)),
     updateMessagesOnGroupByPayload: (messages) => dispatch(actions.updateMessagesOnGroupByPayload(messages)),
     setSearchParameter: (searchParameter) => dispatch(actions.setSearchParameter(searchParameter)),
-    setSystemNotification: (systemNotification) => dispatch(actions.setSystemNotification(systemNotification))
+    setSystemNotification: (systemNotification) => dispatch(actions.setSystemNotification(systemNotification)),
+    setDeepLinkRoute: (deepLinkRoute) => dispatch(actions.setDeepLinkRoute(deepLinkRoute)),
+    setAcceptPayment: (acceptPayment) => dispatch(actions.setAcceptPayment(acceptPayment)),
+    setComments: (comments) => dispatch(actions.setComments(comments))
   };
 };
 
