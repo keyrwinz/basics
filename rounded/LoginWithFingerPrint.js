@@ -158,6 +158,7 @@ class Login extends Component {
     fcmService.subscribeTopic('Notifications')
     fcmService.subscribeTopic('Requests')
     fcmService.subscribeTopic('Payments-' + user.id)
+    fcmService.subscribeTopic('Comments-' + user.id)
     this.retrieveNotification()
     // return () => {
     //   console.log("[App] unRegister")
@@ -279,17 +280,29 @@ class Login extends Component {
         }
         break
       case 'payments': {
-          const { setAcceptPayment } = this.props;
-          let topicId = topic.length > 1 ? topic[1] : null
-          console.log('[payments]', data)
-          if(topicId && parseInt(topicId) == user.id){
-            setAcceptPayment(data)
-          }else{
+        const { setAcceptPayment } = this.props;
+        let topicId = topic.length > 1 ? topic[1] : null
+        console.log('[payments]', data)
+        if(topicId && parseInt(topicId) == user.id){
+          setAcceptPayment(data)
+        }else{
 
-          }
-          
         }
-        break
+        
+      }
+      break
+      case 'comments': {
+        const { setComments } = this.props;
+        let topicId = topic.length > 1 ? topic[1] : null
+        console.log('[comments]', data)
+        if(topicId && parseInt(topicId) == user.id){
+          setComments(data)
+        }else{
+
+        }
+        
+      }
+      break
     }
 
     // const options = {
@@ -685,7 +698,8 @@ const mapDispatchToProps = dispatch => {
     setSearchParameter: (searchParameter) => dispatch(actions.setSearchParameter(searchParameter)),
     setSystemNotification: (systemNotification) => dispatch(actions.setSystemNotification(systemNotification)),
     setDeepLinkRoute: (deepLinkRoute) => dispatch(actions.setDeepLinkRoute(deepLinkRoute)),
-    setAcceptPayment: (acceptPayment) => dispatch(actions.setAcceptPayment(acceptPayment))
+    setAcceptPayment: (acceptPayment) => dispatch(actions.setAcceptPayment(acceptPayment)),
+    setComments: (comments) => dispatch(actions.setComments(comments))
   };
 };
 
