@@ -66,6 +66,7 @@ class Login extends Component {
       await this.setState({showFingerPrint: true})
       await this.setState({notEmpty: true})
     }
+    this.getData();
   }
 
   async onPressFingerPrint(username, password){
