@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import AsyncStorage from '@react-native-community/async-storage';
-import { View , TextInput , Image, TouchableHighlight, Text, ScrollView, Platform, TouchableOpacity} from 'react-native';
+import { View , TextInput , Image, TouchableHighlight, Text, ScrollView, Platform, TouchableOpacity, Dimensions, SafeAreaView, Linking} from 'react-native';
 import {NavigationActions} from 'react-navigation';
 import Style from './../Style.js';
 import { Spinner } from 'components';
@@ -23,6 +23,7 @@ import { localNotificationService } from 'services/broadcasting/LocalNotificatio
 import FingerPrintScanner from './../FingerPrintScanner'
 import { Alert } from 'react-native';
 import Button from 'components/Form/Button';
+const height = Math.round(Dimensions.get('window').height);
 class Login extends Component {
   //Screen1 Component
   constructor(props){
@@ -60,17 +61,67 @@ class Login extends Component {
     }
   }
 
+  onFocusFunction = () => {
+    Linking.getInitialURL().then(url => {
+      this.navigate(url);
+    });
+    Linking.addEventListener('url', this.handleOpenURL);
+  }
+  
   async componentDidMount(){
+    this.focusListener = this.props.navigation.addListener('didFocus', () => {
+      this.onFocusFunction()
+    })
     if((await AsyncStorage.getItem('username') != null && await AsyncStorage.getItem('password') != null)){
       await this.setState({showFingerPrint: true})
       await this.setState({notEmpty: true})
-      await this.setState({username: await AsyncStorage.getItem('username')})
-      await this.setState({password: await AsyncStorage.getItem('password')})
+    }
+
+    Linking.getInitialURL().then(url => {
+      this.navigate(url);
+    });
+    Linking.addEventListener('url', this.handleOpenURL);
+  }
+
+  componentWillUnmount() {
+    this.focusListener.remove()
+    Linking.removeEventListener('url', this.handleOpenURL);
+  }
+  
+  
+  handleOpenURL = (event) => { // D
+    this.navigate(event.url);
+  }
+  navigate = (url) => { // E
+    // console.log(':::TESTING::: ', url)
+    const { navigate } = this.props.navigation;
+    // https://payhiram.ph/profile/10DRLWEMCGUX9AT3PJ8BOV72IZQ5SYN6
+    if(url !== null){
+      const route = url.replace(/.*?:\/\//g, '');
+      const routeName = route.split('/')[0];
+      if (routeName === 'payhiram.ph')
+      {
+        // console.log('/.....1stIF.......')
+        if(route.split('/')[1] === 'profile') {
+          // console.log('/.....2ndIF.......')
+          const {setDeepLinkRoute} = this.props;
+          setDeepLinkRoute(route);
+        }
+      };
+    }
+  }
+
+  async onPressFingerPrint(username, password){
+    if((await AsyncStorage.getItem('username') != null && await AsyncStorage.getItem('password') != null)){
+      await this.setState({showFingerPrint: true})
+      await this.setState({notEmpty: true})
+      // await this.setState({username: await AsyncStorage.getItem('username')})
+      // await this.setState({password: await AsyncStorage.getItem('password')})
+      this.login()
     }else{
       await this.setState({notEmpty: false})
       await this.setState({showFingerPrint: false})
     }
-
     this.infocus = this.props.navigation.addListener('didfocus', () => {
       this.storageChecker()
     })
@@ -106,6 +157,7 @@ class Login extends Component {
     fcmService.subscribeTopic('Message')
     fcmService.subscribeTopic('Notifications')
     fcmService.subscribeTopic('Requests')
+    fcmService.subscribeTopic('Payments-' + user.id)
     this.retrieveNotification()
     // return () => {
     //   console.log("[App] unRegister")
@@ -151,7 +203,9 @@ class Login extends Component {
     if(user == null || data == null){
       return
     }
-    switch(data.topic.toLowerCase()){
+    console.log('notification-data', data)
+    let topic = data.topic.split('-')
+    switch(topic[0].toLowerCase()){
       case 'message': {
           const { messengerGroup } = this.props.state;
           let members = JSON.parse(data.members)
@@ -207,6 +261,35 @@ class Login extends Component {
           }
         }
         break
+      case 'update-request': {
+          const { requests, request } = this.props.state;
+          if(request != null && request.code == data.code){
+            const { setRequest } = this.props;
+            setRequest({
+              ...request,
+              status: data.status
+            })
+            return
+          }
+          if(requests.length > 0){
+            const { setUpdateRequests } = this.props;
+            setUpdateRequests(data)
+            return
+          }
+        }
+        break
+      case 'payments': {
+          const { setAcceptPayment } = this.props;
+          let topicId = topic.length > 1 ? topic[1] : null
+          console.log('[payments]', data)
+          if(topicId && parseInt(topicId) == user.id){
+            setAcceptPayment(data)
+          }else{
+
+          }
+          
+        }
+        break
     }
 
     // const options = {
@@ -225,7 +308,7 @@ class Login extends Component {
   }
 
   login = () => {
-    this.test();
+    // this.test();
     const { login } = this.props;
     if(this.state.token != null){
       this.setState({isLoading: true});
@@ -307,14 +390,46 @@ class Login extends Component {
       {cancelable: false}
     )
   }
-
+  handleFingerPrintSubmit(username, password){
+    const { login } = this.props;
+    this.setState({isLoading: true, error: 0});
+      Api.authenticate(username, password, (response) => {
+        if(response.error){
+          this.setState({error: 2, isLoading: false});
+        }
+        if(response.token){
+          const token = response.token;
+          Api.getAuthUser(response.token, (response) => {
+            login(response, token);
+            this.setState({isLoading: false, error: 0});
+            if(response.username){
+              this.firebaseNotification()
+              this.redirect('drawerStack')
+            }
+            
+          }, error => {
+            console.log("[ERROR]", error);
+            this.setState({isResponseError: true, isLoading: false})
+          })
+        }
+      }, error => {
+        console.log('error', error)
+        this.setState({isResponseError: true, isLoading: false})
+        this.setState({showFingerPrint: false})
+      })
+  }
   submit(){
     this.test();
     const { username, password } = this.state;
     const { login } = this.props;
+    if(username == null || username == '' || password == null || password == ''){
+      this.setState({
+        error: 1
+      })
+      return
+    }
     if((username != null && username != '') && (password != null && password != '')){
       this.setState({isLoading: true, error: 0});
-      // Login
       
       Api.authenticate(username, password, (response) => {
         if(response.error){
@@ -322,17 +437,9 @@ class Login extends Component {
         }
         if(response.token){
           const token = response.token;
-          // this.setState({showFingerPrint: true})
-          // this.setState({visible: true})
           Api.getAuthUser(response.token, (response) => {
             login(response, token);
-            let parameter = {
-              condition: [{
-                value: response.id,
-                clause: '=',
-                column: 'id'
-              }]
-            }
+            console.log("[NOT_EMPTY]", this.state.notEmpty)
             this.setState({isLoading: false, error: 0});
             if(this.state.notEmpty == true){
               console.log("[notEmpty]", this.state.notEmpty);
@@ -345,17 +452,17 @@ class Login extends Component {
             }
             
           }, error => {
-            this.setState({isResponseError: true})
+            this.setState({isResponseError: true, isLoading: false})
           })
         }
       }, error => {
         console.log('error', error)
-        this.setState({isResponseError: true})
+        this.setState({isResponseError: true, isLoading: false})
         this.setState({showFingerPrint: false})
       })
       // this.props.navigation.navigate('drawerStack');
     }else{
-      this.setState({error: 1});
+      this.setState({error: 1, isLoading: false});
     }
   }
 
@@ -363,165 +470,172 @@ class Login extends Component {
     const { isLoading, error, isResponseError } = this.state;
     const {  blockedFlag, isOtpModal } = this.state;
     const { theme } = this.props.state;
+    console.log('error', error)
     return (
-      <ScrollView
-        style={{
-          backgroundColor: theme ? theme.primary : Color.primary
-        }}
-        showsVerticalScrollIndicator={false}>
-        <View style={{
-          flex: 1,
-        }}>
-          <Header params={"Login"} textColor={{color: Color.white}}></Header>
+      <SafeAreaView>
+        <ScrollView
+          style={{
+            backgroundColor: theme ? theme.primary : Color.primary
+          }}
+          showsVerticalScrollIndicator={false}>
           <View style={{
-            backgroundColor: Color.white,
-            width: '100%',
-            paddingTop: 50,
-            marginTop: 10,
-            borderTopLeftRadius: 60,
-            borderTopRightRadius: 60,
-            ...BasicStyles.loginShadow
+            flex: 1,
           }}>
-            <Text style={{
+            <Header params={"Login"} textColor={{color: Color.white}}></Header>
+            <View style={{
+              backgroundColor: Color.white,
               width: '100%',
-              textAlign: 'center',
-              paddingBottom: 20,
-              fontSize: BasicStyles.standardFontSize,
-              fontWeight: 'bold',
-              color: theme ? theme.primary : Color.primary
-            }}>Login to {Helper.APP_NAME_BASIC}</Text>
-            {error > 0 ? <View style={{
-              ...Style.messageContainer
+              paddingTop: 50,
+              marginTop: 10,
+              borderTopLeftRadius: 60,
+              borderTopRightRadius: 60,
+              height: height,
+              ...BasicStyles.loginShadow
             }}>
-              {error == 1 ? (
-                <Text style={{
-                  ...Style.messageText,
-                  fontSize: BasicStyles.standardFontSize
-                }}>Please fill up the required fields.</Text>
-              ) : null}
+              <Text style={{
+                width: '100%',
+                textAlign: 'center',
+                paddingBottom: 20,
+                fontSize: BasicStyles.standardFontSize,
+                fontWeight: 'bold',
+                color: theme ? theme.primary : Color.primary
+              }}>Login to {Helper.APP_NAME_BASIC}</Text>
+              {error > 0 ? <View style={{
+                ...Style.messageContainer
+              }}>
+                {error == 1 ? (
+                  <Text style={{
+                    ...Style.messageText,
+                    fontSize: BasicStyles.standardFontSize
+                  }}>Please fill up the required fields.</Text>
+                ) : null}
 
-              {error == 2 ? (
-                <Text style={{
-                  ...Style.messageText,
-                  fontSize: BasicStyles.standardFontSize
-                }}>Username and password didn't match.</Text>
-              ) : null}
-            </View> : null}
-            
-            <View style={Style.TextContainerRounded}>
-              <TextInput
-                style={{
-                  ...BasicStyles.standardFormControl,
-                  marginBottom: 20,
-                  borderRadius: 25
-                }}
-                onChangeText={(username) => this.setState({username})}
-                value={this.state.username}
-                placeholder={'Username or Email'}
-              />
-
-              <PasswordWithIcon
-                onTyping={(input) => this.setState({
-                  password: input
-                })}
-                style={{
-                  borderRadius: 25
-                }}
+                {error == 2 ? (
+                  <Text style={{
+                    ...Style.messageText,
+                    fontSize: BasicStyles.standardFontSize
+                  }}>Username and password didn't match.</Text>
+                ) : null}
+              </View> : null}
+              
+              <View style={Style.TextContainerRounded}>
+                <TextInput
+                  style={{
+                    ...BasicStyles.standardFormControl,
+                    marginBottom: 20,
+                    borderRadius: 25
+                  }}
+                  onChangeText={(username) => this.setState({username})}
+                  value={this.state.username}
+                  placeholder={'Username or Email'}
                 />
 
+                <PasswordWithIcon
+                  onTyping={(input) => this.setState({
+                    password: input
+                  })}
+                  style={{
+                    borderRadius: 25
+                  }}
+                  />
 
-              <View style={{
-                width: '100%',
-                marginTop: 20
-              }}>
-              {
-                this.state.showFingerPrint == true && (
-                  <FingerPrintScanner navigate={() => this.redirect('drawerStack')} login={() => this.login()} onSubmit={()=>this.submit()}/>
-                )
-              }
-              </View>
 
-              <Button
-                onClick={() => this.submit()}
-                title={'Login'}
-                style={{
-                  backgroundColor: theme ? theme.secondary : Color.secondary,
+                <View style={{
                   width: '100%',
-                  marginBottom: 20,
-                  borderRadius: 25
-                }}
-              />
+                  marginTop: 20,
+                  minHeight: 50
+                }}>
+                {
+                  this.state.showFingerPrint == true && (
+                    <FingerPrintScanner navigate={() => this.redirect('drawerStack')} login={() => this.onPressFingerPrint(null, null)} onSubmit={(username, password)=>this.handleFingerPrintSubmit(username, password)}/>
+                  )
+                }
+                </View>
 
-              {/* <Confirm visible={this.state.visible} message={'Do you want to enable finger print scanning for easier login?'}
-                  onConfirm={() => {
-                      this.openModal(this.state.username, this.state.password)
+                <Button
+                  onClick={() => this.submit()}
+                  title={'Login'}
+                  style={{
+                    backgroundColor: theme ? theme.secondary : Color.secondary,
+                    width: '100%',
+                    marginBottom: 20,
+                    borderRadius: 25
                   }}
-                  onCLose={() => {
-                      this.setState({visible: false})
-                  }}
-              /> */}
+                />
 
-             {/*<Button
-                 onClick={() => this.redirect('forgotPasswordStack')}
-                 title={'Forgot your Password?'}
-                 style={{
-                   backgroundColor: Color.warning,
-                   width: '100%',
-                   marginBottom: 20,
-                   borderRadius: 25
-                 }}
-               />*/}
-               <TouchableOpacity
-                onPress={() => {
-                  this.redirect('forgotPasswordStack')
+                {/* <Confirm visible={this.state.visible} message={'Do you want to enable finger print scanning for easier login?'}
+                    onConfirm={() => {
+                        this.openModal(this.state.username, this.state.password)
+                    }}
+                    onCLose={() => {
+                        this.setState({visible: false})
+                    }}
+                /> */}
+
+               {/*<Button
+                   onClick={() => this.redirect('forgotPasswordStack')}
+                   title={'Forgot your Password?'}
+                   style={{
+                     backgroundColor: Color.warning,
+                     width: '100%',
+                     marginBottom: 20,
+                     borderRadius: 25
+                   }}
+                 />*/}
+                 <TouchableOpacity
+                  onPress={() => {
+                    this.redirect('forgotPasswordStack')
+                  }}>
+                    <Text style={{
+                      width: '100%',
+                      textAlign: 'center',
+                      paddingBottom: 20,
+                      fontSize: BasicStyles.standardFontSize,
+                      fontWeight: 'bold',
+                      color: theme ? theme.primary : Color.primary,
+                      textDecorationLine: 'underline'
+                    }}>Forgot your Password?</Text>
+                 </TouchableOpacity>
+                  
+
+                <Text style={{
+                  width: '100%',
+                  textAlign: 'center',
+                  paddingBottom: 10,
+                  fontSize: BasicStyles.standardFontSize,
+                  fontWeight: 'bold',
+                  color: theme ? theme.primary : Color.primary
+                }}>OR</Text>
+
+                <View style={{
+                  justifyContent: 'center',
+                  alignItems: 'center'
                 }}>
                   <Text style={{
-                    width: '100%',
-                    textAlign: 'center',
+                    paddingTop: 10,
                     paddingBottom: 20,
                     fontSize: BasicStyles.standardFontSize,
                     fontWeight: 'bold',
                     color: theme ? theme.primary : Color.primary
-                  }}>Forgot your Password?</Text>
-               </TouchableOpacity>
-                
+                  }}>Don't have an account?</Text>
+                </View>
 
-              <Text style={{
-                width: '100%',
-                textAlign: 'center',
-                paddingBottom: 10,
-                fontSize: BasicStyles.standardFontSize,
-                fontWeight: 'bold',
-                color: theme ? theme.primary : Color.primary
-              }}>OR</Text>
+                <Button
+                  onClick={() => this.redirect('registerStack')}
+                  title={'Register Now!'}
+                  style={{
+                    backgroundColor: Color.warning,
+                    width: '100%',
+                    marginBottom: 100,
+                    borderRadius: 25
+                  }}
+                />
 
-              <View style={{
-                justifyContent: 'center',
-                alignItems: 'center'
-              }}>
-                <Text style={{
-                  paddingTop: 10,
-                  paddingBottom: 20,
-                  fontSize: BasicStyles.standardFontSize,
-                  fontWeight: 'bold',
-                  color: theme ? theme.primary : Color.primary
-                }}>Don't have an account?</Text>
               </View>
-
-              <Button
-                onClick={() => this.redirect('registerStack')}
-                title={'Register Now!'}
-                style={{
-                  backgroundColor: Color.warning,
-                  width: '100%',
-                  marginBottom: 100,
-                  borderRadius: 25
-                }}
-              />
-
             </View>
           </View>
-        </View>
+
+        </ScrollView>
         <OtpModal
           visible={isOtpModal}
           title={blockedFlag == false ? 'Authentication via OTP' : 'Blocked Account'}
@@ -543,7 +657,7 @@ class Login extends Component {
         {isResponseError ? <CustomError visible={isResponseError} onCLose={() => {
           this.setState({isResponseError: false, isLoading: false})
         }}/> : null}
-      </ScrollView>
+      </SafeAreaView>
     );
   }
 }
@@ -558,6 +672,8 @@ const mapDispatchToProps = dispatch => {
     setTheme: (theme) => dispatch(actions.setTheme(theme)),
     setUnReadMessages: (messages) => dispatch(actions.setUnReadMessages(messages)),
     setUnReadRequests: (requests) => dispatch(actions.setUnReadRequests(requests)),
+    updateRequests: (request) => dispatch(actions.updateRequests(request)),
+    setRequest: (request) => dispatch(actions.setRequest(request)),
     setNotifications: (unread, notifications) => dispatch(actions.setNotifications(unread, notifications)),
     updateNotifications: (unread, notification) => dispatch(actions.updateNotifications(unread, notification)),
     updateMessagesOnGroup: (message) => dispatch(actions.updateMessagesOnGroup(message)),
@@ -567,7 +683,9 @@ const mapDispatchToProps = dispatch => {
     setMessagesOnGroup: (messagesOnGroup) => dispatch(actions.setMessagesOnGroup(messagesOnGroup)),
     updateMessagesOnGroupByPayload: (messages) => dispatch(actions.updateMessagesOnGroupByPayload(messages)),
     setSearchParameter: (searchParameter) => dispatch(actions.setSearchParameter(searchParameter)),
-    setSystemNotification: (systemNotification) => dispatch(actions.setSystemNotification(systemNotification))
+    setSystemNotification: (systemNotification) => dispatch(actions.setSystemNotification(systemNotification)),
+    setDeepLinkRoute: (deepLinkRoute) => dispatch(actions.setDeepLinkRoute(deepLinkRoute)),
+    setAcceptPayment: (acceptPayment) => dispatch(actions.setAcceptPayment(acceptPayment))
   };
 };
 
