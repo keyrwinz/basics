@@ -10,7 +10,7 @@ import {
   Platform,
 } from 'react-native';
  
-// import FingerprintScanner from 'react-native-fingerprint-scanner';
+import FingerprintScanner from 'react-native-fingerprint-scanner';
 import Style from './Style.js';
  
  
@@ -38,7 +38,7 @@ class BiometricPopup extends Component {
   }
  
   componentWillUnmount = () => {
-    // FingerprintScanner.release();
+    FingerprintScanner.release();
   }
  
   requiresLegacyAuthentication() {
@@ -46,30 +46,30 @@ class BiometricPopup extends Component {
   }
  
   authCurrent() {
-    // FingerprintScanner
-    //   .authenticate({ title: 'Log in with FingerPrint' , description: "Scan your finger print on your device to continue", cancelButton: "CANCEL"})
-    //   .then((res) => {
-    //     this.props.onAuthenticate();
-    //     this.props.handlePopupDismissedLegacy();
-    //   })
-    //   .catch(error => {
-    //     console.log("------------------------", error);
-    //     this.props.handlePopupDismissedLegacy();
-    //   });
+    FingerprintScanner
+      .authenticate({ title: 'Log in with FingerPrint' , description: "Scan your finger print on your device to continue", cancelButton: "CANCEL"})
+      .then((res) => {
+        this.props.onAuthenticate();
+        this.props.handlePopupDismissedLegacy();
+      })
+      .catch(error => {
+        console.log("------------------------", error);
+        this.props.handlePopupDismissedLegacy();
+      });
   }
  
   authLegacy() {
-    // FingerprintScanner
-    //   .authenticate({ onAttempt: this.handleAuthenticationAttemptedLegacy })
-    //   .then((res) => {
-    //     console.log("++++++++++++++++++++++", res);
-    //     this.props.handlePopupDismissedLegacy();
-    //     Alert.alert('Fingerprint Authentication', 'Authenticated successfully');
-    //   })
-    //   .catch((error) => {
-    //     this.setState({ errorMessageLegacy: error.message, biometricLegacy: error.biometric });
-    //     this.description.shake();
-    //   });
+    FingerprintScanner
+      .authenticate({ onAttempt: this.handleAuthenticationAttemptedLegacy })
+      .then((res) => {
+        console.log("++++++++++++++++++++++", res);
+        this.props.handlePopupDismissedLegacy();
+        Alert.alert('Fingerprint Authentication', 'Authenticated successfully');
+      })
+      .catch((error) => {
+        this.setState({ errorMessageLegacy: error.message, biometricLegacy: error.biometric });
+        this.description.shake();
+      });
   }
  
   handleAuthenticationAttemptedLegacy = (error) => {

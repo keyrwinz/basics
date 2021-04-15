@@ -7,7 +7,7 @@ import {
   AppState
 } from 'react-native';
 import AsyncStorage from '@react-native-community/async-storage';
-// import FingerprintScanner from 'react-native-fingerprint-scanner';
+import FingerprintScanner from 'react-native-fingerprint-scanner';
 import { connect } from 'react-redux';
 import {NavigationActions} from 'react-navigation';
 import { Spinner } from 'components';
@@ -74,14 +74,14 @@ class FingerprintScan extends Component {
   }
 
   detectFingerprintAvailable = () => {
-    // FingerprintScanner
-    //   .isSensorAvailable()
-    //   .catch(error => this.setState({ errorMessage: error.message, biometric: error.biometric }));
+    FingerprintScanner
+      .isSensorAvailable()
+      .catch(error => this.setState({ errorMessage: error.message, biometric: error.biometric }));
   }
 
   handleAppStateChange = (nextAppState) => {
     if (this.state.appState && this.state.appState.match(/inactive|background/) && nextAppState === 'active') {
-      // FingerprintScanner.release();
+      FingerprintScanner.release();
       this.detectFingerprintAvailable();
     }
     this.setState({ appState: nextAppState });
