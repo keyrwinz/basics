@@ -77,6 +77,8 @@ class Login extends Component {
       await this.setState({notEmpty: true})
     }
 
+    this.getData();
+
     Linking.getInitialURL().then(url => {
       this.navigate(url);
     });
