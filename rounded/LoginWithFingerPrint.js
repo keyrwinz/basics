@@ -306,6 +306,7 @@ class Login extends Component {
             );            
           }else{
             // declined or completed here
+            console.log('on confirm', data)
             setAcceptPayment(data)
             const { setPaymentConfirmation } = this.props;
             setPaymentConfirmation(false)
