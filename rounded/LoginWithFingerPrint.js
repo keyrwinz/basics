@@ -287,6 +287,22 @@ class Login extends Component {
         console.log('[payments]', data)
         if(topicId && parseInt(topicId) == user.id){
           setAcceptPayment(data)
+          Alert.alert(
+            "Payment Request",
+            "There\'s new payment request, would you like to open it?",
+            [
+              {
+                text: "Cancel",
+                onPress: () => {
+                  setAcceptPayment(null)
+                },
+                style: "cancel"
+              },
+              { text: "Yes", onPress: () => {
+                this.props.navigation.navigate('recievePaymentRequestStack')
+              } }
+            ]
+          );
         }else{
 
         }
