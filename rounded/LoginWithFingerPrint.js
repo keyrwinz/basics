@@ -286,23 +286,31 @@ class Login extends Component {
         let topicId = topic.length > 1 ? topic[1] : null
         console.log('[payments]', data)
         if(topicId && parseInt(topicId) == user.id){
-          setAcceptPayment(data)
-          Alert.alert(
-            "Payment Request",
-            "There\'s new payment request, would you like to open it?",
-            [
-              {
-                text: "Cancel",
-                onPress: () => {
-                  setAcceptPayment(null)
+          if(data.transfer_status == 'requesting'){
+            setAcceptPayment(data)
+            Alert.alert(
+              "Payment Request",
+              "There\'s new payment request, would you like to open it?",
+              [
+                {
+                  text: "Cancel",
+                  onPress: () => {
+                    setAcceptPayment(null)
+                  },
+                  style: "cancel"
                 },
-                style: "cancel"
-              },
-              { text: "Yes", onPress: () => {
-                this.props.navigation.navigate('recievePaymentRequestStack')
-              } }
-            ]
-          );
+                { text: "Yes", onPress: () => {
+                  this.props.navigation.navigate('recievePaymentRequestStack')
+                } }
+              ]
+            );            
+          }else{
+            // declined or completed here
+            setAcceptPayment(data)
+            const { setPaymentConfirmation } = this.props;
+            setPaymentConfirmation(false)
+          }
+
         }else{
 
         }
@@ -717,7 +725,8 @@ const mapDispatchToProps = dispatch => {
     setSystemNotification: (systemNotification) => dispatch(actions.setSystemNotification(systemNotification)),
     setDeepLinkRoute: (deepLinkRoute) => dispatch(actions.setDeepLinkRoute(deepLinkRoute)),
     setAcceptPayment: (acceptPayment) => dispatch(actions.setAcceptPayment(acceptPayment)),
-    setComments: (comments) => dispatch(actions.setComments(comments))
+    setComments: (comments) => dispatch(actions.setComments(comments)),
+    setPaymentConfirmation: (flag) => dispatch(actions.setPaymentConfirmation(flag)),
   };
 };
 
