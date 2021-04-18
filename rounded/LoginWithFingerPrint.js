@@ -155,18 +155,18 @@ class Login extends Component {
     }
     fcmService.registerAppWithFCM()
     fcmService.register(this.onRegister, this.onNotification, this.onOpenNotification)
-    localNotificationService.configure(this.onOpenNotification, 'Payhiram')
+    localNotificationService.configure(this.onOpenNotification)
     fcmService.subscribeTopic('Message')
     fcmService.subscribeTopic('Notifications')
     fcmService.subscribeTopic('Requests')
     fcmService.subscribeTopic('Payments-' + user.id)
     fcmService.subscribeTopic('Comments-' + user.id)
     this.retrieveNotification()
-    // return () => {
-    //   console.log("[App] unRegister")
-    //   fcmService.unRegister()
-    //   localNotificationService.unRegister()
-    // }
+    return () => {
+      console.log("[App] unRegister")
+      fcmService.unRegister()
+      localNotificationService.unRegister()
+    }
   }
 
   retrieveNotification = () => {
