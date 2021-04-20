@@ -202,10 +202,11 @@ class Login extends Component {
   onNotification = (notify) => {
     const { user } = this.props.state;
     // console.log("[App] onNotification", notify)
-    let { data } = notify
-    if(user == null || data == null){
+    let data = null
+    if(user == null || !notify.data){
       return
     }
+    data = notify.data
     console.log('notification-data', data)
     let topic = data.topic.split('-')
     switch(topic[0].toLowerCase()){
