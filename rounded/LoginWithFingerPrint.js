@@ -155,7 +155,7 @@ class Login extends Component {
     }
     fcmService.registerAppWithFCM()
     fcmService.register(this.onRegister, this.onNotification, this.onOpenNotification)
-    localNotificationService.configure(this.onOpenNotification)
+    localNotificationService.configure(this.onOpenNotification, Helper.APP_NAME)
     fcmService.subscribeTopic('Message')
     fcmService.subscribeTopic('Notifications')
     fcmService.subscribeTopic('Requests')
