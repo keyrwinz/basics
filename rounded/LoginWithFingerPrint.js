@@ -156,11 +156,11 @@ class Login extends Component {
     fcmService.registerAppWithFCM()
     fcmService.register(this.onRegister, this.onNotification, this.onOpenNotification)
     localNotificationService.configure(this.onOpenNotification, Helper.APP_NAME)
-    fcmService.subscribeTopic('Message-' + user.id)
+    // fcmService.subscribeTopic('Message-' + user.id)
     fcmService.subscribeTopic('Notifications-' + user.id)
     // fcmService.subscribeTopic('Requests')
     fcmService.subscribeTopic('Payments-' + user.id)
-    fcmService.subscribeTopic('Comments-' + user.id)
+    // fcmService.subscribeTopic('Comments-' + user.id)
     this.retrieveNotification()
     return () => {
       console.log("[App] unRegister")
