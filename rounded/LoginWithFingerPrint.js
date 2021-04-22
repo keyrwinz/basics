@@ -311,6 +311,7 @@ class Login extends Component {
             setAcceptPayment(data)
             const { setPaymentConfirmation } = this.props;
             setPaymentConfirmation(false)
+            this.props.navigation.navigate('Dashboard')
           }
 
         }else{
