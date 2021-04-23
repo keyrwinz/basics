@@ -106,6 +106,10 @@ class Login extends Component {
           // console.log('/.....2ndIF.......')
           const {setDeepLinkRoute} = this.props;
           setDeepLinkRoute(route);
+        }else if(route.split('/')[1] === 'reset_password') {
+          const {viewChangePass} = this.props;
+          viewChangePass(1);
+          this.state.navigation.navigate('forgotPasswordStack')
         }
       };
     }
@@ -669,6 +673,7 @@ const mapDispatchToProps = dispatch => {
     setSearchParameter: (searchParameter) => dispatch(actions.setSearchParameter(searchParameter)),
     setSystemNotification: (systemNotification) => dispatch(actions.setSystemNotification(systemNotification)),
     setDeepLinkRoute: (deepLinkRoute) => dispatch(actions.setDeepLinkRoute(deepLinkRoute)),
+    viewChangePass: (changePassword) => dispatch(actions.viewChangePass(changePassword))
   };
 };
 
