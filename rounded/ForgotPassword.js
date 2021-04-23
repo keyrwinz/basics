@@ -51,8 +51,11 @@ class ForgotPassword extends Component {
     let parameter = {
       email: email
     }
+    
+    this.setState({isLoading: true})
     Api.request(config.IS_DEV + '/accounts/request_reset', parameter, userInfo => {
       this.setState({
+        isLoading: false,
         successMessage: 'Successfully sent! Please check your e-mail address to continue.',
         errorMessage: null
       })
@@ -152,6 +155,7 @@ class ForgotPassword extends Component {
   }
 
   _changePassword = () => {
+    this.setState({successMessage: false})
     const { theme } = this.props.state;
     return (
       <View>
@@ -186,6 +190,8 @@ class ForgotPassword extends Component {
             marginBottom: 10
           }}
         />
+        
+        {this.state.isLoading ? <Spinner mode="overlay"/> : null }
       </View>
     );    
   }
@@ -214,12 +220,15 @@ class ForgotPassword extends Component {
             marginBottom: 10
           }}
         />
+        
+        {this.state.isLoading ? <Spinner mode="overlay"/> : null }
       </View>
     );
   }
   render() {
     const { isLoading, errorMessage, changeStep, successMessage } = this.state;
-    const { theme } = this.props.state;
+    const { theme, changePassword } = this.props.state;
+    const { viewChangePass } = this.props;
     const { blockedFlag, isOtpModal, isResponseError, responseErrorTitle, responseErrorMessage  } = this.state;
     return (
       <ScrollView style={{
@@ -254,6 +263,7 @@ class ForgotPassword extends Component {
                   flexDirection: 'row',
                     paddingTop: 10,
                     paddingBottom: 10,
+                    marginLeft: '15%'
                 }}>
                   <Text style={{
                     ...Style.messageText,
@@ -270,21 +280,24 @@ class ForgotPassword extends Component {
               successMessage != null && (
                 <View style={{
                   flexDirection: 'row',
+                  justifyContent: 'center',
+                  textAlign: 'center',
                     paddingTop: 10,
                     paddingBottom: 10,
-                    paddingLeft: 10,
-                    paddingRight: 10
+                    paddingLeft: 30,
+                    paddingRight: 30,
+                    marginLeft: '10%'
                 }}>
                   <Text style={[Style.messageText, {
-                    color: Color.black
+                    color: Color.secondary
                   }]}>{successMessage}</Text>
                 </View>
               )
             }
             
             <View style={Style.TextContainerRounded}>
-              { changeStep == 0 && (this._sendRequest()) }
-              { changeStep == 1 && (this._changePassword()) }
+              { changePassword == 0 && (this._sendRequest()) }
+              { changePassword == 1 && (this._changePassword()) }
                <View style={{
                 justifyContent: 'center',
                 alignItems: 'center'
@@ -314,8 +327,8 @@ class ForgotPassword extends Component {
             yes: 'Authenticate',
             no: 'Cancel'
           }}
-          onCancel={() => this.setState({changeStep: 0, isOtpModal: false})}
-          onSuccess={() => this.setState({changeStep: 1, isOtpModal: false})}
+          onCancel={() => viewChangePass(changePassword = 0) && this.setState({isOtpModal: false})}
+          onSuccess={() => viewChangePass(changePassword = 1) && this.setState({isOtpModal: false})}
           onResend={() => this.updateOtp()}
           error={errorMessage}
           blockedFlag={blockedFlag}
@@ -338,7 +351,8 @@ const mapStateToProps = state => ({ state: state });
 const mapDispatchToProps = dispatch => {
   const { actions } = require('@redux');
   return {
-    login: (user, token) => dispatch(actions.login(user, token))
+    login: (user, token) => dispatch(actions.login(user, token)),
+    viewChangePass: (changePassword) => dispatch(actions.viewChangePass(changePassword))
   };
 };
 
