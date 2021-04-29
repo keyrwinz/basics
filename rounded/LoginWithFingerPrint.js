@@ -23,6 +23,8 @@ import { localNotificationService } from 'services/broadcasting/LocalNotificatio
 import FingerPrintScanner from './../FingerPrintScanner'
 import { Alert } from 'react-native';
 import Button from 'components/Form/Button';
+import NetInfo from "@react-native-community/netinfo";
+
 const height = Math.round(Dimensions.get('window').height);
 class Login extends Component {
   //Screen1 Component
@@ -42,7 +44,8 @@ class Login extends Component {
       showFingerPrint: false,
       notEmpty: false,
       isConfirmed: false,
-      enable: false
+      enable: false,
+      isConnected: false
     };
     this.audio = null;
   }
@@ -51,6 +54,17 @@ class Login extends Component {
   //   console.log("[Update]");
     
   // }
+  checkInternetConnection(){
+    NetInfo.addEventListener(networkState => {
+      console.log("Connection type - ", networkState.type);
+      console.log("Is connected? - ", networkState.isConnected);
+      if(networkState.isConnected == false){
+        this.setState({isResponseError: true, isLoading: false})
+      }
+      this.setState({isConnected: networkState.isConnected == true ? true : false})
+    });
+  }
+
   async storageChecker(){
     console.log("[Not Empty storage]", await AsyncStorage.getItem('username') != null &&  await AsyncStorage.getItem('password') != null);
     if((await AsyncStorage.getItem('username') != null && await AsyncStorage.getItem('password') != null)){
@@ -79,6 +93,7 @@ class Login extends Component {
     }
 
     this.getData();
+    this.checkInternetConnection();
 
     Linking.getInitialURL().then(url => {
       this.navigate(url);
@@ -700,7 +715,8 @@ class Login extends Component {
         ></OtpModal>
 
         {isLoading ? <Spinner mode="overlay"/> : null }
-        {isResponseError ? <CustomError visible={isResponseError} onCLose={() => {
+        {isResponseError ? <CustomError visible={isResponseError} message={this.state.isConnected == true ? 'You have no internet connection' : null}
+        onCLose={() => {
           this.setState({isResponseError: false, isLoading: false})
         }}/> : null}
       </SafeAreaView>
