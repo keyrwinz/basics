@@ -42,6 +42,7 @@ class Login extends Component {
       showFingerPrint: false,
       notEmpty: false,
       isConfirmed: false,
+      enable: false
     };
     this.audio = null;
   }
@@ -404,9 +405,12 @@ class Login extends Component {
   }
 
   async confirm(username, password){
-      console.log(username, password);
+      const { setEnableFingerPrint } = this.props;
+      const {enable} = this.state
+      await this.setState({enable : !enable})
       await AsyncStorage.setItem('username', username)
       await AsyncStorage.setItem('password', password)
+      setEnableFingerPrint(enable);
       this.setState({showFingerPrint: true})
   }
 
@@ -730,6 +734,9 @@ const mapDispatchToProps = dispatch => {
     setAcceptPayment: (acceptPayment) => dispatch(actions.setAcceptPayment(acceptPayment)),
     setComments: (comments) => dispatch(actions.setComments(comments)),
     setPaymentConfirmation: (flag) => dispatch(actions.setPaymentConfirmation(flag)),
+    setEnableFingerPrint(isEnable){
+      dispatch(actions.setEnableFingerPrint(isEnable));
+    }
   };
 };
 
