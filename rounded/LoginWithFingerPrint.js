@@ -42,6 +42,7 @@ class Login extends Component {
       showFingerPrint: false,
       notEmpty: false,
       isConfirmed: false,
+      enable: false
     };
     this.audio = null;
   }
@@ -76,6 +77,8 @@ class Login extends Component {
       await this.setState({showFingerPrint: true})
       await this.setState({notEmpty: true})
     }
+
+    this.getData();
 
     Linking.getInitialURL().then(url => {
       this.navigate(url);
@@ -157,16 +160,18 @@ class Login extends Component {
     }
     fcmService.registerAppWithFCM()
     fcmService.register(this.onRegister, this.onNotification, this.onOpenNotification)
-    localNotificationService.configure(this.onOpenNotification, 'Payhiram')
-    fcmService.subscribeTopic('Message')
-    fcmService.subscribeTopic('Notifications')
-    fcmService.subscribeTopic('Requests')
+    localNotificationService.configure(this.onOpenNotification, Helper.APP_NAME)
+    // fcmService.subscribeTopic('Message-' + user.id)
+    fcmService.subscribeTopic('Notifications-' + user.id)
+    // fcmService.subscribeTopic('Requests')
+    fcmService.subscribeTopic('Payments-' + user.id)
+    // fcmService.subscribeTopic('Comments-' + user.id)
     this.retrieveNotification()
-    // return () => {
-    //   console.log("[App] unRegister")
-    //   fcmService.unRegister()
-    //   localNotificationService.unRegister()
-    // }
+    return () => {
+      console.log("[App] unRegister")
+      fcmService.unRegister()
+      localNotificationService.unRegister()
+    }
   }
 
   retrieveNotification = () => {
@@ -202,11 +207,14 @@ class Login extends Component {
   onNotification = (notify) => {
     const { user } = this.props.state;
     // console.log("[App] onNotification", notify)
-    let { data } = notify
-    if(user == null || data == null){
+    let data = null
+    if(user == null || !notify.data){
       return
     }
-    switch(data.topic.toLowerCase()){
+    data = notify.data
+    console.log('notification-data', data)
+    let topic = data.topic.split('-')
+    switch(topic[0].toLowerCase()){
       case 'message': {
           const { messengerGroup } = this.props.state;
           let members = JSON.parse(data.members)
@@ -279,6 +287,56 @@ class Login extends Component {
           }
         }
         break
+      case 'payments': {
+        const { setAcceptPayment } = this.props;
+        let topicId = topic.length > 1 ? topic[1] : null
+        console.log('[payments]', data)
+        if(topicId && parseInt(topicId) == user.id){
+          if(data.transfer_status == 'requesting'){
+            setAcceptPayment(data)
+            Alert.alert(
+              "Payment Request",
+              "There\'s new payment request, would you like to open it?",
+              [
+                {
+                  text: "Cancel",
+                  onPress: () => {
+                    setAcceptPayment(null)
+                  },
+                  style: "cancel"
+                },
+                { text: "Yes", onPress: () => {
+                  this.props.navigation.navigate('recievePaymentRequestStack')
+                } }
+              ]
+            );            
+          }else{
+            // declined or completed here
+            console.log('on confirm', data)
+            setAcceptPayment(data)
+            const { setPaymentConfirmation } = this.props;
+            setPaymentConfirmation(false)
+            this.props.navigation.navigate('Dashboard')
+          }
+
+        }else{
+
+        }
+        
+      }
+      break
+      case 'comments': {
+        const { setComments } = this.props;
+        let topicId = topic.length > 1 ? topic[1] : null
+        console.log('[comments]', data)
+        if(topicId && parseInt(topicId) == user.id){
+          setComments(data)
+        }else{
+
+        }
+        
+      }
+      break
     }
 
     // const options = {
@@ -351,9 +409,12 @@ class Login extends Component {
   }
 
   async confirm(username, password){
-      console.log(username, password);
+      const { setEnableFingerPrint } = this.props;
+      const {enable} = this.state
+      await this.setState({enable : !enable})
       await AsyncStorage.setItem('username', username)
       await AsyncStorage.setItem('password', password)
+      setEnableFingerPrint(enable);
       this.setState({showFingerPrint: true})
   }
 
@@ -581,7 +642,8 @@ class Login extends Component {
                       paddingBottom: 20,
                       fontSize: BasicStyles.standardFontSize,
                       fontWeight: 'bold',
-                      color: theme ? theme.primary : Color.primary
+                      color: theme ? theme.primary : Color.primary,
+                      textDecorationLine: 'underline'
                     }}>Forgot your Password?</Text>
                  </TouchableOpacity>
                   
@@ -673,7 +735,13 @@ const mapDispatchToProps = dispatch => {
     setSearchParameter: (searchParameter) => dispatch(actions.setSearchParameter(searchParameter)),
     setSystemNotification: (systemNotification) => dispatch(actions.setSystemNotification(systemNotification)),
     setDeepLinkRoute: (deepLinkRoute) => dispatch(actions.setDeepLinkRoute(deepLinkRoute)),
-    viewChangePass: (changePassword) => dispatch(actions.viewChangePass(changePassword))
+    viewChangePass: (changePassword) => dispatch(actions.viewChangePass(changePassword)),
+    setAcceptPayment: (acceptPayment) => dispatch(actions.setAcceptPayment(acceptPayment)),
+    setComments: (comments) => dispatch(actions.setComments(comments)),
+    setPaymentConfirmation: (flag) => dispatch(actions.setPaymentConfirmation(flag)),
+    setEnableFingerPrint(isEnable){
+      dispatch(actions.setEnableFingerPrint(isEnable));
+    }
   };
 };
 
