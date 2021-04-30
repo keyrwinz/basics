@@ -117,13 +117,24 @@ class Login extends Component {
     if(url !== null){
       const route = url.replace(/.*?:\/\//g, '');
       const routeName = route.split('/')[0];
-      if (routeName === 'payhiram.ph')
+      if (routeName === 'payhiram.ph' || 'admin.payhiram.ph')
       {
+
+        console.log('ROUTE: ', route.split('/')[1])
         // console.log('/.....1stIF.......')
         if(route.split('/')[1] === 'profile') {
           // console.log('/.....2ndIF.......')
           const {setDeepLinkRoute} = this.props;
           setDeepLinkRoute(route);
+        }else if(route.split('/')[1] === 'reset_password') {
+          const {viewChangePass} = this.props;
+          viewChangePass(1);
+          this.props.navigation.navigate('forgotPasswordStack')
+        }else if(route.split('/')[1] === 'login_verification') {
+          this.props.navigation.navigate('verifyEmailStack', {
+            username: route.split('/')[2],
+            code: route.split('/')[3]
+          })
         }
       };
     }
@@ -747,6 +758,7 @@ const mapDispatchToProps = dispatch => {
     setSearchParameter: (searchParameter) => dispatch(actions.setSearchParameter(searchParameter)),
     setSystemNotification: (systemNotification) => dispatch(actions.setSystemNotification(systemNotification)),
     setDeepLinkRoute: (deepLinkRoute) => dispatch(actions.setDeepLinkRoute(deepLinkRoute)),
+    viewChangePass: (changePassword) => dispatch(actions.viewChangePass(changePassword)),
     setAcceptPayment: (acceptPayment) => dispatch(actions.setAcceptPayment(acceptPayment)),
     setComments: (comments) => dispatch(actions.setComments(comments)),
     setPaymentConfirmation: (flag) => dispatch(actions.setPaymentConfirmation(flag)),
