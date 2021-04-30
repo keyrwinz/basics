@@ -120,20 +120,20 @@ class Login extends Component {
       if (routeName === 'payhiram.ph' || 'admin.payhiram.ph')
       {
 
-        console.log('ROUTE: ', route.split('/')[1])
+        console.log('ROUTE: ', route.split('/')[2])
         // console.log('/.....1stIF.......')
-        if(route.split('/')[1] === 'profile') {
+        if(route.split('/')[2] === 'profile') {
           // console.log('/.....2ndIF.......')
           const {setDeepLinkRoute} = this.props;
           setDeepLinkRoute(route);
-        }else if(route.split('/')[1] === 'reset_password') {
+        }else if(route.split('/')[2] === 'reset_password') {
           const {viewChangePass} = this.props;
           viewChangePass(1);
           this.props.navigation.navigate('forgotPasswordStack')
-        }else if(route.split('/')[1] === 'login_verification') {
+        }else if(route.split('/')[2] === 'login_verification') {
           this.props.navigation.navigate('verifyEmailStack', {
-            username: route.split('/')[2],
-            code: route.split('/')[3]
+            username: route.split('/')[3],
+            code: route.split('/')[4]
           })
         }
       };
