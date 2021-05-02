@@ -13,18 +13,60 @@ import config from 'src/config';
 import Button from 'components/Form/Button';
 const width = Math.round(Dimensions.get('window').width);
 const height = Math.round(Dimensions.get('window').height);
-class Register extends Component {
+class Verify extends Component {
   //Screen1 Component
   constructor(props){
     super(props);
     this.state = {
         isResponseError: false,
         isLoading: false,
-        errorMessage: false
+        errorMessage: null,
+        user: null
     };
   }
   
   componentDidMount(){
+    console.log('params', this.props.navigation.state)
+    this.retrieve()
+  }
+
+  retrieve(){
+    const { params } = this.props.navigation.state;
+    if(params == null || (params && !params.code)){
+      return
+    }
+    let parameter = {
+      condition: [{
+        value: params.code,
+        column: 'code',
+        clause: '='
+      }, {
+        value: params.username,
+        column: 'username',
+        clause: '='
+      }]
+    }
+    this.setState({isLoading: true})
+    Api.request(Routes.accountRetrieve, parameter, response => {
+      this.setState({isLoading: false})
+      if(response.data.length > 0){
+        this.setState({
+          user: response.data[0],
+          errorMessage: null
+        })
+      }else{
+        this.setState({
+          user: null,
+          errorMessage: 'Invalid accessed!'
+        })
+      }
+    }, error => {
+      this.setState({
+        isLoading: false,
+        user: null,
+        errorMessage: 'Invalid accessed!'
+      })
+    })
   }
 
   redirect = (route) => {
@@ -32,70 +74,29 @@ class Register extends Component {
   }
   
   submit(){
-    const { username, email, password } = this.state;
-    if(this.validate() == false){
+    const { user } = this.state;
+    if(user == null){
+      this.setState({
+        errorMessage: 'Invalid accessed!'
+      })
       return
     }
+
     let parameter = {
-      username: username,
-      email: email,
-      password: password,
-      config: null,
-      account_type: 'USER',
-      referral_code: null,
-      status: 'ADMIN'
+      id: user.id,
+      status: 'VERIFIED'
     }
     this.setState({isLoading: true})
-    Api.request(Routes.accountCreate, parameter, response => {
+    Api.request(Routes.accountVerification, parameter, response => {
       this.setState({isLoading: false})
-      if(response.error !== null){
-        if(response.error.status === 100){
-          let message = response.error.message
-          if(typeof message.username !== undefined && typeof message.username !== 'undefined'){
-            this.setState({errorMessage: message.username[0]})
-          }else if(typeof message.email !== undefined && typeof message.email !== 'undefined'){
-            this.setState({errorMessage: message.email[0]})
-          }
-        }else if(response.data !== null){
-          if(response.data > 0){
-            this.redirect('loginStack')
-          }
-        }
-      }
+      this.redirect('loginStack')
     }, error => {
-      this.setState({isResponseError: true})
+      this.setState({isLoading: false})
     })
   }
 
-  validate(){
-    const { username, email, password, confirmPassword } = this.state;
-    if(username.length >= 6 &&
-      email !== '' &&
-      password !== '' &&
-      password.length >= 6 &
-      password.localeCompare(confirmPassword) === 0 &&
-      Helper.validateEmail(email) === true){
-      return true
-    }else if(email !== '' && Helper.validateEmail(email) === false){
-      this.setState({errorMessage: 'You have entered an invalid email address.'})
-      return false
-    }else if(username !== '' && username.length < 6){
-      this.setState({errorMessage: 'Username must be atleast 6 characters.'})
-      return false
-    }else if(password !== '' && password.length < 6){
-       this.setState({errorMessage: 'Password must be atleast 6 characters.'})
-       return false
-    }else if(password !== '' && password.localeCompare(confirmPassword) !== 0){
-       this.setState({errorMessage: 'Password did not match.'})
-       return false
-    }else{ 
-      this.setState({errorMessage: 'Please fill in all required fields.'})
-      return false
-    }
-  }
-
   render() {
-    const { isLoading, errorMessage, isResponseError } = this.state;
+    const { isLoading, errorMessage, isResponseError, user } = this.state;
     const { theme } = this.props.state;
     return (
       <ScrollView style={{
@@ -105,6 +106,7 @@ class Register extends Component {
         <View style={{
           flex: 1
         }}>
+          {isLoading ? <Spinner mode="overlay"/> : null }
           <Header params={"Verify Email"}></Header>
             <View style={{
               backgroundColor: Color.white,
@@ -123,75 +125,89 @@ class Register extends Component {
                 fontSize: BasicStyles.standardFontSize,
                 fontWeight: 'bold',
                 color: theme ? theme.primary : Color.primary
-              }}>Verification</Text>
+              }}>Email Verification</Text>
+              {
+                errorMessage != null && (
+                  <View style={{
+                    flexDirection: 'row',
+                      paddingTop: 10,
+                      paddingBottom: 10,
+                      paddingLeft: '20%'
+                  }}>
+                    <Text style={{
+                      ...Style.messageText,
+                      fontSize: BasicStyles.standardFontSize,
+                      fontWeight: 'bold'
+                    }}>Oops! </Text>
+                    <Text style={{
+                      ...Style.messageText,
+                      fontSize: BasicStyles.standardFontSize
+                    }}>{errorMessage}</Text>
+                  </View>
+                )
+              }
+                
+              {
+                (user && errorMessage == null) && (
+                  <Text style={{
+                    width: '100%',
+                    textAlign: 'center',
+                    paddingBottom: 20,
+                    paddingLeft: 20,
+                    paddingRight: 20,
+                    fontSize: BasicStyles.standardFontSize,
+                  }}>Hi {user?.username}! Please click the continue button to verify your email address here in {Helper.APP_NAME_BASIC}.</Text>
+                )
+              }
+              
+                
+              <View style={Style.TextContainerRounded}>
                 {
-                  errorMessage != null && (
-                    <View style={{
-                      flexDirection: 'row',
-                        paddingTop: 10,
-                        paddingBottom: 10,
-                        paddingLeft: '20%'
-                    }}>
-                      <Text style={{
-                        ...Style.messageText,
-                        fontSize: BasicStyles.standardFontSize,
-                        fontWeight: 'bold'
-                      }}>Oops! </Text>
-                      <Text style={{
-                        ...Style.messageText,
-                        fontSize: BasicStyles.standardFontSize
-                      }}>{errorMessage}</Text>
-                    </View>
+                  user && (
+                    <Button
+                      onClick={() => this.submit()}
+                      title={'Continue'}
+                      style={{
+                        backgroundColor: theme ? theme.secondary : Color.secondary,
+                        width: '100%',
+                        marginBottom: 20
+                      }}
+                    />
                   )
                 }
                 
-                
-                <View style={Style.TextContainerRounded}>
 
-                  <Button
-                    onClick={() => this.submit()}
-                    title={'Register'}
-                    style={{
-                      backgroundColor: theme ? theme.secondary : Color.secondary,
-                      width: '100%',
-                      marginBottom: 20
-                    }}
-                  />
-
-                  <View style={{
-                    height: 1,
-                    backgroundColor: Color.gray
-                  }}>
-                  </View>
-
-                  <View style={{
-                    justifyContent: 'center',
-                    alignItems: 'center'
-                  }}>
-                    <Text style={{
-                      paddingTop: 10,
-                      paddingBottom: 10,
-                      color: Color.gray
-                    }}>Have an account Already?</Text>
-                  </View>
-
-                  <Button
-                    onClick={() => this.redirect('loginStack')}
-                    title={'Login Now!'}
-                    style={{
-                      backgroundColor: Color.warning,
-                      width: '100%',
-                      marginBottom: 100
-                    }}
-                  />
+                <View style={{
+                  height: 1,
+                  backgroundColor: Color.gray
+                }}>
                 </View>
+
+                <View style={{
+                  justifyContent: 'center',
+                  alignItems: 'center'
+                }}>
+                  <Text style={{
+                    paddingTop: 10,
+                    paddingBottom: 10,
+                    color: Color.gray
+                  }}>Have an account Already?</Text>
+                </View>
+
+                <Button
+                  onClick={() => this.redirect('loginStack')}
+                  title={'Login Now!'}
+                  style={{
+                    backgroundColor: Color.warning,
+                    width: '100%',
+                    marginBottom: 100
+                  }}
+                />
+              </View>
             </View>
         </View>
 
-        {isLoading ? <Spinner mode="overlay"/> : null }
-        {isResponseError ? <CustomError visible={isResponseError} onCLose={() => {
-          this.setState({isResponseError: false, isLoading: false})
-        }}/> : null}
+        
       </ScrollView>
     );
   }
@@ -210,4 +226,4 @@ const mapDispatchToProps = dispatch => {
 export default connect(
   mapStateToProps,
   mapDispatchToProps
-)(Register);
+)(Verify);
