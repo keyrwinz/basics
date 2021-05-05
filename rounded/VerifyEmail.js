@@ -27,27 +27,31 @@ class Verify extends Component {
   
   componentDidMount(){
     console.log('params', this.props.navigation.state)
+    this.setState({isLoading: true})
     this.retrieve()
   }
 
   retrieve(){
     const { params } = this.props.navigation.state;
+    console.log(params);
     if(params == null || (params && !params.code)){
       return
     }
+    let username = params.username.replace('%20', ' ')
     let parameter = {
       condition: [{
         value: params.code,
         column: 'code',
         clause: '='
       }, {
-        value: params.username,
+        value: username,
         column: 'username',
         clause: '='
       }]
     }
     this.setState({isLoading: true})
     Api.request(Routes.accountRetrieve, parameter, response => {
+      console.log('asdfasdf', response);
       this.setState({isLoading: false})
       if(response.data.length > 0){
         this.setState({
@@ -64,8 +68,9 @@ class Verify extends Component {
       this.setState({
         isLoading: false,
         user: null,
-        errorMessage: 'Invalid accessed!'
+        errorMessage: null
       })
+      this.retrieve()
     })
   }
 
