@@ -130,6 +130,24 @@ class Register extends Component {
           
           <View style={Style.TextContainer}>
             <TextInput
+                style={{
+                  ...BasicStyles.standardFormControl,
+                  marginBottom: 20
+                }}
+                onChangeText={(username) => this.setState({username})}
+                value={this.state.username}
+                placeholder={'First Name'}
+              />
+              <TextInput
+                style={{
+                  ...BasicStyles.standardFormControl,
+                  marginBottom: 20
+                }}
+                onChangeText={(username) => this.setState({username})}
+                value={this.state.username}
+                placeholder={'Last Name'}
+              />
+            <TextInput
               style={{
                 ...BasicStyles.standardFormControl,
                 marginBottom: 20
@@ -149,12 +167,16 @@ class Register extends Component {
               placeholder={'Email Address'}
               keyboardType={'email-address'}
             />
-            <PasswordWithIcon onTyping={(input) => this.setState({
-              password: input
-            })}
-            placeholder={'Password'}/>
-
             <View style={{
+              marginBottom: 20
+            }}>
+              <PasswordWithIcon onTyping={(input) => this.setState({
+                password: input
+              })}
+              placeholder={'Password'}/>
+            </View>
+
+            {/* <View style={{
               marginTop: 20,
               marginBottom: 20
             }}>
@@ -163,15 +185,18 @@ class Register extends Component {
               })}
               placeholder={'Confirm Password'}
               />
-            </View>
+            </View> */}
 
             <Button
               onClick={() => this.submit()}
               title={'Register'}
+              // textStyle={{color:'black'}}
               style={{
-                backgroundColor: theme ? theme.primary : Color.primary,
+                backgroundColor: theme ? theme.secondary : Color.secondary,
                 width: '100%',
-                marginBottom: 20
+                marginBottom: 20,
+                borderRadius: BasicStyles.standardBorderRadius,
+                ...BasicStyles.standardShadow,
               }}
             />
 
@@ -195,10 +220,13 @@ class Register extends Component {
             <Button
               onClick={() => this.redirect('loginStack')}
               title={'Login Now!'}
+              textStyle={{color:'black'}}
               style={{
-                backgroundColor: theme ? theme.secondary : Color.secondary,
+                backgroundColor: theme ? theme.primary : Color.primary,
                 width: '100%',
-                marginBottom: 100
+                marginBottom: 100,
+                borderRadius: BasicStyles.standardBorderRadius,
+                ...BasicStyles.standardShadow,
               }}
             />
 

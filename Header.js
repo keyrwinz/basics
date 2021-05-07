@@ -7,7 +7,7 @@ export default  class Header extends Component{
     return (
       <View>
         <View style={Style.LogoContainer}>
-          <Image source={require('assets/logo.png')} style={Style.LogoSize}/>
+          <Image source={require('assets/logo0.png')} style={Style.LogoSize}/>
         </View>
         <View style={{
           alignItems: 'center',
