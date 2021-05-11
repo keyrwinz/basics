@@ -186,7 +186,7 @@ class Login extends Component {
     // fcmService.subscribeTopic('Message-' + user.id)
     fcmService.subscribeTopic('Notifications-' + user.id)
     // fcmService.subscribeTopic('Requests')
-    fcmService.subscribeTopic('Payments-' + user.id)
+    fcmService.subscribeTopic(user.id)
     // fcmService.subscribeTopic('Comments-' + user.id)
     this.retrieveNotification()
     return () => {
