@@ -18,8 +18,8 @@ import { Player } from '@react-native-community/audio-toolkit';
 import {FontAwesomeIcon} from '@fortawesome/react-native-fontawesome';
 import OtpModal from 'components/Modal/Otp.js';
 import { faFingerprint } from '@fortawesome/free-solid-svg-icons';
-import { fcmService } from 'services/broadcasting/FCMService';
-import { localNotificationService } from 'services/broadcasting/LocalNotificationService';
+// import { fcmService } from 'services/broadcasting/FCMService';
+// import { localNotificationService } from 'services/broadcasting/LocalNotificationService';
 import FingerPrintScanner from './../FingerPrintScanner'
 import { Alert } from 'react-native';
 import Button from 'components/Form/Button';
@@ -175,6 +175,7 @@ class Login extends Component {
   }
 
 
+<<<<<<< HEAD
   firebaseNotification(){
     const { user } = this.props.state;
     if(user == null){
@@ -195,6 +196,28 @@ class Login extends Component {
       localNotificationService.unRegister()
     }
   }
+=======
+  // firebaseNotification(){
+  //   const { user } = this.props.state;
+  //   if(user == null){
+  //     return
+  //   }
+  //   fcmService.registerAppWithFCM()
+  //   fcmService.register(this.onRegister, this.onNotification, this.onOpenNotification)
+  //   localNotificationService.configure(this.onOpenNotification, Helper.APP_NAME)
+  //   // fcmService.subscribeTopic('Message-' + user.id)
+  //   fcmService.subscribeTopic('Notifications-' + user.id)
+  //   // fcmService.subscribeTopic('Requests')
+  //   fcmService.subscribeTopic('Payments-' + user.id)
+  //   // fcmService.subscribeTopic('Comments-' + user.id)
+  //   this.retrieveNotification()
+  //   return () => {
+  //     console.log("[App] unRegister")
+  //     fcmService.unRegister()
+  //     localNotificationService.unRegister()
+  //   }
+  // }
+>>>>>>> 2b65aededb37ba8ee1bcf6c14e3d4052781014a6
 
   retrieveNotification = () => {
     const { setNotifications } = this.props;
@@ -385,7 +408,7 @@ class Login extends Component {
         login(response, this.state.token);
         this.setState({isLoading: false});
         if(response.username){
-          this.firebaseNotification()
+          // this.firebaseNotification()
           this.redirect('drawerStack')
         }
       }, error => {
@@ -475,7 +498,7 @@ class Login extends Component {
             login(response, token);
             this.setState({isLoading: false, error: 0});
             if(response.username){
-              this.firebaseNotification()
+              // this.firebaseNotification()
               this.redirect('drawerStack')
             }
             
@@ -519,7 +542,7 @@ class Login extends Component {
               this.openModal(username, password);
             }
             if(response.username){
-              this.firebaseNotification()
+              // this.firebaseNotification()
               this.redirect('drawerStack')
             }
             

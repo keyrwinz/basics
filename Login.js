@@ -381,7 +381,7 @@ class Login extends Component {
     return (
       <ScrollView style={Style.ScrollView}
         showsVerticalScrollIndicator={false}>
-        <View style={Style.MainContainer}>
+        <View style={[Style.MainContainer, {backgroundColor: '#F5F5F5'}]}>
           <Header params={"Login"}></Header>
 
           {error > 0 ? <View style={{
@@ -402,11 +402,11 @@ class Login extends Component {
             ) : null}
           </View> : null}
           
-          <View style={Style.TextContainer}>
+          <View style={[Style.TextContainer]}>
             <TextInput
               style={{
                 ...BasicStyles.standardFormControl,
-                marginBottom: 20
+                marginBottom: 20,
               }}
               onChangeText={(username) => this.setState({username})}
               value={this.state.username}
@@ -426,12 +426,15 @@ class Login extends Component {
 
             <Button
               onClick={() => this.submit()}
+              textStyle={{color:'black'}}
               title={'Login'}
               style={{
                 backgroundColor: theme ? theme.primary : Color.primary,
                 width: '100%',
                 marginBottom: 20,
-                marginTop: 20
+                marginTop: 20,
+                borderRadius: BasicStyles.standardBorderRadius,
+                ...BasicStyles.standardShadow,
               }}
             />
 
@@ -439,8 +442,9 @@ class Login extends Component {
             <Button
               onClick={() => this.redirect('forgotPasswordStack')}
               title={'Forgot your Password?'}
+              textStyle={{color:'black'}}
               style={{
-                backgroundColor: Color.warning,
+                backgroundColor: 'transparent',
                 width: '100%',
                 marginBottom: 20
               }}
@@ -470,7 +474,9 @@ class Login extends Component {
               style={{
                 backgroundColor: theme ? theme.secondary : Color.secondary,
                 width: '100%',
-                marginBottom: 100
+                marginBottom: 100,
+                borderRadius: BasicStyles.standardBorderRadius,
+                ...BasicStyles.standardShadow,
               }}
             />
           </View>
