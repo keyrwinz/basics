@@ -27,8 +27,8 @@ import {Notifications, NotificationAction, NotificationCategory} from 'react-nat
 import Header from './Header';
 import OtpModal from 'components/Modal/Otp.js';
 import { ScrollView } from 'react-native-gesture-handler';
-// import { fcmService } from 'services/broadcasting/FCMService';
-// import { localNotificationService } from 'services/broadcasting/LocalNotificationService';
+import { fcmService } from 'services/broadcasting/FCMService';
+import { localNotificationService } from 'services/broadcasting/LocalNotificationService';
 
 class FingerprintScan extends Component {
 
@@ -131,17 +131,17 @@ class FingerprintScan extends Component {
     }
   }
 
-  // firebaseNotification(){
-  //   const { user } = this.props.state;
-  //   if(user == null){
-  //     return
-  //   }
-  //   fcmService.registerAppWithFCM()
-  //   fcmService.register(this.onRegister, this.onNotification, this.onOpenNotification)
-  //   localNotificationService.configure(this.onOpenNotification, 'Payhiram')
-  //   fcmService.subscribeTopic('Message')
-  //   fcmService.subscribeTopic('Notifications')
-  // }
+  firebaseNotification(){
+    const { user } = this.props.state;
+    if(user == null){
+      return
+    }
+    fcmService.registerAppWithFCM()
+    fcmService.register(this.onRegister, this.onNotification, this.onOpenNotification)
+    localNotificationService.configure(this.onOpenNotification, 'Payhiram')
+    fcmService.subscribeTopic('Message')
+    fcmService.subscribeTopic('Notifications')
+  }
 
   onRegister = (token) => {
     console.log("[App] onRegister", token)
