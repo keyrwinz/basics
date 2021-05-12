@@ -18,8 +18,8 @@ import { Player } from '@react-native-community/audio-toolkit';
 import {FontAwesomeIcon} from '@fortawesome/react-native-fontawesome';
 import OtpModal from 'components/Modal/Otp.js';
 import { faFingerprint } from '@fortawesome/free-solid-svg-icons';
-// import { fcmService } from 'services/broadcasting/FCMService';
-// import { localNotificationService } from 'services/broadcasting/LocalNotificationService';
+import { fcmService } from 'services/broadcasting/FCMService';
+import { localNotificationService } from 'services/broadcasting/LocalNotificationService';
 import FingerPrintScanner from './../FingerPrintScanner'
 import { Alert } from 'react-native';
 import Button from 'components/Form/Button';
@@ -175,26 +175,26 @@ class Login extends Component {
   }
 
 
-  // firebaseNotification(){
-  //   const { user } = this.props.state;
-  //   if(user == null){
-  //     return
-  //   }
-  //   fcmService.registerAppWithFCM()
-  //   fcmService.register(this.onRegister, this.onNotification, this.onOpenNotification)
-  //   localNotificationService.configure(this.onOpenNotification, Helper.APP_NAME)
-  //   // fcmService.subscribeTopic('Message-' + user.id)
-  //   fcmService.subscribeTopic('Notifications-' + user.id)
-  //   // fcmService.subscribeTopic('Requests')
-  //   fcmService.subscribeTopic('Payments-' + user.id)
-  //   // fcmService.subscribeTopic('Comments-' + user.id)
-  //   this.retrieveNotification()
-  //   return () => {
-  //     console.log("[App] unRegister")
-  //     fcmService.unRegister()
-  //     localNotificationService.unRegister()
-  //   }
-  // }
+  firebaseNotification(){
+    const { user } = this.props.state;
+    if(user == null){
+      return
+    }
+    fcmService.registerAppWithFCM()
+    fcmService.register(this.onRegister, this.onNotification, this.onOpenNotification)
+    localNotificationService.configure(this.onOpenNotification, Helper.APP_NAME)
+    // fcmService.subscribeTopic('Message-' + user.id)
+    fcmService.subscribeTopic('Notifications-' + user.id)
+    // fcmService.subscribeTopic('Requests')
+    fcmService.subscribeTopic('Payments-' + user.id)
+    // fcmService.subscribeTopic('Comments-' + user.id)
+    this.retrieveNotification()
+    return () => {
+      console.log("[App] unRegister")
+      fcmService.unRegister()
+      localNotificationService.unRegister()
+    }
+  }
 
   retrieveNotification = () => {
     const { setNotifications } = this.props;
