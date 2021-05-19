@@ -82,7 +82,6 @@ class Login extends Component {
   }
   
   async componentDidMount(){
-    this.firebaseNotification()
     this.focusListener = this.props.navigation.addListener('didFocus', () => {
       this.onFocusFunction()
     })
@@ -182,10 +181,9 @@ class Login extends Component {
     fcmService.register(this.onRegister, this.onNotification, this.onOpenNotification)
     localNotificationService.configure(this.onOpenNotification, Helper.APP_NAME)
     fcmService.subscribeTopic(user.id)
-    // fcmService.subscribeTopic('Message-' + user.id)
     // fcmService.subscribeTopic('Notifications-' + user.id)
     // fcmService.subscribeTopic('Requests')
-    // fcmService.subscribeTopic(user.id)
+    // fcmService.subscribeTopic('Payments-' + user.id)
     // fcmService.subscribeTopic('Comments-' + user.id)
     this.retrieveNotification()
     return () => {
@@ -217,16 +215,15 @@ class Login extends Component {
   }
 
   onRegister = (token) => {
-    console.log("[App] onRegister", token)
+  //   console.log("[App] onRegister", token)
   }
 
   onOpenNotification = (notify) => {
-    console.log("[App] onOpenNotification", notify)
+    // console.log("[App] onOpenNotification", notify)
   }
 
   onNotification = (notify) => {
     const { user } = this.props.state;
-    console.log("[App] onNotification", notify)
     let data = null
     if(user == null || !notify.data){
       return
@@ -383,7 +380,7 @@ class Login extends Component {
         login(response, this.state.token);
         this.setState({isLoading: false});
         if(response.username){
-          // this.firebaseNotification()
+          this.firebaseNotification()
           this.redirect('drawerStack')
         }
       }, error => {
@@ -473,7 +470,7 @@ class Login extends Component {
             login(response, token);
             this.setState({isLoading: false, error: 0});
             if(response.username){
-              // this.firebaseNotification()
+              this.firebaseNotification()
               this.redirect('drawerStack')
             }
             
@@ -517,7 +514,7 @@ class Login extends Component {
               this.openModal(username, password);
             }
             if(response.username){
-              // this.firebaseNotification()
+              this.firebaseNotification()
               this.redirect('drawerStack')
             }
             
