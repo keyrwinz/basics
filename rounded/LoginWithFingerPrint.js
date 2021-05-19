@@ -56,8 +56,6 @@ class Login extends Component {
   // }
   checkInternetConnection(){
     NetInfo.addEventListener(networkState => {
-      console.log("Connection type - ", networkState.type);
-      console.log("Is connected? - ", networkState.isConnected);
       if(networkState.isConnected == false){
         this.setState({isResponseError: true, isLoading: false})
       }
@@ -174,7 +172,6 @@ class Login extends Component {
     }
   }
 
-
   firebaseNotification(){
     const { user } = this.props.state;
     if(user == null){
@@ -183,10 +180,10 @@ class Login extends Component {
     fcmService.registerAppWithFCM()
     fcmService.register(this.onRegister, this.onNotification, this.onOpenNotification)
     localNotificationService.configure(this.onOpenNotification, Helper.APP_NAME)
-    // fcmService.subscribeTopic('Message-' + user.id)
-    fcmService.subscribeTopic('Notifications-' + user.id)
+    fcmService.subscribeTopic(user.id)
+    // fcmService.subscribeTopic('Notifications-' + user.id)
     // fcmService.subscribeTopic('Requests')
-    fcmService.subscribeTopic('Payments-' + user.id)
+    // fcmService.subscribeTopic('Payments-' + user.id)
     // fcmService.subscribeTopic('Comments-' + user.id)
     this.retrieveNotification()
     return () => {
@@ -212,14 +209,13 @@ class Login extends Component {
       offset: 0
     }
     Api.request(Routes.notificationsRetrieve, parameter, notifications => {
-      console.log("[RESTRIEVE]", notifications.data)
       setNotifications(notifications.size, notifications.data)
     }, error => {
     })
   }
 
   onRegister = (token) => {
-    console.log("[App] onRegister", token)
+  //   console.log("[App] onRegister", token)
   }
 
   onOpenNotification = (notify) => {
@@ -228,15 +224,14 @@ class Login extends Component {
 
   onNotification = (notify) => {
     const { user } = this.props.state;
-    // console.log("[App] onNotification", notify)
     let data = null
     if(user == null || !notify.data){
       return
     }
     data = notify.data
     console.log('notification-data', data)
-    let topic = data.topic.split('-')
-    switch(topic[0].toLowerCase()){
+    let payload = data.payload
+    switch(payload.toLowerCase()){
       case 'message': {
           const { messengerGroup } = this.props.state;
           let members = JSON.parse(data.members)
@@ -385,7 +380,7 @@ class Login extends Component {
         login(response, this.state.token);
         this.setState({isLoading: false});
         if(response.username){
-          // this.firebaseNotification()
+          this.firebaseNotification()
           this.redirect('drawerStack')
         }
       }, error => {
@@ -475,7 +470,7 @@ class Login extends Component {
             login(response, token);
             this.setState({isLoading: false, error: 0});
             if(response.username){
-              // this.firebaseNotification()
+              this.firebaseNotification()
               this.redirect('drawerStack')
             }
             
@@ -519,7 +514,7 @@ class Login extends Component {
               this.openModal(username, password);
             }
             if(response.username){
-              // this.firebaseNotification()
+              this.firebaseNotification()
               this.redirect('drawerStack')
             }
             

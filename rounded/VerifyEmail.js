@@ -26,14 +26,12 @@ class Verify extends Component {
   }
   
   componentDidMount(){
-    console.log('params', this.props.navigation.state)
     this.setState({isLoading: true})
     this.retrieve()
   }
 
   retrieve(){
     const { params } = this.props.navigation.state;
-    console.log(params);
     if(params == null || (params && !params.code)){
       return
     }
@@ -51,7 +49,6 @@ class Verify extends Component {
     }
     this.setState({isLoading: true})
     Api.request(Routes.accountRetrieve, parameter, response => {
-      console.log('asdfasdf', response);
       this.setState({isLoading: false})
       if(response.data.length > 0){
         this.setState({
