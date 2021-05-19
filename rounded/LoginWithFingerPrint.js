@@ -230,8 +230,8 @@ class Login extends Component {
     }
     data = notify.data
     console.log('notification-data', data)
-    let topic = data.topic.split('-')
-    switch(topic[0].toLowerCase()){
+    let payload = data.payload
+    switch(payload.toLowerCase()){
       case 'message': {
           const { messengerGroup } = this.props.state;
           let members = JSON.parse(data.members)
