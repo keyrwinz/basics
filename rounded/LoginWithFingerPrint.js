@@ -18,8 +18,8 @@ import { Player } from '@react-native-community/audio-toolkit';
 import {FontAwesomeIcon} from '@fortawesome/react-native-fontawesome';
 import OtpModal from 'components/Modal/Otp.js';
 import { faFingerprint } from '@fortawesome/free-solid-svg-icons';
-// import { fcmService } from 'services/broadcasting/FCMService';
-// import { localNotificationService } from 'services/broadcasting/LocalNotificationService';
+import { fcmService } from 'services/broadcasting/FCMService';
+import { localNotificationService } from 'services/broadcasting/LocalNotificationService';
 import FingerPrintScanner from './../FingerPrintScanner'
 import { Alert } from 'react-native';
 import Button from 'components/Form/Button';
@@ -56,8 +56,6 @@ class Login extends Component {
   // }
   checkInternetConnection(){
     NetInfo.addEventListener(networkState => {
-      console.log("Connection type - ", networkState.type);
-      console.log("Is connected? - ", networkState.isConnected);
       if(networkState.isConnected == false){
         this.setState({isResponseError: true, isLoading: false})
       }
@@ -84,6 +82,7 @@ class Login extends Component {
   }
   
   async componentDidMount(){
+    this.firebaseNotification()
     this.focusListener = this.props.navigation.addListener('didFocus', () => {
       this.onFocusFunction()
     })
@@ -174,8 +173,6 @@ class Login extends Component {
     }
   }
 
-
-<<<<<<< HEAD
   firebaseNotification(){
     const { user } = this.props.state;
     if(user == null){
@@ -184,10 +181,11 @@ class Login extends Component {
     fcmService.registerAppWithFCM()
     fcmService.register(this.onRegister, this.onNotification, this.onOpenNotification)
     localNotificationService.configure(this.onOpenNotification, Helper.APP_NAME)
-    // fcmService.subscribeTopic('Message-' + user.id)
-    fcmService.subscribeTopic('Notifications-' + user.id)
-    // fcmService.subscribeTopic('Requests')
     fcmService.subscribeTopic(user.id)
+    // fcmService.subscribeTopic('Message-' + user.id)
+    // fcmService.subscribeTopic('Notifications-' + user.id)
+    // fcmService.subscribeTopic('Requests')
+    // fcmService.subscribeTopic(user.id)
     // fcmService.subscribeTopic('Comments-' + user.id)
     this.retrieveNotification()
     return () => {
@@ -196,28 +194,6 @@ class Login extends Component {
       localNotificationService.unRegister()
     }
   }
-=======
-  // firebaseNotification(){
-  //   const { user } = this.props.state;
-  //   if(user == null){
-  //     return
-  //   }
-  //   fcmService.registerAppWithFCM()
-  //   fcmService.register(this.onRegister, this.onNotification, this.onOpenNotification)
-  //   localNotificationService.configure(this.onOpenNotification, Helper.APP_NAME)
-  //   // fcmService.subscribeTopic('Message-' + user.id)
-  //   fcmService.subscribeTopic('Notifications-' + user.id)
-  //   // fcmService.subscribeTopic('Requests')
-  //   fcmService.subscribeTopic('Payments-' + user.id)
-  //   // fcmService.subscribeTopic('Comments-' + user.id)
-  //   this.retrieveNotification()
-  //   return () => {
-  //     console.log("[App] unRegister")
-  //     fcmService.unRegister()
-  //     localNotificationService.unRegister()
-  //   }
-  // }
->>>>>>> 2b65aededb37ba8ee1bcf6c14e3d4052781014a6
 
   retrieveNotification = () => {
     const { setNotifications } = this.props;
@@ -235,7 +211,6 @@ class Login extends Component {
       offset: 0
     }
     Api.request(Routes.notificationsRetrieve, parameter, notifications => {
-      console.log("[RESTRIEVE]", notifications.data)
       setNotifications(notifications.size, notifications.data)
     }, error => {
     })
@@ -246,12 +221,12 @@ class Login extends Component {
   }
 
   onOpenNotification = (notify) => {
-    // console.log("[App] onOpenNotification", notify)
+    console.log("[App] onOpenNotification", notify)
   }
 
   onNotification = (notify) => {
     const { user } = this.props.state;
-    // console.log("[App] onNotification", notify)
+    console.log("[App] onNotification", notify)
     let data = null
     if(user == null || !notify.data){
       return
