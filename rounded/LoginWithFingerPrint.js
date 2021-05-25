@@ -82,6 +82,7 @@ class Login extends Component {
   }
   
   async componentDidMount(){
+    this.getTheme()
     this.focusListener = this.props.navigation.addListener('didFocus', () => {
       this.onFocusFunction()
     })
@@ -138,12 +139,33 @@ class Login extends Component {
     }
   }
 
+  getTheme = async () => {
+    try {
+      const primary = await AsyncStorage.getItem(Helper.APP_NAME + 'primary');
+      const secondary = await AsyncStorage.getItem(Helper.APP_NAME + 'secondary');
+      const tertiary = await AsyncStorage.getItem(Helper.APP_NAME + 'tertiary');
+      const fourth = await AsyncStorage.getItem(Helper.APP_NAME + 'fourth');
+      if(primary != null && secondary != null && tertiary != null) {
+        const { setTheme } = this.props;
+        setTheme({
+          primary: primary,
+          secondary: secondary,
+          tertiary: tertiary,
+          fourth: fourth
+        })
+      }
+    } catch (e) {
+      console.log(e)
+    }
+  }
+
+
   async onPressFingerPrint(username, password){
     if((await AsyncStorage.getItem('username') != null && await AsyncStorage.getItem('password') != null)){
       await this.setState({showFingerPrint: true})
       await this.setState({notEmpty: true})
-      // await this.setState({username: await AsyncStorage.getItem('username')})
-      // await this.setState({password: await AsyncStorage.getItem('password')})
+      await this.setState({username: await AsyncStorage.getItem('username')})
+      await this.setState({password: await AsyncStorage.getItem('password')})
       this.login()
     }else{
       await this.setState({notEmpty: false})
@@ -245,7 +267,7 @@ class Login extends Component {
           if(parseInt(data.messenger_group_id) === messengerGroup.id && members.indexOf(user.id) > -1){
             if(parseInt(data.account_id) != user.id){
               const { updateMessagesOnGroup } = this.props;
-              updateMessagesOnGroup(data); 
+              updateMessagesOnGroup(data);
             }
             return
           }
@@ -537,7 +559,6 @@ class Login extends Component {
     const { isLoading, error, isResponseError } = this.state;
     const {  blockedFlag, isOtpModal } = this.state;
     const { theme } = this.props.state;
-    console.log('error', error)
     return (
       <SafeAreaView>
         <ScrollView
@@ -673,7 +694,6 @@ class Login extends Component {
                   fontWeight: 'bold',
                   color: theme ? theme.primary : Color.primary
                 }}>OR</Text>
-
                 <View style={{
                   justifyContent: 'center',
                   alignItems: 'center'
