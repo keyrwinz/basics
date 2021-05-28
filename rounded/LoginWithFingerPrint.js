@@ -82,6 +82,7 @@ class Login extends Component {
   }
   
   async componentDidMount(){
+    this.getTheme()
     this.focusListener = this.props.navigation.addListener('didFocus', () => {
       this.onFocusFunction()
     })
@@ -138,12 +139,33 @@ class Login extends Component {
     }
   }
 
+  getTheme = async () => {
+    try {
+      const primary = await AsyncStorage.getItem(Helper.APP_NAME + 'primary');
+      const secondary = await AsyncStorage.getItem(Helper.APP_NAME + 'secondary');
+      const tertiary = await AsyncStorage.getItem(Helper.APP_NAME + 'tertiary');
+      const fourth = await AsyncStorage.getItem(Helper.APP_NAME + 'fourth');
+      if(primary != null && secondary != null && tertiary != null) {
+        const { setTheme } = this.props;
+        setTheme({
+          primary: primary,
+          secondary: secondary,
+          tertiary: tertiary,
+          fourth: fourth
+        })
+      }
+    } catch (e) {
+      console.log(e)
+    }
+  }
+
+
   async onPressFingerPrint(username, password){
     if((await AsyncStorage.getItem('username') != null && await AsyncStorage.getItem('password') != null)){
       await this.setState({showFingerPrint: true})
       await this.setState({notEmpty: true})
-      // await this.setState({username: await AsyncStorage.getItem('username')})
-      // await this.setState({password: await AsyncStorage.getItem('password')})
+      await this.setState({username: await AsyncStorage.getItem('username')})
+      await this.setState({password: await AsyncStorage.getItem('password')})
       this.login()
     }else{
       await this.setState({notEmpty: false})
@@ -231,6 +253,7 @@ class Login extends Component {
     data = notify.data
     console.log('notification-data', data)
     let payload = data.payload
+    console.log('payload', payload)
     switch(payload.toLowerCase()){
       case 'message': {
           const { messengerGroup } = this.props.state;
@@ -245,7 +268,7 @@ class Login extends Component {
           if(parseInt(data.messenger_group_id) === messengerGroup.id && members.indexOf(user.id) > -1){
             if(parseInt(data.account_id) != user.id){
               const { updateMessagesOnGroup } = this.props;
-              updateMessagesOnGroup(data); 
+              updateMessagesOnGroup(data);
             }
             return
           }
@@ -260,19 +283,21 @@ class Login extends Component {
         }
         break
       case 'requests': {
+          console.log('requests', user)
           let unReadRequests = this.props.state.unReadRequests
           if(data.target == 'public'){
             console.log("[Public Requests]", data)
             unReadRequests.push(data)
             const { setUnReadRequests } = this.props;
             setUnReadRequests($unReadRequests);
-          }else if(data.target == 'partner'){
+          }else if(data.target == 'partners'){
             const { user } = this.props.state;
             if(user == null){
               return
             }else{
               console.log("[Partner Requests]", data.scope)
-              console.log("[Partner Requests] user", user.scope_location)
+
+              console.log("[Partner Requests] user", user.plan.original.data[0])
               if(user.scope_location.includes(data.scope)){
                 console.log("[Partner Requests] added", data)
                 unReadRequests.push(data)
@@ -497,7 +522,6 @@ class Login extends Component {
     }
     if((username != null && username != '') && (password != null && password != '')){
       this.setState({isLoading: true, error: 0});
-      
       Api.authenticate(username, password, (response) => {
         if(response.error){
           this.setState({error: 2, isLoading: false});
@@ -537,7 +561,6 @@ class Login extends Component {
     const { isLoading, error, isResponseError } = this.state;
     const {  blockedFlag, isOtpModal } = this.state;
     const { theme } = this.props.state;
-    console.log('error', error)
     return (
       <SafeAreaView>
         <ScrollView
@@ -673,7 +696,6 @@ class Login extends Component {
                   fontWeight: 'bold',
                   color: theme ? theme.primary : Color.primary
                 }}>OR</Text>
-
                 <View style={{
                   justifyContent: 'center',
                   alignItems: 'center'
