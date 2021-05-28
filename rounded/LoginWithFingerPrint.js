@@ -253,6 +253,7 @@ class Login extends Component {
     data = notify.data
     console.log('notification-data', data)
     let payload = data.payload
+    console.log('payload', payload)
     switch(payload.toLowerCase()){
       case 'message': {
           const { messengerGroup } = this.props.state;
@@ -282,19 +283,21 @@ class Login extends Component {
         }
         break
       case 'requests': {
+          console.log('requests', user)
           let unReadRequests = this.props.state.unReadRequests
           if(data.target == 'public'){
             console.log("[Public Requests]", data)
             unReadRequests.push(data)
             const { setUnReadRequests } = this.props;
             setUnReadRequests($unReadRequests);
-          }else if(data.target == 'partner'){
+          }else if(data.target == 'partners'){
             const { user } = this.props.state;
             if(user == null){
               return
             }else{
               console.log("[Partner Requests]", data.scope)
-              console.log("[Partner Requests] user", user.scope_location)
+
+              console.log("[Partner Requests] user", user.plan.original.data[0])
               if(user.scope_location.includes(data.scope)){
                 console.log("[Partner Requests] added", data)
                 unReadRequests.push(data)
@@ -519,7 +522,6 @@ class Login extends Component {
     }
     if((username != null && username != '') && (password != null && password != '')){
       this.setState({isLoading: true, error: 0});
-      
       Api.authenticate(username, password, (response) => {
         if(response.error){
           this.setState({error: 2, isLoading: false});
