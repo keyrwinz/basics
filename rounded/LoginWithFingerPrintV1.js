@@ -1,35 +1,28 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import AsyncStorage from '@react-native-community/async-storage';
-import { View , TextInput , Image, TouchableHighlight, Text, ScrollView, Platform, TouchableOpacity, Dimensions, SafeAreaView, Linking} from 'react-native';
-import {NavigationActions} from 'react-navigation';
+import { View , TextInput, Text, ScrollView, TouchableOpacity, Dimensions, SafeAreaView, Linking} from 'react-native';
 import Style from './../Style.js';
 import { Spinner } from 'components';
 import PasswordWithIcon from 'components/InputField/Password.js';
 import CustomError from 'components/Modal/Error.js';
-import Confirm from 'components/Modal/ConfirmationModal.js'
 import Api from 'services/api/index.js';
-import CommonRequest from 'services/CommonRequest.js';
 import { Routes, Color, Helper, BasicStyles } from 'common';
 import Header from './../HeaderWithoutName';
 import config from 'src/config';
-import Pusher from 'services/Pusher.js';
-import { Player } from '@react-native-community/audio-toolkit';
-import {FontAwesomeIcon} from '@fortawesome/react-native-fontawesome';
 import OtpModal from 'components/Modal/Otp.js';
-import { faFingerprint } from '@fortawesome/free-solid-svg-icons';
 import { fcmService } from 'services/broadcasting/FCMService';
 import { localNotificationService } from 'services/broadcasting/LocalNotificationService';
 import FingerPrintScanner from './../FingerPrintScanner'
 import { Alert } from 'react-native';
 import Button from 'components/Form/Button';
 import NetInfo from "@react-native-community/netinfo";
-
+import NotificationsHandler from 'services/NotificationHandler';
 const height = Math.round(Dimensions.get('window').height);
 class Login extends Component {
-  //Screen1 Component
   constructor(props){
     super(props);
+    this.notificationHandler = React.createRef();
     this.state = {
       username: null,
       password: null,
@@ -49,11 +42,19 @@ class Login extends Component {
     };
     this.audio = null;
   }
-  
-  // async componentDidUpdate(){
-  //   console.log("[Update]");
-    
-  // }
+
+  onRegister = () => {
+    this.notificationHandler.onRegister();
+  };
+
+  onOpenNotification = (notify) => {
+    this.notificationHandler.onOpenNotification(notify);
+  };
+
+  onNotification = (notify) => {
+    this.notificationHandler.onNotification(notify);
+  };
+
   checkInternetConnection(){
     NetInfo.addEventListener(networkState => {
       if(networkState.isConnected == false){
@@ -64,7 +65,6 @@ class Login extends Component {
   }
 
   async storageChecker(){
-    console.log("[Not Empty storage]", await AsyncStorage.getItem('username') != null &&  await AsyncStorage.getItem('password') != null);
     if((await AsyncStorage.getItem('username') != null && await AsyncStorage.getItem('password') != null)){
       await this.setState({showFingerPrint: true})
       await this.setState({notEmpty: true})
@@ -110,9 +110,7 @@ class Login extends Component {
     this.navigate(event.url);
   }
   navigate = (url) => { // E
-    // console.log(':::TESTING::: ', url)
     const { navigate } = this.props.navigation;
-    // https://payhiram.ph/profile/10DRLWEMCGUX9AT3PJ8BOV72IZQ5SYN6
     if(url !== null){
       const route = url.replace(/.*?:\/\//g, '');
       const routeName = route.split('/')[0];
@@ -203,10 +201,6 @@ class Login extends Component {
     fcmService.register(this.onRegister, this.onNotification, this.onOpenNotification)
     localNotificationService.configure(this.onOpenNotification, Helper.APP_NAME)
     fcmService.subscribeTopic(user.id)
-    // fcmService.subscribeTopic('Notifications-' + user.id)
-    // fcmService.subscribeTopic('Requests')
-    // fcmService.subscribeTopic('Payments-' + user.id)
-    // fcmService.subscribeTopic('Comments-' + user.id)
     this.retrieveNotification()
     return () => {
       console.log("[App] unRegister")
@@ -234,166 +228,6 @@ class Login extends Component {
       setNotifications(notifications.size, notifications.data)
     }, error => {
     })
-  }
-
-  onRegister = (token) => {
-  //   console.log("[App] onRegister", token)
-  }
-
-  onOpenNotification = (notify) => {
-    // console.log("[App] onOpenNotification", notify)
-  }
-
-  onNotification = (notify) => {
-    const { user } = this.props.state;
-    let data = null
-    if(user == null || !notify.data){
-      return
-    }
-    data = notify.data
-    console.log('notification-data', data)
-    let payload = data.payload
-    console.log('payload', payload)
-    switch(payload.toLowerCase()){
-      case 'message': {
-          const { messengerGroup } = this.props.state;
-          let members = JSON.parse(data.members)
-          console.log('members', members)
-          if(messengerGroup == null && members.indexOf(user.id) > -1){
-            console.log('[messengerGroup] on empty', data)
-            const { setUnReadMessages } = this.props;
-            setUnReadMessages(data)
-            return
-          }
-          if(parseInt(data.messenger_group_id) === messengerGroup.id && members.indexOf(user.id) > -1){
-            if(parseInt(data.account_id) != user.id){
-              const { updateMessagesOnGroup } = this.props;
-              updateMessagesOnGroup(data);
-            }
-            return
-          }
-        }
-        break
-      case 'notifications': {
-          if(parseInt(data.to) == user.id){
-            console.log("[Notifications] data", data)
-            const { updateNotifications } = this.props;
-            updateNotifications(1, data)
-          }
-        }
-        break
-      case 'requests': {
-          console.log('requests', user)
-          let unReadRequests = this.props.state.unReadRequests
-          if(data.target == 'public'){
-            console.log("[Public Requests]", data)
-            unReadRequests.push(data)
-            const { setUnReadRequests } = this.props;
-            setUnReadRequests($unReadRequests);
-          }else if(data.target == 'partners'){
-            const { user } = this.props.state;
-            if(user == null){
-              return
-            }else{
-              console.log("[Partner Requests]", data.scope)
-
-              console.log("[Partner Requests] user", user.plan.original.data[0])
-              if(user.scope_location.includes(data.scope)){
-                console.log("[Partner Requests] added", data)
-                unReadRequests.push(data)
-                const { setUnReadRequests } = this.props;
-                setUnReadRequests($unReadRequests);
-              }else{
-                console.log("[Partner Requests] Empty")
-              }
-            }
-          }else if(data.target == 'circle'){
-            //
-          }
-        }
-        break
-      case 'update-request': {
-          const { requests, request } = this.props.state;
-          if(request != null && request.code == data.code){
-            const { setRequest } = this.props;
-            setRequest({
-              ...request,
-              status: data.status
-            })
-            return
-          }
-          if(requests.length > 0){
-            const { setUpdateRequests } = this.props;
-            setUpdateRequests(data)
-            return
-          }
-        }
-        break
-      case 'payments': {
-        const { setAcceptPayment } = this.props;
-        let topicId = topic.length > 1 ? topic[1] : null
-        console.log('[payments]', data)
-        if(topicId && parseInt(topicId) == user.id){
-          if(data.transfer_status == 'requesting'){
-            setAcceptPayment(data)
-            Alert.alert(
-              "Payment Request",
-              "There\'s new payment request, would you like to open it?",
-              [
-                {
-                  text: "Cancel",
-                  onPress: () => {
-                    setAcceptPayment(null)
-                  },
-                  style: "cancel"
-                },
-                { text: "Yes", onPress: () => {
-                  this.props.navigation.navigate('recievePaymentRequestStack')
-                } }
-              ]
-            );            
-          }else{
-            // declined or completed here
-            console.log('on confirm', data)
-            setAcceptPayment(data)
-            const { setPaymentConfirmation } = this.props;
-            setPaymentConfirmation(false)
-            this.props.navigation.navigate('Dashboard')
-          }
-
-        }else{
-
-        }
-        
-      }
-      break
-      case 'comments': {
-        const { setComments } = this.props;
-        let topicId = topic.length > 1 ? topic[1] : null
-        console.log('[comments]', data)
-        if(topicId && parseInt(topicId) == user.id){
-          setComments(data)
-        }else{
-
-        }
-        
-      }
-      break
-    }
-
-    // const options = {
-    //   soundName: 'default',
-    //   playSound: true
-    // }
-
-    // localNotificationService.showNotification(
-    //   0,
-    //   notify.title,
-    //   notify.body,
-    //   notify,
-    //   options,
-    //   "test"
-    // )
   }
 
   login = () => {
@@ -571,6 +405,8 @@ class Login extends Component {
           <View style={{
             flex: 1,
           }}>
+            
+            <NotificationsHandler notificationHandler={ref => (this.notificationHandler = ref)} />
             <Header params={"Login"} textColor={{color: Color.white}}></Header>
             <View style={{
               backgroundColor: Color.white,
