@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import AsyncStorage from '@react-native-community/async-storage';
-import { View , TextInput, Text, ScrollView, TouchableOpacity, Dimensions, SafeAreaView, Linking} from 'react-native';
+import { View , TextInput, Text, ScrollView, TouchableOpacity, Dimensions, SafeAreaView, Linking, Platform} from 'react-native';
 import Style from './../Style.js';
 import { Spinner } from 'components';
 import PasswordWithIcon from 'components/InputField/Password.js';
@@ -18,6 +18,8 @@ import { Alert } from 'react-native';
 import Button from 'components/Form/Button';
 import NetInfo from "@react-native-community/netinfo";
 import NotificationsHandler from 'services/NotificationHandler';
+import DeviceInfo from 'react-native-device-info';
+import { getUniqueId, getManufacturer } from 'react-native-device-info';
 const height = Math.round(Dimensions.get('window').height);
 class Login extends Component {
   constructor(props){
@@ -209,6 +211,22 @@ class Login extends Component {
     }
   }
 
+  getDeviceInfo(){
+    let deviceId = DeviceInfo.getDeviceId();
+    let model = DeviceInfo.getModel();
+    let uniqueId = DeviceInfo.getUniqueId();
+    let brand = DeviceInfo.getBrand();
+    DeviceInfo.getManufacturer().then((manufacturer) => {
+      let manufacturers = manufacturer
+      console.log('[device]', deviceId, '[model]', model, 'uniqueId', uniqueId, 'manufacturer', manufacturers, '[brand]', brand)
+    });
+    DeviceInfo.getBaseOs().then((baseOs) => {
+      // "Windows", "Android" etc
+      let os = baseOs
+      console.log('[device]', deviceId, '[model]', model, 'uniqueId', uniqueId, 'os', Platform.OS)
+    });
+  }
+
   retrieveNotification = () => {
     const { setNotifications } = this.props;
     const { user } = this.props.state;
@@ -239,6 +257,7 @@ class Login extends Component {
         login(response, this.state.token);
         this.setState({isLoading: false});
         if(response.username){
+          this.getDeviceInfo()
           this.firebaseNotification()
           this.redirect('drawerStack')
         }
