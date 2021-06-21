@@ -73,13 +73,6 @@ class Login extends Component {
       await this.setState({showFingerPrint: false})
     }
   }
-
-  onFocusFunction = () => {
-    Linking.getInitialURL().then(url => {
-      this.navigate(url);
-    });
-    Linking.addEventListener('url', this.handleOpenURL);
-  }
   
   async componentDidMount(){
     this.getTheme()
@@ -93,18 +86,11 @@ class Login extends Component {
 
     this.getData();
     this.checkInternetConnection();
-
-    Linking.getInitialURL().then(url => {
-      this.navigate(url);
-    });
-    Linking.addEventListener('url', this.handleOpenURL);
   }
 
   componentWillUnmount() {
     this.focusListener.remove()
-    Linking.removeEventListener('url', this.handleOpenURL);
   }
-  
   
   handleOpenURL = (event) => { // D
     this.navigate(event.url);
