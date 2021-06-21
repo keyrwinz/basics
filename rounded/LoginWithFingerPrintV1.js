@@ -76,7 +76,7 @@ class Login extends Component {
     }
   }
 
-  onFocusFunction = () => {s
+  onFocusFunction = () => {
   }
   
   async componentDidMount(){
