@@ -76,11 +76,7 @@ class Login extends Component {
     }
   }
 
-  onFocusFunction = () => {
-    Linking.getInitialURL().then(url => {
-      this.navigate(url);
-    });
-    Linking.addEventListener('url', this.handleOpenURL);
+  onFocusFunction = () => {s
   }
   
   async componentDidMount(){
@@ -95,16 +91,10 @@ class Login extends Component {
 
     this.getData();
     this.checkInternetConnection();
-
-    Linking.getInitialURL().then(url => {
-      this.navigate(url);
-    });
-    Linking.addEventListener('url', this.handleOpenURL);
   }
 
   componentWillUnmount() {
     this.focusListener.remove()
-    Linking.removeEventListener('url', this.handleOpenURL);
   }
   
   
