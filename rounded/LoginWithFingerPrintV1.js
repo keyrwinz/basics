@@ -40,7 +40,8 @@ class Login extends Component {
       notEmpty: false,
       isConfirmed: false,
       enable: false,
-      isConnected: false
+      isConnected: false,
+      manufacturers: null
     };
     this.audio = null;
   }
@@ -212,19 +213,50 @@ class Login extends Component {
   }
 
   getDeviceInfo(){
+    const { user } = this.props.state;
+    if(user == null){
+      return
+    }
+    console.log('[user]', user.device_info)
     let deviceId = DeviceInfo.getDeviceId();
     let model = DeviceInfo.getModel();
     let uniqueId = DeviceInfo.getUniqueId();
-    let brand = DeviceInfo.getBrand();
     DeviceInfo.getManufacturer().then((manufacturer) => {
-      let manufacturers = manufacturer
-      console.log('[device]', deviceId, '[model]', model, 'uniqueId', uniqueId, 'manufacturer', manufacturers, '[brand]', brand)
+      this.setState({manufacturers: manufacturer})
+      console.log('[device]s', deviceId, '[model]', model, '[uniqueId]', uniqueId, '[manufacturer]', this.state.manufacturers, '[os]', Platform.OS)
+      if(user.device_info == null){
+        console.log('[primary]')
+        let parameters = {
+          account_id: user.id,
+          model: model,
+          unique_code: uniqueId,
+          details: JSON.stringify({manufacturer: this.state.manufacturers, os: Platform.OS, deviceId: deviceId}),
+          status: 'primary'
+        }
+        console.log('[primary]', parameters)
+        Api.request(Routes.deviceCreate, parameters, response => {
+          console.log('[ressssssssssssspnse]', response)
+        }, error => {
+          console.log('[device error: ]', error)
+        })
+      }else{
+        console.log('[F]')
+        let parameter = {
+          account_id: user.id,
+          model: model,
+          unique_code: uniqueId,
+          details: JSON.stringify({manufacturer: this.state.manufacturers, os: Platform.OS, deviceId: deviceId}),
+          status: 'secondary'
+        }
+        console.log('[secondary]', parameter)
+        Api.request(Routes.deviceCreate, parameter, response => {
+          console.log('[responseeeeeeeeeee]', response)
+        }, error => {
+          console.log('[device errors: ]', error)
+        })
+      }
     });
-    DeviceInfo.getBaseOs().then((baseOs) => {
-      // "Windows", "Android" etc
-      let os = baseOs
-      console.log('[device]', deviceId, '[model]', model, 'uniqueId', uniqueId, 'os', Platform.OS)
-    });
+    // deviceCreate
   }
 
   retrieveNotification = () => {
@@ -257,7 +289,6 @@ class Login extends Component {
         login(response, this.state.token);
         this.setState({isLoading: false});
         if(response.username){
-          this.getDeviceInfo()
           this.firebaseNotification()
           this.redirect('drawerStack')
         }
@@ -358,7 +389,7 @@ class Login extends Component {
           })
         }
       }, error => {
-        console.log('error', error)
+        console.log('errorFingerPrint', error)
         this.setState({isResponseError: true, isLoading: false})
         this.setState({showFingerPrint: false})
       })
@@ -392,6 +423,7 @@ class Login extends Component {
             }
             if(response.username){
               this.firebaseNotification()
+              // this.getDeviceInfo()
               this.redirect('drawerStack')
             }
             
@@ -400,7 +432,7 @@ class Login extends Component {
           })
         }
       }, error => {
-        console.log('error', error)
+        console.log('errorLogin', error)
         this.setState({isResponseError: true, isLoading: false})
         this.setState({showFingerPrint: false})
       })
