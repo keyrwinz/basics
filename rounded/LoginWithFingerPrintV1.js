@@ -19,7 +19,6 @@ import Button from 'components/Form/Button';
 import NetInfo from "@react-native-community/netinfo";
 import NotificationsHandler from 'services/NotificationHandler';
 import DeviceInfo from 'react-native-device-info';
-import { getUniqueId, getManufacturer } from 'react-native-device-info';
 const height = Math.round(Dimensions.get('window').height);
 class Login extends Component {
   constructor(props){
