@@ -131,7 +131,10 @@ class Register extends Component {
     }else if(password !== '' && password.length < 6){
        this.setState({errorMessage: 'Password must be atleast 6 characters.'})
        return false
-    }else{ 
+    }else if(password !== '' && password.localeCompare(confirmPassword) !== 0){
+      this.setState({errorMessage: 'Password did not match.'})
+      return false
+   }else{ 
       this.setState({errorMessage: 'Please fill in all required fields.'})
       return false
     }
@@ -215,8 +218,8 @@ class Register extends Component {
               placeholder={'Password'}/>
             </View>
 
-            {/* <View style={{
-              marginTop: 20,
+            <View style={{
+              // marginTop: 20,
               marginBottom: 20
             }}>
               <PasswordWithIcon onTyping={(input) => this.setState({
@@ -224,7 +227,7 @@ class Register extends Component {
               })}
               placeholder={'Confirm Password'}
               />
-            </View> */}
+            </View>
 
             <Button
               onClick={() => this.submit()}
