@@ -201,53 +201,6 @@ class Login extends Component {
     }
   }
 
-  getDeviceInfo(){
-    const { user } = this.props.state;
-    if(user == null){
-      return
-    }
-    console.log('[user]', user.device_info)
-    let deviceId = DeviceInfo.getDeviceId();
-    let model = DeviceInfo.getModel();
-    let uniqueId = DeviceInfo.getUniqueId();
-    DeviceInfo.getManufacturer().then((manufacturer) => {
-      this.setState({manufacturers: manufacturer})
-      console.log('[device]s', deviceId, '[model]', model, '[uniqueId]', uniqueId, '[manufacturer]', this.state.manufacturers, '[os]', Platform.OS)
-      if(user.device_info == null){
-        console.log('[primary]')
-        let parameters = {
-          account_id: user.id,
-          model: model,
-          unique_code: uniqueId,
-          details: JSON.stringify({manufacturer: this.state.manufacturers, os: Platform.OS, deviceId: deviceId}),
-          status: 'primary'
-        }
-        console.log('[primary]', parameters)
-        Api.request(Routes.deviceCreate, parameters, response => {
-          console.log('[ressssssssssssspnse]', response)
-        }, error => {
-          console.log('[device error: ]', error)
-        })
-      }else{
-        console.log('[F]')
-        let parameter = {
-          account_id: user.id,
-          model: model,
-          unique_code: uniqueId,
-          details: JSON.stringify({manufacturer: this.state.manufacturers, os: Platform.OS, deviceId: deviceId}),
-          status: 'secondary'
-        }
-        console.log('[secondary]', parameter)
-        Api.request(Routes.deviceCreate, parameter, response => {
-          console.log('[responseeeeeeeeeee]', response)
-        }, error => {
-          console.log('[device errors: ]', error)
-        })
-      }
-    });
-    // deviceCreate
-  }
-
   retrieveNotification = () => {
     const { setNotifications } = this.props;
     const { user } = this.props.state;
@@ -275,6 +228,7 @@ class Login extends Component {
     if(this.state.token != null){
       this.setState({isLoading: true});
       Api.getAuthUser(this.state.token, (response) => {
+        console.log('[response]', response)
         login(response, this.state.token);
         this.setState({isLoading: false});
         if(response.username){
@@ -282,6 +236,7 @@ class Login extends Component {
           this.redirect('drawerStack')
         }
       }, error => {
+        console.log('[errort]', error)
         this.setState({isResponseError: true})
       })
     }
@@ -396,7 +351,9 @@ class Login extends Component {
     if((username != null && username != '') && (password != null && password != '')){
       this.setState({isLoading: true, error: 0});
       Api.authenticate(username, password, (response) => {
+        console.log("[SDF]", response)
         if(response.error){
+          console.log('[dsf]', response.error)
           this.setState({error: 2, isLoading: false});
         }
         if(response.token){
@@ -412,7 +369,6 @@ class Login extends Component {
             }
             if(response.username){
               this.firebaseNotification()
-              // this.getDeviceInfo()
               this.redirect('drawerStack')
             }
             
