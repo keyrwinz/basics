@@ -222,6 +222,21 @@ class Login extends Component {
     })
   }
 
+  getRemainingBalance = () => {
+    const { setRemainingBalancePlan } = this.props;
+    const { user } = this.props.state;
+    if(user === null){
+      return
+    }
+    let parameter = {
+      account_id: user.id
+    }
+    Api.request(Routes.getRemainingBalancePartner, parameter, response => {
+      setRemainingBalancePlan(response.plan_amount - response.request_amount)
+    }, error => {
+    })
+  }
+
   login = () => {
     // this.test();
     const { login } = this.props;
@@ -234,6 +249,9 @@ class Login extends Component {
         if(response.username){
           this.firebaseNotification()
           this.redirect('drawerStack')
+          if(response.account_type === 'PARTNER'){
+            this.getRemainingBalance()
+          }
         }
       }, error => {
         console.log('[errort]', error)
@@ -351,9 +369,7 @@ class Login extends Component {
     if((username != null && username != '') && (password != null && password != '')){
       this.setState({isLoading: true, error: 0});
       Api.authenticate(username, password, (response) => {
-        console.log("[SDF]", response)
         if(response.error){
-          console.log('[dsf]', response.error)
           this.setState({error: 2, isLoading: false});
         }
         if(response.token){
@@ -611,6 +627,7 @@ const mapDispatchToProps = dispatch => {
     setAcceptPayment: (acceptPayment) => dispatch(actions.setAcceptPayment(acceptPayment)),
     setComments: (comments) => dispatch(actions.setComments(comments)),
     setPaymentConfirmation: (flag) => dispatch(actions.setPaymentConfirmation(flag)),
+    setRemainingBalancePlan: (remainingBalancePlan) => dispatch(actions.setRemainingBalancePlan(remainingBalancePlan)),
     setEnableFingerPrint(isEnable){
       dispatch(actions.setEnableFingerPrint(isEnable));
     }
