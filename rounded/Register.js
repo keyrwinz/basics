@@ -77,8 +77,7 @@ class Register extends Component {
     const { username, email, password, confirmPassword } = this.state;
     if(username.length >= 6 &&
       email !== '' &&
-      password !== '' &&
-      password.length >= 6 &
+      Helper.validatePassword(password) === true &&
       password.localeCompare(confirmPassword) === 0 &&
       Helper.validateEmail(email) === true){
       return true
@@ -92,8 +91,8 @@ class Register extends Component {
     }else if(username !== '' && username.length < 6){
       this.setState({errorMessage: 'Username must be atleast 6 characters.'})
       return false
-    }else if(password !== '' && password.length < 6){
-      this.setState({errorMessage: 'Password must be atleast 6 characters.'})
+    }else if(Helper.validatePassword(password) === false){
+      this.setState({errorMessage: 'Passwords should be atleast 6 characters. It must be alphanumeric characters. It should contain 1 number, 1 special character and 1 capital letter.'})
       return false
     }else if(password !== '' && password.localeCompare(confirmPassword) !== 0){
       this.setState({errorMessage: 'Password did not match.'})
@@ -149,7 +148,8 @@ class Register extends Component {
                       }}>Oops! </Text>
                       <Text style={{
                         ...Style.messageText,
-                        fontSize: BasicStyles.standardFontSize
+                        fontSize: BasicStyles.standardFontSize,
+                        width: 300,
                       }}>{errorMessage}</Text>
                     </View>
                   )
