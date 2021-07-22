@@ -82,6 +82,10 @@ class Register extends Component {
       password.localeCompare(confirmPassword) === 0 &&
       Helper.validateEmail(email) === true){
       return true
+      
+    }else if(username.replace(/\s/g, '') !== username){
+      this.setState({errorMessage: 'Spaces in username is not allowed'})
+      return false
     }else if(email !== '' && Helper.validateEmail(email) === false){
       this.setState({errorMessage: 'You have entered an invalid email address.'})
       return false
@@ -89,11 +93,11 @@ class Register extends Component {
       this.setState({errorMessage: 'Username must be atleast 6 characters.'})
       return false
     }else if(password !== '' && password.length < 6){
-       this.setState({errorMessage: 'Password must be atleast 6 characters.'})
-       return false
+      this.setState({errorMessage: 'Password must be atleast 6 characters.'})
+      return false
     }else if(password !== '' && password.localeCompare(confirmPassword) !== 0){
-       this.setState({errorMessage: 'Password did not match.'})
-       return false
+      this.setState({errorMessage: 'Password did not match.'})
+      return false
     }else{ 
       this.setState({errorMessage: 'Please fill in all required fields.'})
       return false
