@@ -82,7 +82,7 @@ class Register extends Component {
       Helper.validateEmail(email) === true){
       return true
       
-    }else if(username.replace(/\s/g, '') !== username){
+    }else if(username.includes(' ')){
       this.setState({errorMessage: 'Spaces in username is not allowed'})
       return false
     }else if(email !== '' && Helper.validateEmail(email) === false){
@@ -138,19 +138,16 @@ class Register extends Component {
                     <View style={{
                       flexDirection: 'row',
                         paddingTop: 10,
-                        paddingBottom: 10,
-                        paddingLeft: '20%'
+                        paddingBottom: 10
                     }}>
                       <Text style={{
                         ...Style.messageText,
                         fontSize: BasicStyles.standardFontSize,
-                        fontWeight: 'bold'
-                      }}>Oops! </Text>
-                      <Text style={{
-                        ...Style.messageText,
-                        fontSize: BasicStyles.standardFontSize,
-                        width: 300,
-                      }}>{errorMessage}</Text>
+                        width: '100%',
+                        textAlign: 'center',
+                        paddingLeft: 10,
+                        paddingRight: 10,
+                      }}>Oops! {errorMessage}</Text>
                     </View>
                   )
                 }
