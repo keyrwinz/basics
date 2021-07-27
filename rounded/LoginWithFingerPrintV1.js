@@ -232,7 +232,7 @@ class Login extends Component {
       account_id: user.id
     }
     Api.request(Routes.getRemainingBalancePartner, parameter, response => {
-      setRemainingBalancePlan(response.plan_amount - response.request_amount)
+      setRemainingBalancePlan(Number(response.plan_amount) - Number(response.request_amount))
     }, error => {
     })
   }
