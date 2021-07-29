@@ -254,7 +254,7 @@ class Login extends Component {
           }
         }
       }, error => {
-        console.log('[errort]', error)
+        console.log('[error login]', error)
         this.setState({isResponseError: true})
       })
     }
@@ -375,6 +375,7 @@ class Login extends Component {
         if(response.token){
           const token = response.token;
           Api.getAuthUser(response.token, (response) => {
+            console.log('[tokeeen]', token);
             login(response, token);
             console.log("[NOT_EMPTY]", this.state.notEmpty)
             this.setState({isLoading: false, error: 0});
