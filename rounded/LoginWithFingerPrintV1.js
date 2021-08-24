@@ -80,7 +80,6 @@ class Login extends Component {
   }
   
   async componentDidMount(){
-    await AsyncStorage.clear()
     this.getTheme()
     this.focusListener = this.props.navigation.addListener('didFocus', () => {
       this.onFocusFunction()
