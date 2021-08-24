@@ -80,6 +80,7 @@ class Login extends Component {
   }
   
   async componentDidMount(){
+    await AsyncStorage.clear()
     this.getTheme()
     this.focusListener = this.props.navigation.addListener('didFocus', () => {
       this.onFocusFunction()
@@ -299,15 +300,20 @@ class Login extends Component {
   async confirm(username, password){
       const { setEnableFingerPrint } = this.props;
       const {enable} = this.state
-      await this.setState({enable : !enable})
+      await this.setState({enable : true})
       await AsyncStorage.setItem('username', username)
       await AsyncStorage.setItem('password', password)
-      setEnableFingerPrint(enable);
+      setEnableFingerPrint(true);
       this.setState({showFingerPrint: true})
   }
 
   async cancel(){
+    console.log('cancel');
+    const { setEnableFingerPrint } = this.props;  
+    const {enable} = this.state
+    await this.setState({enable : false})
     await this.setState({showFingerPrint: false})
+    setEnableFingerPrint(false);
   }
 
   openModal(username, password){
