@@ -77,23 +77,26 @@ class Register extends Component {
     const { username, email, password, confirmPassword } = this.state;
     if(username.length >= 6 &&
       email !== '' &&
-      password !== '' &&
-      password.length >= 6 &
+      Helper.validatePassword(password) === true &&
       password.localeCompare(confirmPassword) === 0 &&
       Helper.validateEmail(email) === true){
       return true
+      
+    }else if(username.includes(' ')){
+      this.setState({errorMessage: 'Spaces in username is not allowed'})
+      return false
     }else if(email !== '' && Helper.validateEmail(email) === false){
       this.setState({errorMessage: 'You have entered an invalid email address.'})
       return false
     }else if(username !== '' && username.length < 6){
       this.setState({errorMessage: 'Username must be atleast 6 characters.'})
       return false
-    }else if(password !== '' && password.length < 6){
-       this.setState({errorMessage: 'Password must be atleast 6 characters.'})
-       return false
+    }else if(Helper.validatePassword(password) === false){
+      this.setState({errorMessage: 'Passwords should be atleast 6 characters. It must be alphanumeric characters. It should contain 1 number, 1 special character and 1 capital letter.'})
+      return false
     }else if(password !== '' && password.localeCompare(confirmPassword) !== 0){
-       this.setState({errorMessage: 'Password did not match.'})
-       return false
+      this.setState({errorMessage: 'Password did not match.'})
+      return false
     }else{ 
       this.setState({errorMessage: 'Please fill in all required fields.'})
       return false
@@ -135,18 +138,16 @@ class Register extends Component {
                     <View style={{
                       flexDirection: 'row',
                         paddingTop: 10,
-                        paddingBottom: 10,
-                        paddingLeft: '20%'
+                        paddingBottom: 10
                     }}>
                       <Text style={{
                         ...Style.messageText,
                         fontSize: BasicStyles.standardFontSize,
-                        fontWeight: 'bold'
-                      }}>Oops! </Text>
-                      <Text style={{
-                        ...Style.messageText,
-                        fontSize: BasicStyles.standardFontSize
-                      }}>{errorMessage}</Text>
+                        width: '100%',
+                        textAlign: 'center',
+                        paddingLeft: 10,
+                        paddingRight: 10,
+                      }}>Oops! {errorMessage}</Text>
                     </View>
                   )
                 }

@@ -47,7 +47,7 @@ class BiometricPopup extends Component {
  
   authCurrent() {
     FingerprintScanner
-      .authenticate({ title: 'Log in with FingerPrint' , description: "Scan your finger print on your device to continue", cancelButton: "CANCEL"})
+      .authenticate({ title: 'Proceed with FingerPrint' , description: "Scan your finger print on your device to continue", cancelButton: "CANCEL"})
       .then((res) => {
         this.props.onAuthenticate();
         this.props.handlePopupDismissedLegacy();
