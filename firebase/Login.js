@@ -74,6 +74,7 @@ class Login extends Component {
               let data = el.data()
               if(el.data() !== null){
                 console.log('.............', el);
+                el.data()['doc_id'] = el.id
                 login(el.data(), data.customerId)
                 this.setState({isLoading: false, error: 0});
                 this.props.navigation.navigate('homePageStack')
@@ -99,6 +100,7 @@ submit(){
           .then(response => {
             response.forEach(async el => {
               if(el.data() !== null){
+                el.data()['doc_id'] = el.id
                 let data = el.data()
                 login(el.data(), data.customerId)
                 await AsyncStorage.setItem(Helper.APP_NAME + 'uid', data.customerId)
