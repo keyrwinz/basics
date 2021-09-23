@@ -465,6 +465,7 @@ class Login extends Component {
                   }}
                   onChangeText={(username) => this.setState({username})}
                   value={this.state.username}
+                  placeholderTextColor={Color.darkGray}
                   placeholder={'Username or Email'}
                 />
 

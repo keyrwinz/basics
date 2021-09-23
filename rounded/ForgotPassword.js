@@ -208,6 +208,7 @@ class ForgotPassword extends Component {
           onChangeText={(email) => this.setState({email})}
           value={this.state.email}
           placeholder={'Email Address'}
+          placeholderTextColor={Color.darkGray}
           keyboardType={'email-address'}
         />
 

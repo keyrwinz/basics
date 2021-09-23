@@ -162,6 +162,7 @@ class Register extends Component {
                     onChangeText={(username) => this.setState({username})}
                     value={this.state.username}
                     placeholder={'Username'}
+                    placeholderTextColor={Color.darkGray}
                   />
                   
                   <TextInput
@@ -173,6 +174,7 @@ class Register extends Component {
                     value={this.state.email}
                     placeholder={'Email Address'}
                     keyboardType={'email-address'}
+                    placeholderTextColor={Color.darkGray}
                   />
                   <PasswordWithIcon onTyping={(input) => this.setState({
                     password: input
