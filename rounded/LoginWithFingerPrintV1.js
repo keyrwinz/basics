@@ -219,6 +219,9 @@ class Login extends Component {
     Api.request(Routes.notificationsRetrieve, parameter, notifications => {
       setNotifications(notifications.size, notifications.data)
     }, error => {
+      if(error.message === 'Network request failed'){
+        this.setState({isResponseError: true})
+      }
     })
   }
 
@@ -234,6 +237,9 @@ class Login extends Component {
     Api.request(Routes.getRemainingBalancePartner, parameter, response => {
       setRemainingBalancePlan(Number(response.plan_amount) - Number(response.request_amount))
     }, error => {
+      if(error.message === 'Network request failed'){
+        this.setState({isResponseError: true})
+      }
     })
   }
 
@@ -254,8 +260,9 @@ class Login extends Component {
           }
         }
       }, error => {
-        console.log('[errort]', error)
-        this.setState({isResponseError: true})
+        if(error.message === 'Network request failed'){
+          this.setState({isResponseError: true})
+        }
       })
     }
   }
@@ -351,14 +358,20 @@ class Login extends Component {
             }
             
           }, error => {
-            console.log("[ERROR]", error);
-            this.setState({isResponseError: true, isLoading: false})
+            if(error.message === 'Network request failed'){
+              this.setState({isResponseError: true, isLoading: false})
+            }else{
+              this.setState({isLoading: false})
+            }
           })
         }
       }, error => {
-        console.log('errorFingerPrint', error)
-        this.setState({isResponseError: true, isLoading: false})
-        this.setState({showFingerPrint: false})
+        if(error.message === 'Network request failed'){
+          this.setState({isResponseError: true, isLoading: false})
+        }else{
+          this.setState({isLoading: false})
+          this.setState({showFingerPrint: false})
+        }
       })
   }
   submit(){
@@ -394,13 +407,21 @@ class Login extends Component {
             }
             
           }, error => {
-            this.setState({isResponseError: true, isLoading: false})
+            if(error.message === 'Network request failed'){
+              this.setState({isResponseError: true, isLoading: false})
+            }else{
+              this.setState({isLoading: false})
+            }
           })
         }
       }, error => {
         console.log('errorLogin', error)
-        this.setState({isResponseError: true, isLoading: false})
-        this.setState({showFingerPrint: false})
+        if(error.message === 'Network request failed'){
+          this.setState({isResponseError: true, isLoading: false})
+        }else{
+          this.setState({isLoading: false})
+          this.setState({showFingerPrint: false})
+        }
       })
       // this.props.navigation.navigate('drawerStack');
     }else{
