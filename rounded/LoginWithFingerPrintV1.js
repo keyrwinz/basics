@@ -254,8 +254,9 @@ class Login extends Component {
           }
         }
       }, error => {
-        console.log('[errort]', error)
-        this.setState({isResponseError: true})
+        if(error.message === 'Network request failed'){
+          this.setState({isResponseError: true})
+        }
       })
     }
   }
