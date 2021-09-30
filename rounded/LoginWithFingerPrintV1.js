@@ -441,7 +441,7 @@ class Login extends Component {
           }}
           showsVerticalScrollIndicator={false}>
           <View style={{
-            flex: 1,
+            flex: 1
           }}>
             
             <NotificationsHandler notificationHandler={ref => (this.notificationHandler = ref)} />
@@ -453,7 +453,7 @@ class Login extends Component {
               marginTop: 10,
               borderTopLeftRadius: 60,
               borderTopRightRadius: 60,
-              height: height,
+              height: height * 1.5,
               ...BasicStyles.loginShadow
             }}>
               <Text style={{
