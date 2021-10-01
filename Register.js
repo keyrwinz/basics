@@ -176,7 +176,7 @@ class Register extends Component {
               placeholder={'Password'}/>
             </View>
 
-            {/* <View style={{
+            <View style={{
               marginTop: 20,
               marginBottom: 20
             }}>
@@ -185,7 +185,7 @@ class Register extends Component {
               })}
               placeholder={'Confirm Password'}
               />
-            </View> */}
+            </View>
 
             <Button
               onClick={() => this.submit()}
