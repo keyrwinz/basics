@@ -198,7 +198,7 @@ class Login extends Component {
     }
     const { myDevice } = this.props.state;
     if(user.devices && user.devices.indexOf(myDevice.unique_code) >= 0){
-      fcmService.subscribeTopic(user.unique_code)
+      fcmService.subscribeTopic(myDevice.unique_code)
     }
     this.retrieveNotification()
     return () => {
