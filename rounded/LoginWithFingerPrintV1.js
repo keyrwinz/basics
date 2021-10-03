@@ -196,6 +196,10 @@ class Login extends Component {
     if(user && user.scope_location !== null){
       fcmService.subscribeTopic(user.scope_location)
     }
+    const { myDevice } = this.props.state;
+    if(user.devices && user.devices.indexOf(myDevice.unique_code) >= 0){
+      fcmService.subscribeTopic(user.unique_code)
+    }
     this.retrieveNotification()
     return () => {
       console.log("[App] unRegister")
