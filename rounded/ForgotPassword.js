@@ -208,6 +208,7 @@ class ForgotPassword extends Component {
           onChangeText={(email) => this.setState({email})}
           value={this.state.email}
           placeholder={'Email Address'}
+          placeholderTextColor={Color.darkGray}
           keyboardType={'email-address'}
         />
 
@@ -242,7 +243,7 @@ class ForgotPassword extends Component {
             <View style={{
               backgroundColor: Color.white,
               width: '100%',
-              height: height,
+              height: height * 1.5,
               paddingTop: 50,
               marginTop: 10,
               borderTopLeftRadius: 60,

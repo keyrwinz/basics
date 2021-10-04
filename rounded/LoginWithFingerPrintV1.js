@@ -191,6 +191,13 @@ class Login extends Component {
     fcmService.register(this.onRegister, this.onNotification, this.onOpenNotification)
     localNotificationService.configure(this.onOpenNotification, Helper.APP_NAME)
     fcmService.subscribeTopic(user.id)
+    if(user && user.scope_location !== null){
+      fcmService.subscribeTopic(user.scope_location)
+    }
+    const { myDevice } = this.props.state;
+    if(user.devices && user.devices.indexOf(myDevice.unique_code) >= 0){
+      fcmService.subscribeTopic(myDevice.unique_code)
+    }
     this.retrieveNotification()
     return () => {
       console.log("[App] unRegister")
@@ -218,6 +225,9 @@ class Login extends Component {
     Api.request(Routes.notificationsRetrieve, parameter, notifications => {
       setNotifications(notifications.size, notifications.data)
     }, error => {
+      if(error.message === 'Network request failed'){
+        this.setState({isResponseError: true})
+      }
     })
   }
 
@@ -233,6 +243,9 @@ class Login extends Component {
     Api.request(Routes.getRemainingBalancePartner, parameter, response => {
       setRemainingBalancePlan(Number(response.plan_amount) - Number(response.request_amount))
     }, error => {
+      if(error.message === 'Network request failed'){
+        this.setState({isResponseError: true})
+      }
     })
   }
 
@@ -296,15 +309,20 @@ class Login extends Component {
   async confirm(username, password){
       const { setEnableFingerPrint } = this.props;
       const {enable} = this.state
-      await this.setState({enable : !enable})
+      await this.setState({enable : true})
       await AsyncStorage.setItem('username', username)
       await AsyncStorage.setItem('password', password)
-      setEnableFingerPrint(enable);
+      setEnableFingerPrint(true);
       this.setState({showFingerPrint: true})
   }
 
   async cancel(){
+    console.log('cancel');
+    const { setEnableFingerPrint } = this.props;  
+    const {enable} = this.state
+    await this.setState({enable : false})
     await this.setState({showFingerPrint: false})
+    setEnableFingerPrint(false);
   }
 
   openModal(username, password){
@@ -343,14 +361,20 @@ class Login extends Component {
             }
             
           }, error => {
-            console.log("[ERROR]", error);
-            this.setState({isResponseError: true, isLoading: false})
+            if(error.message === 'Network request failed'){
+              this.setState({isResponseError: true, isLoading: false})
+            }else{
+              this.setState({isLoading: false})
+            }
           })
         }
       }, error => {
-        console.log('errorFingerPrint', error)
-        this.setState({isResponseError: true, isLoading: false})
-        this.setState({showFingerPrint: false})
+        if(error.message === 'Network request failed'){
+          this.setState({isResponseError: true, isLoading: false})
+        }else{
+          this.setState({isLoading: false})
+          this.setState({showFingerPrint: false})
+        }
       })
   }
   submit(){
@@ -387,13 +411,21 @@ class Login extends Component {
             }
             
           }, error => {
-            this.setState({isResponseError: true, isLoading: false})
+            if(error.message === 'Network request failed'){
+              this.setState({isResponseError: true, isLoading: false})
+            }else{
+              this.setState({isLoading: false})
+            }
           })
         }
       }, error => {
         console.log('errorLogin', error)
-        this.setState({isResponseError: true, isLoading: false})
-        this.setState({showFingerPrint: false})
+        if(error.message === 'Network request failed'){
+          this.setState({isResponseError: true, isLoading: false})
+        }else{
+          this.setState({isLoading: false})
+          this.setState({showFingerPrint: false})
+        }
       })
       // this.props.navigation.navigate('drawerStack');
     }else{
@@ -413,7 +445,7 @@ class Login extends Component {
           }}
           showsVerticalScrollIndicator={false}>
           <View style={{
-            flex: 1,
+            flex: 1
           }}>
             
             <NotificationsHandler notificationHandler={ref => (this.notificationHandler = ref)} />
@@ -425,7 +457,7 @@ class Login extends Component {
               marginTop: 10,
               borderTopLeftRadius: 60,
               borderTopRightRadius: 60,
-              height: height,
+              height: height * 1.5,
               ...BasicStyles.loginShadow
             }}>
               <Text style={{
@@ -463,6 +495,7 @@ class Login extends Component {
                   }}
                   onChangeText={(username) => this.setState({username})}
                   value={this.state.username}
+                  placeholderTextColor={Color.darkGray}
                   placeholder={'Username or Email'}
                 />
 
