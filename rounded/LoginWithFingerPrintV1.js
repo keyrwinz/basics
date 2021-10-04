@@ -263,6 +263,7 @@ class Login extends Component {
         if(error.message === 'Network request failed'){
           this.setState({isResponseError: true})
         }
+        this.setState({isLoading: false});
       })
     }
   }
@@ -405,7 +406,6 @@ class Login extends Component {
               this.firebaseNotification()
               this.redirect('drawerStack')
             }
-            
           }, error => {
             if(error.message === 'Network request failed'){
               this.setState({isResponseError: true, isLoading: false})
