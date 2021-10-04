@@ -18,6 +18,7 @@ import { Alert } from 'react-native';
 import Button from 'components/Form/Button';
 import NetInfo from "@react-native-community/netinfo";
 import NotificationsHandler from 'services/NotificationHandler';
+import LoaderModal from '../../generic/LoaderModal.js';
 import DeviceInfo from 'react-native-device-info';
 const height = Math.round(Dimensions.get('window').height);
 class Login extends Component {
@@ -621,7 +622,7 @@ class Login extends Component {
           blockedFlag={blockedFlag}
         ></OtpModal>
 
-        {isLoading ? <Spinner mode="overlay"/> : null }
+        {isLoading ? <LoaderModal isLoading={isLoading}/> : null }
         {isResponseError ? <CustomError visible={isResponseError} message={this.state.isConnected == true ? 'You have no internet connection' : null}
         onCLose={() => {
           this.setState({isResponseError: false, isLoading: false})
