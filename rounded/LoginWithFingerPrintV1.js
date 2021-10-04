@@ -190,14 +190,7 @@ class Login extends Component {
     fcmService.registerAppWithFCM()
     fcmService.register(this.onRegister, this.onNotification, this.onOpenNotification)
     localNotificationService.configure(this.onOpenNotification, Helper.APP_NAME)
-    fcmService.subscribeTopic(user.id)
-    if(user && user.scope_location !== null){
-      fcmService.subscribeTopic(user.scope_location)
-    }
-    const { myDevice } = this.props.state;
-    if(user.devices && user.devices.indexOf(myDevice.unique_code) >= 0){
-      fcmService.subscribeTopic(myDevice.unique_code)
-    }
+    this.notificationHandler.setTopics()
     this.retrieveNotification()
     return () => {
       console.log("[App] unRegister")
