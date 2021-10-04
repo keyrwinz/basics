@@ -175,7 +175,10 @@ class Login extends Component {
   }
 
   redirect = (route) => {
-    this.props.navigation.navigate(route);
+    // console.log('=================', route);
+    setTimeout(() => {
+      this.props.navigation.navigate(route);
+    }, 1000)
   }
 
   playAudio = () => {
@@ -352,10 +355,11 @@ class Login extends Component {
           const token = response.token;
           Api.getAuthUser(response.token, (response) => {
             login(response, token);
-            this.setState({isLoading: false, error: 0});
+            console.log('[TOKEN RESPONSE]', response);
             if(response.username){
-              this.firebaseNotification()
+              // this.firebaseNotification()
               this.redirect('drawerStack')
+              this.setState({isLoading: false, error: 0});
             }
             
           }, error => {
