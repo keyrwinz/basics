@@ -18,7 +18,6 @@ import { Alert } from 'react-native';
 import Button from 'components/Form/Button';
 import NetInfo from "@react-native-community/netinfo";
 import NotificationsHandler from 'services/NotificationHandler';
-import DeviceInfo from 'react-native-device-info';
 const height = Math.round(Dimensions.get('window').height);
 class Login extends Component {
   constructor(props){
@@ -166,7 +165,6 @@ class Login extends Component {
     })
   }
 
-
   test = () => {
     if(config.TEST == true){
       this.props.navigation.navigate('drawerStack');
@@ -204,6 +202,7 @@ class Login extends Component {
   retrieveNotification = () => {
     const { setNotifications } = this.props;
     const { user } = this.props.state;
+    console.log('[user]', user)
     if(user == null){
       return
     }
@@ -243,7 +242,6 @@ class Login extends Component {
     if(this.state.token != null){
       this.setState({isLoading: true});
       Api.getAuthUser(this.state.token, (response) => {
-        console.log('[response]', response)
         login(response, this.state.token);
         this.setState({isLoading: false});
         if(response.username){
@@ -254,7 +252,6 @@ class Login extends Component {
           }
         }
       }, error => {
-        console.log('[error login]', error)
         this.setState({isResponseError: true})
       })
     }
