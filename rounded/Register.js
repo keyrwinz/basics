@@ -118,7 +118,7 @@ class Register extends Component {
             <View style={{
               backgroundColor: Color.white,
               width: '100%',
-              height: height,
+              height: height * 1.5,
               paddingTop: 50,
               marginTop: 10,
               borderTopLeftRadius: 60,
@@ -162,6 +162,7 @@ class Register extends Component {
                     onChangeText={(username) => this.setState({username})}
                     value={this.state.username}
                     placeholder={'Username'}
+                    placeholderTextColor={Color.darkGray}
                   />
                   
                   <TextInput
@@ -173,6 +174,7 @@ class Register extends Component {
                     value={this.state.email}
                     placeholder={'Email Address'}
                     keyboardType={'email-address'}
+                    placeholderTextColor={Color.darkGray}
                   />
                   <PasswordWithIcon onTyping={(input) => this.setState({
                     password: input

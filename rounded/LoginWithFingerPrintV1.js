@@ -192,7 +192,7 @@ class Login extends Component {
     fcmService.registerAppWithFCM()
     fcmService.register(this.onRegister, this.onNotification, this.onOpenNotification)
     localNotificationService.configure(this.onOpenNotification, Helper.APP_NAME)
-    fcmService.subscribeTopic(user.id)
+    this.notificationHandler.setTopics()
     this.retrieveNotification()
     return () => {
       console.log("[App] unRegister")
@@ -441,7 +441,7 @@ class Login extends Component {
           }}
           showsVerticalScrollIndicator={false}>
           <View style={{
-            flex: 1,
+            flex: 1
           }}>
             
             <NotificationsHandler notificationHandler={ref => (this.notificationHandler = ref)} />
@@ -453,7 +453,7 @@ class Login extends Component {
               marginTop: 10,
               borderTopLeftRadius: 60,
               borderTopRightRadius: 60,
-              height: height,
+              height: height * 1.5,
               ...BasicStyles.loginShadow
             }}>
               <Text style={{
@@ -491,6 +491,7 @@ class Login extends Component {
                   }}
                   onChangeText={(username) => this.setState({username})}
                   value={this.state.username}
+                  placeholderTextColor={Color.darkGray}
                   placeholder={'Username or Email'}
                 />
 
