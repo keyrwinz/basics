@@ -207,7 +207,6 @@ class Login extends Component {
   retrieveNotification = () => {
     const { setNotifications } = this.props;
     const { user } = this.props.state;
-    console.log('[user]', user)
     if(user == null){
       return
     }
@@ -318,7 +317,6 @@ class Login extends Component {
   }
 
   async cancel(){
-    console.log('cancel');
     const { setEnableFingerPrint } = this.props;  
     const {enable} = this.state
     await this.setState({enable : false})
@@ -355,7 +353,6 @@ class Login extends Component {
           const token = response.token;
           Api.getAuthUser(response.token, (response) => {
             login(response, token);
-            console.log('[TOKEN RESPONSE]', response);
             if(response.username){
               // this.firebaseNotification()
               this.redirect('drawerStack')
@@ -398,9 +395,7 @@ class Login extends Component {
         if(response.token){
           const token = response.token;
           Api.getAuthUser(response.token, (response) => {
-            console.log('[tokeeen]', token);
             login(response, token);
-            console.log("[NOT_EMPTY]", this.state.notEmpty)
             this.setState({isLoading: false, error: 0});
             if(this.state.notEmpty == true){
               console.log("[notEmpty]", this.state.notEmpty);
