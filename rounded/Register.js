@@ -26,7 +26,8 @@ class Register extends Component {
       token: null,
       error: 0,
       errorMessage: null,
-      isResponseError: false
+      isResponseError: false,
+      referral_code: null
     };
   }
   
@@ -38,7 +39,7 @@ class Register extends Component {
   }
   
   submit(){
-    const { username, email, password } = this.state;
+    const { username, email, password, referral_code } = this.state;
     if(this.validate() == false){
       return
     }
@@ -48,9 +49,10 @@ class Register extends Component {
       password: password,
       config: null,
       account_type: 'USER',
-      referral_code: null,
+      referral_code: referral_code,
       status: 'ADMIN'
     }
+    console.log('[parameter]', parameter)
     this.setState({isLoading: true})
     Api.request(Routes.accountCreate, parameter, response => {
       this.setState({isLoading: false})
@@ -191,6 +193,16 @@ class Register extends Component {
                     placeholder={'Confirm Password'}
                     />
                   </View>
+                  <TextInput
+                    style={{
+                      ...BasicStyles.standardFormControl,
+                      marginBottom: 20
+                    }}
+                    onChangeText={(referral_code) => this.setState({referral_code})}
+                    value={this.state.referral_code}
+                    placeholder={'Enter Referral Code (Optional)'}
+                    placeholderTextColor={Color.darkGray}
+                  />
 
                   <Button
                     onClick={() => this.submit()}
