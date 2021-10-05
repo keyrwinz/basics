@@ -77,11 +77,11 @@ class Register extends Component {
     const { username, email, password, confirmPassword } = this.state;
     if(username.length >= 6 &&
       email !== '' &&
+      username.includes(' ') === false &&
       Helper.validatePassword(password) === true &&
       password.localeCompare(confirmPassword) === 0 &&
       Helper.validateEmail(email) === true){
       return true
-      
     }else if(username.includes(' ')){
       this.setState({errorMessage: 'Spaces in username is not allowed'})
       return false
