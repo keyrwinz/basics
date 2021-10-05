@@ -76,7 +76,10 @@ class FingerprintScan extends Component {
   detectFingerprintAvailable = () => {
     FingerprintScanner
       .isSensorAvailable()
-      .catch(error => this.setState({ errorMessage: error.message, biometric: error.biometric }));
+      .catch(error => {
+        console.log('[000000000000000000]');
+        this.setState({ errorMessage: error.message, biometric: error.biometric })
+      });
   }
 
   handleAppStateChange = (nextAppState) => {
