@@ -167,7 +167,6 @@ class Login extends Component {
     })
   }
 
-
   test = () => {
     if(config.TEST == true){
       this.props.navigation.navigate('drawerStack');
@@ -253,7 +252,6 @@ class Login extends Component {
     if(this.state.token != null){
       this.setState({isLoading: true});
       Api.getAuthUser(this.state.token, (response) => {
-        console.log('[response]', response)
         login(response, this.state.token);
         this.setState({isLoading: false});
         if(response.username){
@@ -319,7 +317,6 @@ class Login extends Component {
   }
 
   async cancel(){
-    console.log('cancel');
     const { setEnableFingerPrint } = this.props;  
     const {enable} = this.state
     await this.setState({enable : false})
@@ -356,7 +353,6 @@ class Login extends Component {
           const token = response.token;
           Api.getAuthUser(response.token, (response) => {
             login(response, token);
-            console.log('[TOKEN RESPONSE]', response);
             if(response.username){
               // this.firebaseNotification()
               this.redirect('drawerStack')
@@ -400,7 +396,6 @@ class Login extends Component {
           const token = response.token;
           Api.getAuthUser(response.token, (response) => {
             login(response, token);
-            console.log("[NOT_EMPTY]", this.state.notEmpty)
             this.setState({isLoading: false, error: 0});
             if(this.state.notEmpty == true){
               console.log("[notEmpty]", this.state.notEmpty);
