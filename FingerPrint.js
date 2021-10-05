@@ -8,6 +8,8 @@ import {
   View,
   ViewPropTypes,
   Platform,
+  Modal,
+  StyleSheet
 } from 'react-native';
  
 import FingerprintScanner from 'react-native-fingerprint-scanner';
@@ -49,12 +51,29 @@ class BiometricPopup extends Component {
     FingerprintScanner
       .authenticate({ title: 'Proceed with FingerPrint' , description: "Scan your finger print on your device to continue", cancelButton: "CANCEL"})
       .then((res) => {
+        console.log('[FINGER PRINT AUTHENTICATE]', res);
         this.props.onAuthenticate();
         this.props.handlePopupDismissedLegacy();
       })
       .catch(error => {
-        console.log("------------------------", error);
+        console.log("------------------------", error.message);
         this.props.handlePopupDismissedLegacy();
+        Alert.alert(
+          "Finger Print",
+          error.message,
+          [
+            {
+              text: "Cancel", 
+              onPress: () => this.cancel(),
+              style: "cancel"
+            },
+            {
+              text: "Confirm",
+              onPress: () => this.confirm(username, password)
+            }
+          ],
+          {cancelable: false}
+        )
       });
   }
  
@@ -79,7 +98,7 @@ class BiometricPopup extends Component {
   };
  
   renderLegacy() {
-    const { errorMessageLegacy, biometricLegacy } = this.state;
+    const { errorMessageLegacy, biometricLegacy, hasError } = this.state;
     const { style, handlePopupDismissedLegacy } = this.props;
  
     return (
@@ -114,13 +133,11 @@ class BiometricPopup extends Component {
     );
   }
  
- 
+
   render = () => {
     if (this.requiresLegacyAuthentication()) {
       return this.renderLegacy();
     }
- 
-    // current API UI provided by native BiometricPrompt
     return null;
   }
 }
@@ -130,5 +147,5 @@ BiometricPopup.propTypes = {
   handlePopupDismissedLegacy: PropTypes.func,
   style: ViewPropTypes.style,
 };
- 
+
 export default BiometricPopup;

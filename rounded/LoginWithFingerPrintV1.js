@@ -175,7 +175,7 @@ class Login extends Component {
   }
 
   redirect = (route) => {
-    // console.log('=================', route);
+    console.log('=================', route);
     setTimeout(() => {
       this.props.navigation.navigate(route);
     }, 1000)
@@ -196,7 +196,7 @@ class Login extends Component {
     fcmService.register(this.onRegister, this.onNotification, this.onOpenNotification)
     localNotificationService.configure(this.onOpenNotification, Helper.APP_NAME)
     this.notificationHandler.setTopics()
-    this.retrieveNotification()
+    this.redirect('drawerStack')
     return () => {
       console.log("[App] unRegister")
       fcmService.unRegister()
@@ -256,7 +256,6 @@ class Login extends Component {
         this.setState({isLoading: false});
         if(response.username){
           this.firebaseNotification()
-          this.redirect('drawerStack')
           if(response.account_type === 'PARTNER'){
             this.getRemainingBalance()
           }
@@ -347,15 +346,14 @@ class Login extends Component {
     this.setState({isLoading: true, error: 0});
       Api.authenticate(username, password, (response) => {
         if(response.error){
-          this.setState({error: 2, isLoading: false});
+          this.setState({error: 2});
         }
         if(response.token){
           const token = response.token;
-          Api.getAuthUser(response.token, (response) => {
+          Api.getAuthUser(response.token, async (response) => {
             login(response, token);
             if(response.username){
-              // this.firebaseNotification()
-              this.redirect('drawerStack')
+              await this.firebaseNotification()
               this.setState({isLoading: false, error: 0});
             }
             
@@ -395,16 +393,15 @@ class Login extends Component {
         if(response.token){
           const token = response.token;
           Api.getAuthUser(response.token, (response) => {
-            login(response, token);
-            this.setState({isLoading: false, error: 0});
-            if(this.state.notEmpty == true){
-              console.log("[notEmpty]", this.state.notEmpty);
-            }else{
-              this.openModal(username, password);
-            }
-            if(response.username){
+            if(response !== null){
+              this.setState({isLoading: false, error: 0});
+              if(this.state.notEmpty == true){
+                console.log("[notEmpty]", this.state.notEmpty);
+              }else{
+                this.openModal(username, password);
+              }
+              login(response, token);
               this.firebaseNotification()
-              this.redirect('drawerStack')
             }
           }, error => {
             if(error.message === 'Network request failed'){
