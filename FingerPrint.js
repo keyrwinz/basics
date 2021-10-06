@@ -11,7 +11,7 @@ import {
   Modal,
   StyleSheet
 } from 'react-native';
- 
+import { connect } from 'react-redux';
 import FingerprintScanner from 'react-native-fingerprint-scanner';
 import Style from './Style.js';
  
@@ -48,6 +48,7 @@ class BiometricPopup extends Component {
   }
  
   authCurrent() {
+    const { setEnableFingerPrint } = this.props;
     FingerprintScanner
       .authenticate({ title: 'Proceed with FingerPrint' , description: "Scan your finger print on your device to continue", cancelButton: "CANCEL"})
       .then((res) => {
@@ -56,24 +57,27 @@ class BiometricPopup extends Component {
         this.props.handlePopupDismissedLegacy();
       })
       .catch(error => {
-        console.log("------------------------", error.message);
         this.props.handlePopupDismissedLegacy();
-        Alert.alert(
-          "Finger Print",
-          error.message,
-          [
-            {
-              text: "Cancel", 
-              onPress: () => this.cancel(),
-              style: "cancel"
-            },
-            {
-              text: "Confirm",
-              onPress: () => this.confirm(username, password)
-            }
-          ],
-          {cancelable: false}
-        )
+        if(error.message.includes('lockout')){
+          Alert.alert(
+            "Finger Print",
+            error.message,
+            [
+              {
+                text: "Cancel", 
+                onPress: () => {},
+                style: "cancel"
+              },
+              {
+                text: "Confirm",
+                onPress: () => setEnableFingerPrint(false)
+              }
+            ],
+            {cancelable: false}
+          )
+        }else{
+          setEnableFingerPrint(false)
+        }
       });
   }
  
@@ -148,4 +152,16 @@ BiometricPopup.propTypes = {
   style: ViewPropTypes.style,
 };
 
-export default BiometricPopup;
+const mapStateToProps = state => ({ state: state });
+const mapDispatchToProps = dispatch => {
+  const { actions } = require('@redux');
+  return {
+    setEnableFingerPrint(isEnable){
+      dispatch(actions.setEnableFingerPrint(isEnable));
+    }
+  }
+}
+export default connect(
+  mapStateToProps,
+  mapDispatchToProps
+)(BiometricPopup);

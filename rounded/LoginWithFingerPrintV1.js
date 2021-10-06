@@ -41,7 +41,8 @@ class Login extends Component {
       isConfirmed: false,
       enable: false,
       isConnected: false,
-      manufacturers: null
+      manufacturers: null,
+      deviceCode: null
     };
     this.audio = null;
   }
@@ -81,6 +82,8 @@ class Login extends Component {
   }
   
   async componentDidMount(){
+    // console.log('[HISTORY]', this.props.history);
+    this.setState({deviceCode: DeviceInfo.getUniqueId()})
     this.getTheme()
     this.focusListener = this.props.navigation.addListener('didFocus', () => {
       this.onFocusFunction()
@@ -175,9 +178,18 @@ class Login extends Component {
   }
 
   redirect = (route) => {
-    console.log('=================', route);
+    const {user} = this.props.state
+    console.log('=================', user.devices, this.state.deviceCode);
     setTimeout(() => {
-      this.props.navigation.navigate(route);
+      if(user.devices.includes(this.state.deviceCode)){
+        this.props.navigation.navigate(route);
+        setInterval(() => {
+          this.setState({isLoading: false});
+        }, 10000)
+      }else{
+        this.props.navigation.navigate('checkDeviceStack');
+        this.setState({isLoading: false});
+      }
     }, 1000)
   }
 
@@ -354,7 +366,7 @@ class Login extends Component {
             login(response, token);
             if(response.username){
               await this.firebaseNotification()
-              this.setState({isLoading: false, error: 0});
+              this.setState({ error: 0});
             }
             
           }, error => {
@@ -388,22 +400,23 @@ class Login extends Component {
       this.setState({isLoading: true, error: 0});
       Api.authenticate(username, password, (response) => {
         if(response.error){
-          this.setState({error: 2, isLoading: false});
+          this.setState({error: 2});
         }
         if(response.token){
           const token = response.token;
           Api.getAuthUser(response.token, (response) => {
             if(response !== null){
-              this.setState({isLoading: false, error: 0});
+              this.setState({error: 0});
               if(this.state.notEmpty == true){
                 console.log("[notEmpty]", this.state.notEmpty);
               }else{
                 this.openModal(username, password);
               }
               login(response, token);
-              this.firebaseNotification()
+            this.firebaseNotification()
             }
           }, error => {
+            console.log('[ERROR]', error);
             if(error.message === 'Network request failed'){
               this.setState({isResponseError: true, isLoading: false})
             }else{
