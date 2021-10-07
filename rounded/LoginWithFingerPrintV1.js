@@ -3,7 +3,6 @@ import { connect } from 'react-redux';
 import AsyncStorage from '@react-native-community/async-storage';
 import { View , TextInput, Text, ScrollView, TouchableOpacity, Dimensions, SafeAreaView, Linking, Platform} from 'react-native';
 import Style from './../Style.js';
-import { Spinner } from 'components';
 import PasswordWithIcon from 'components/InputField/Password.js';
 import CustomError from 'components/Modal/Error.js';
 import Api from 'services/api/index.js';

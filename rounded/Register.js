@@ -1,7 +1,6 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
-import AsyncStorage from '@react-native-community/async-storage';
-import { View , TextInput , Image, TouchableHighlight, Text, ScrollView, Dimensions} from 'react-native';
+import { View , TextInput, Text, ScrollView, Dimensions} from 'react-native';
 import Style from './../Style.js';
 import { Spinner } from 'components';
 import Api from 'services/api/index.js';
@@ -9,9 +8,7 @@ import { Routes, Color, Helper, BasicStyles } from 'common';
 import CustomError from 'components/Modal/Error.js';
 import PasswordWithIcon from 'components/InputField/Password.js';
 import Header from './../HeaderWithoutName';
-import config from 'src/config';
 import Button from 'components/Form/Button';
-const width = Math.round(Dimensions.get('window').width);
 const height = Math.round(Dimensions.get('window').height);
 class Register extends Component {
   //Screen1 Component
@@ -55,6 +52,7 @@ class Register extends Component {
     console.log('[parameter]', parameter)
     this.setState({isLoading: true})
     Api.request(Routes.accountCreate, parameter, response => {
+      console.log('[register]', response)
       this.setState({isLoading: false})
       if(response.error !== null){
         if(response.error.status === 100){
