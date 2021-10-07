@@ -181,7 +181,7 @@ class Login extends Component {
     const {user} = this.props.state
     console.log('=================', user.devices, this.state.deviceCode);
     setTimeout(() => {
-      if(user.devices.includes(this.state.deviceCode)){
+      if(user.devices.length > 0 && user.devices.includes(this.state.deviceCode)){
         this.props.navigation.navigate(route);
         setInterval(() => {
           this.setState({isLoading: false});
