@@ -187,7 +187,7 @@ class Login extends Component {
           this.setState({isLoading: false});
         }, 10000)
       }else{
-        this.props.navigation.navigate('checkDeviceStack');
+        this.props.navigation.navigate(config.TEST_DEVICE_FLAG == true ? 'drawerStack' : 'checkDeviceStack');
         this.setState({isLoading: false});
       }
     }, 1000)
