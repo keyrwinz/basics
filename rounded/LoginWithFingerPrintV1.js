@@ -178,8 +178,7 @@ class Login extends Component {
   }
 
   redirect = (route) => {
-    const {user} = this.props.state
-    // console.log('=================', user.devices, this.state.deviceCode);
+    const {user} = this.props.state;
     setTimeout(() => {
       if(user?.devices?.length > 0 && user?.devices?.includes(this.state.deviceCode)){
         this.props.navigation.navigate(route);
