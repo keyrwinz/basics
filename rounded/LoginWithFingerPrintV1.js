@@ -181,15 +181,15 @@ class Login extends Component {
     const {user} = this.props.state
     // console.log('=================', user.devices, this.state.deviceCode);
     setTimeout(() => {
-      if(user?.devices?.length > 0 && user?.devices?.includes(this.state.deviceCode)){
+      // if(user?.devices?.length > 0 && user?.devices?.includes(this.state.deviceCode)){
         this.props.navigation.navigate(route);
         setInterval(() => {
           this.setState({isLoading: false});
         }, 10000)
-      }else{
-        this.props.navigation.navigate('checkDeviceStack');
-        this.setState({isLoading: false});
-      }
+      // }else{
+      //   this.props.navigation.navigate('checkDeviceStack');
+      //   this.setState({isLoading: false});
+      // }
     }, 1000)
   }
 
@@ -595,7 +595,7 @@ class Login extends Component {
                 </View>
 
                 <Button
-                  onClick={() => this.redirect('registerStack')}
+                  onClick={() => this.props.navigation.navigate('registerStack')}
                   title={'Register Now!'}
                   style={{
                     backgroundColor: Color.warning,
