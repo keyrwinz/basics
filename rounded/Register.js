@@ -230,7 +230,7 @@ class Register extends Component {
                   </View>
 
                   <Button
-                    onClick={() => this.redirect('loginStack')}
+                    onClick={() => this.props.navigation.navigate('loginStack')}
                     title={'Login Now!'}
                     style={{
                       backgroundColor: Color.warning,

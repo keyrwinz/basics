@@ -188,6 +188,7 @@ class Login extends Component {
         this.props.navigation.navigate(config.TEST_DEVICE_FLAG == true ? 'drawerStack' : 'checkDeviceStack');
         this.setState({isLoading: false});
       }
+      
     }, 1000)
   }
 
@@ -593,7 +594,7 @@ class Login extends Component {
                 </View>
 
                 <Button
-                  onClick={() => this.redirect('registerStack')}
+                  onClick={() => this.props.navigation.navigate('registerStack')}
                   title={'Register Now!'}
                   style={{
                     backgroundColor: Color.warning,
