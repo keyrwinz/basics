@@ -193,7 +193,7 @@ class Register extends Component {
                     placeholder={'Confirm Password'}
                     />
                   </View>
-                  <TextInput
+                  {/* <TextInput
                     style={{
                       ...BasicStyles.standardFormControl,
                       marginBottom: 20
@@ -202,7 +202,7 @@ class Register extends Component {
                     value={this.state.referral_code}
                     placeholder={'Enter Referral Code (Optional)'}
                     placeholderTextColor={Color.darkGray}
-                  />
+                  /> */}
 
                   <Button
                     onClick={() => this.submit()}
