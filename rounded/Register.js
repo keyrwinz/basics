@@ -11,8 +11,11 @@ import PasswordWithIcon from 'components/InputField/Password.js';
 import Header from './../HeaderWithoutName';
 import config from 'src/config';
 import Button from 'components/Form/Button';
+import {FontAwesomeIcon} from '@fortawesome/react-native-fontawesome';
+import { faCheck, faEdit } from '@fortawesome/free-solid-svg-icons';
 const width = Math.round(Dimensions.get('window').width);
 const height = Math.round(Dimensions.get('window').height);
+
 class Register extends Component {
   //Screen1 Component
   constructor(props){
@@ -28,7 +31,8 @@ class Register extends Component {
       error: 0,
       errorMessage: null,
       isResponseError: false,
-      referral_code: null
+      referral_code: null,
+      continueFlag: false
     };
   }
   
@@ -76,6 +80,81 @@ class Register extends Component {
     })
   }
 
+  getEmailCode(){
+    const { email } = this.state;
+    if(email == null || email == ''){
+      this.setState({errorMessage: 'Email address is required.'})
+      return false
+    }else if(email !== '' && Helper.validateEmail(email) === false){
+      this.setState({errorMessage: 'You have entered an invalid email address.'})
+      return false
+    }
+    let parameter = {
+      email: email
+    }
+    this.setState({
+      isLoading: true
+    })
+    Api.request(Routes.preVerify, parameter, response => {
+      if(response.data == null && response.error  != null){
+        this.setState({
+          errorMessage: response.error
+        })
+      }
+      this.setState({
+        isLoading: false
+      })
+    }, error => {
+      this.setState({
+        isLoading: false
+      })
+    })
+  }
+
+  verifyCode(code){
+    this.setState({emailCode: code})
+    if(code && code.length == 6){
+      // verify here
+      const { email } = this.state;
+      let parameter = {
+        condition: [{
+          value: code,
+          column: 'category',
+          clause: '='
+        }, {
+          value: email,
+          column: 'payload_value',
+          clause: '='
+        }, {
+          value: 'pre_register',
+          column: 'payload',
+          clause: '='
+        }]
+      }
+      this.setState({
+        isLoading: true
+      })
+      Api.request(Routes.payloadRetrieve, parameter, response => {
+        this.setState({
+          isLoading: false
+        })
+        if(response.data && response.data.length > 0){
+          this.setState({
+            continueFlag: true
+          })
+        }else{
+          this.setState({
+            continueFlag: false
+          })
+        }
+      }, error => {
+        this.setState({
+          isLoading: false
+        })
+      })
+    }
+  }
+
   validate(){
     const { username, email, password, confirmPassword } = this.state;
     if(username.length >= 6 &&
@@ -107,7 +186,7 @@ class Register extends Component {
   }
 
   render() {
-    const { isLoading, errorMessage, isResponseError } = this.state;
+    const { isLoading, errorMessage, isResponseError, continueFlag } = this.state;
     const { theme } = this.props.state;
     return (
       <ScrollView style={{
@@ -168,18 +247,46 @@ class Register extends Component {
                     placeholderTextColor={Color.darkGray}
                   />
                   
-                  <TextInput
-                    style={{
-                      ...BasicStyles.standardFormControl,
-                      marginBottom: 20
-                    }}
-                    onChangeText={(email) => this.setState({email})}
-                    value={this.state.email}
-                    placeholder={'Email Address'}
-                    keyboardType={'email-address'}
-                    placeholderTextColor={Color.darkGray}
-                  />
+                  <View style={{
+                    flexDirection: 'row',
+                    width: '100%',
+                    ...BasicStyles.standardFormControl,
+                    marginBottom: 20
+                  }}>
+                    <TextInput
+                      style={{
+                        width: continueFlag ? '70%' : '100%'
+                      }}
+                      onChangeText={(email) => this.setState({email})}
+                      value={this.state.email}
+                      placeholder={'Email Address'}
+                      keyboardType={'email-address'}
+                      editable={!continueFlag}
+                      placeholderTextColor={Color.darkGray}
+                    />
+                    {
+                      continueFlag && (
+                        <TouchableOpacity style={{
+                          borderTopRightRadius: 25,
+                          borderBottomRightRadius: 25,
+                          width: '30%',
+                          alignItems: 'center',
+                          justifyContent: 'center'
+                        }}
+                        onPress={() => {
+                          this.setState({
+                            continueFlag: false,
+                            emailCode: null
+                          })
+                        }}
+                        >
+                          <FontAwesomeIcon icon={faEdit} color={Color.danger}/>
+                        </TouchableOpacity>
+                      )
+                    }
+                  </View>
 
+                 
                   <View style={{
                     flexDirection: 'row',
                     width: '100%',
@@ -191,10 +298,13 @@ class Register extends Component {
                       style={{
                         width: '70%'
                       }}
-                      onChangeText={(code) => this.setState({emailCode: code})}
+                      onChangeText={(code) => {
+                        this.verifyCode(code)
+                      }}
                       value={this.state.emailCode}
                       placeholder={'Email Code'}
                       placeholderTextColor={Color.darkGray}
+                      editable={!continueFlag}
                     />
 
                     <TouchableOpacity style={{
@@ -205,18 +315,28 @@ class Register extends Component {
                       justifyContent: 'center'
                     }}
                     onPress={() => {
-                      //
+                      this.getEmailCode()
                     }}
                     >
-                      <Text style={{
-                        color: theme ? theme.secondary : Color.secondary,
-                        fontWeight: 'bold',
-                        fontSize: BasicStyles.standardFontSize
-                      }}>Get Code</Text>
+                      {
+                        continueFlag == false && (
+                          <Text style={{
+                            color: theme ? theme.secondary : Color.secondary,
+                            fontWeight: 'bold',
+                            fontSize: BasicStyles.standardFontSize
+                          }}>Get Code</Text>
+                        )
+                      }
+                      {
+                        continueFlag == true && (
+                          <FontAwesomeIcon icon={faCheck} color={Color.secondary}/>
+                        )
+                      }
+                      
                     </TouchableOpacity>
-
                   </View>
 
+                  
 
                   <PasswordWithIcon onTyping={(input) => this.setState({
                     password: input
@@ -244,19 +364,26 @@ class Register extends Component {
                     placeholderTextColor={Color.darkGray}
                   /> */}
 
-                  <Button
-                    onClick={() => this.submit()}
-                    title={'Register'}
-                    style={{
-                      backgroundColor: theme ? theme.secondary : Color.secondary,
-                      width: '100%',
-                      marginBottom: 20
-                    }}
-                  />
+                  {
+                    continueFlag && (
+                      <Button
+                        onClick={() => this.submit()}
+                        title={'Register'}
+                        style={{
+                          backgroundColor: theme ? theme.secondary : Color.secondary,
+                          width: '100%',
+                          marginBottom: 20
+                        }}
+                      />
+                    )
+                  }
+
+                  
 
                   <View style={{
                     height: 1,
-                    backgroundColor: Color.gray
+                    backgroundColor: Color.gray,
+                    marginTop: continueFlag == false ? 100 : 0
                   }}>
                   </View>
 
