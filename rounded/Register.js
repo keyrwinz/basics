@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import AsyncStorage from '@react-native-community/async-storage';
-import { View , TextInput , Image, TouchableHighlight, Text, ScrollView, Dimensions, TouchableOpacity} from 'react-native';
+import { View , TextInput , Image, TouchableHighlight, Text, ScrollView, Dimensions, TouchableOpacity, ActivityIndicator} from 'react-native';
 import Style from './../Style.js';
 import { Spinner } from 'components';
 import Api from 'services/api/index.js';
@@ -319,7 +319,7 @@ class Register extends Component {
                     }}
                     >
                       {
-                        continueFlag == false && (
+                        (continueFlag == false && isLoading == false) && (
                           <Text style={{
                             color: theme ? theme.secondary : Color.secondary,
                             fontWeight: 'bold',
@@ -328,8 +328,14 @@ class Register extends Component {
                         )
                       }
                       {
-                        continueFlag == true && (
+                        (continueFlag == true && isLoading == false) && (
                           <FontAwesomeIcon icon={faCheck} color={Color.secondary}/>
+                        )
+                      }
+
+                      {
+                        (isLoading == true) && (
+                          <ActivityIndicator size={20} color={Color.secondary} />
                         )
                       }
                       
