@@ -64,12 +64,7 @@ class BiometricPopup extends Component {
             error.message,
             [
               {
-                text: "Cancel", 
-                onPress: () => {},
-                style: "cancel"
-              },
-              {
-                text: "Confirm",
+                text: "OK",
                 onPress: () => setEnableFingerPrint(false)
               }
             ],
