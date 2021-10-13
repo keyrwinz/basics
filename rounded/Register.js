@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
-import { View , TextInput, Text, ScrollView, Dimensions} from 'react-native';
+import AsyncStorage from '@react-native-community/async-storage';
+import { View , TextInput , Image, TouchableHighlight, Text, ScrollView, Dimensions, TouchableOpacity} from 'react-native';
 import Style from './../Style.js';
 import { Spinner } from 'components';
 import Api from 'services/api/index.js';
@@ -18,6 +19,7 @@ class Register extends Component {
       username: '',
       email: '',
       password: '',
+      emailCode: null,
       confirmPassword: '',
       isLoading: false,
       token: null,
@@ -176,6 +178,45 @@ class Register extends Component {
                     keyboardType={'email-address'}
                     placeholderTextColor={Color.darkGray}
                   />
+
+                  <View style={{
+                    flexDirection: 'row',
+                    width: '100%',
+                    ...BasicStyles.standardFormControl,
+                    marginBottom: 20
+                  }}>
+
+                    <TextInput
+                      style={{
+                        width: '70%'
+                      }}
+                      onChangeText={(code) => this.setState({emailCode: code})}
+                      value={this.state.emailCode}
+                      placeholder={'Email Code'}
+                      placeholderTextColor={Color.darkGray}
+                    />
+
+                    <TouchableOpacity style={{
+                      borderTopRightRadius: 25,
+                      borderBottomRightRadius: 25,
+                      width: '30%',
+                      alignItems: 'center',
+                      justifyContent: 'center'
+                    }}
+                    onPress={() => {
+                      //
+                    }}
+                    >
+                      <Text style={{
+                        color: theme ? theme.secondary : Color.secondary,
+                        fontWeight: 'bold',
+                        fontSize: BasicStyles.standardFontSize
+                      }}>Get Code</Text>
+                    </TouchableOpacity>
+
+                  </View>
+
+
                   <PasswordWithIcon onTyping={(input) => this.setState({
                     password: input
                   })}
@@ -191,7 +232,7 @@ class Register extends Component {
                     placeholder={'Confirm Password'}
                     />
                   </View>
-                  <TextInput
+                  {/* <TextInput
                     style={{
                       ...BasicStyles.standardFormControl,
                       marginBottom: 20
@@ -200,7 +241,7 @@ class Register extends Component {
                     value={this.state.referral_code}
                     placeholder={'Enter Referral Code (Optional)'}
                     placeholderTextColor={Color.darkGray}
-                  />
+                  /> */}
 
                   <Button
                     onClick={() => this.submit()}
