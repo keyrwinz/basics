@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import AsyncStorage from '@react-native-community/async-storage';
-import { View , TextInput , Image, TouchableHighlight, Text, ScrollView, Dimensions, TouchableOpacity, ActivityIndicator} from 'react-native';
+import { Alert, View , TextInput , Image, TouchableHighlight, Text, ScrollView, Dimensions, TouchableOpacity, ActivityIndicator} from 'react-native';
 import Style from './../Style.js';
 import { Spinner } from 'components';
 import Api from 'services/api/index.js';
@@ -55,7 +55,7 @@ class Register extends Component {
       config: null,
       account_type: 'USER',
       referral_code: referral_code,
-      status: 'ADMIN'
+      status: 'EMAIL_VERIFIED'
     }
     console.log('[parameter]', parameter)
     this.setState({isLoading: true})
@@ -100,6 +100,17 @@ class Register extends Component {
         this.setState({
           errorMessage: response.error
         })
+      }else{
+        Alert.alert(
+          "Email Code Notification",
+          "We sent a code to your email address specified.",
+          [
+            {
+              text: "Ok", onPress: () => {
+              }
+            }
+          ]
+        );
       }
       this.setState({
         isLoading: false
@@ -156,7 +167,7 @@ class Register extends Component {
   }
 
   validate(){
-    const { username, email, password, confirmPassword } = this.state;
+    const { username, email, password, confirmPassword,continueFlag } = this.state;
     if(username.length >= 6 &&
       email !== '' &&
       username.includes(' ') === false &&
@@ -178,6 +189,11 @@ class Register extends Component {
       return false
     }else if(password !== '' && password.localeCompare(confirmPassword) !== 0){
       this.setState({errorMessage: 'Password did not match.'})
+      return false
+    }else if(continueFlag == false){
+      this.setState({
+        errorMessage: 'Email address is not verified.'
+      })
       return false
     }else{ 
       this.setState({errorMessage: 'Please fill in all required fields.'})
