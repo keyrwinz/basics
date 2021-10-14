@@ -55,7 +55,8 @@ class Register extends Component {
       config: null,
       account_type: 'USER',
       referral_code: referral_code,
-      status: 'EMAIL_VERIFIED'
+      status: 'ADMIN',
+      account_status: 'EMAIL_VERIFIED'
     }
     console.log('[parameter]', parameter)
     this.setState({isLoading: true})
