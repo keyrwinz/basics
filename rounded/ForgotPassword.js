@@ -306,7 +306,7 @@ class ForgotPassword extends Component {
                 <Text style={{
                   paddingTop: 10,
                   paddingBottom: 10,
-                  color: Color.gray
+                  color: '#949699'
                 }}>Have an account Already?</Text>
               </View>
               <Button

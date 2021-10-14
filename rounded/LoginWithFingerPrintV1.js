@@ -565,7 +565,7 @@ class Login extends Component {
                       width: '100%',
                       textAlign: 'center',
                       paddingBottom: 20,
-                      fontSize: BasicStyles.standardFontSize,
+                      fontSize: BasicStyles.standardFontSize + 1,
                       fontWeight: 'bold',
                       color: theme ? theme.primary : Color.primary,
                       textDecorationLine: 'underline'

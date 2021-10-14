@@ -192,8 +192,8 @@ class Verify extends Component {
                   <Text style={{
                     paddingTop: 10,
                     paddingBottom: 10,
-                    color: Color.gray
-                  }}>Have an account Already?</Text>
+                    color: '#949699'
+                  }}>Have an account already?</Text>
                 </View>
 
                 <Button
