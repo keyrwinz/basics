@@ -1,6 +1,5 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
-import AsyncStorage from '@react-native-community/async-storage';
 import { Alert, View , TextInput , Image, TouchableHighlight, Text, ScrollView, Dimensions, TouchableOpacity, ActivityIndicator} from 'react-native';
 import Style from './../Style.js';
 import { Spinner } from 'components';
@@ -9,7 +8,6 @@ import { Routes, Color, Helper, BasicStyles } from 'common';
 import CustomError from 'components/Modal/Error.js';
 import PasswordWithIcon from 'components/InputField/Password.js';
 import Header from './../HeaderWithoutName';
-import config from 'src/config';
 import Button from 'components/Form/Button';
 import {FontAwesomeIcon} from '@fortawesome/react-native-fontawesome';
 import { faCheck, faEdit } from '@fortawesome/free-solid-svg-icons';
@@ -58,7 +56,6 @@ class Register extends Component {
       status: 'ADMIN',
       account_status: 'EMAIL_VERIFIED'
     }
-    console.log('[parameter]', parameter)
     this.setState({isLoading: true})
     Api.request(Routes.accountCreate, parameter, response => {
       this.setState({isLoading: false})
@@ -97,14 +94,11 @@ class Register extends Component {
       isLoading: true
     })
     Api.request(Routes.preVerify, parameter, response => {
-      if(response.data == null && response.error != null){
+      if(response.data == null && response.error  != null){
         this.setState({
           errorMessage: response.error
         })
       }else{
-        this.setState({
-          errorMessage: null
-        })
         Alert.alert(
           "Email Code Notification",
           "We sent a code to your email address specified.",
@@ -420,8 +414,8 @@ class Register extends Component {
                     <Text style={{
                       paddingTop: 10,
                       paddingBottom: 10,
-                      color: Color.gray
-                    }}>Have an account Already?</Text>
+                      color: '#949699'
+                    }}>Have an account already?</Text>
                   </View>
 
                   <Button
