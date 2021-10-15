@@ -77,29 +77,22 @@ class Login extends Component {
       await this.setState({showFingerPrint: false})
     }
   }
-
-  onFocusFunction = () => {
-  }
   
   async componentDidMount(){
-    // console.log('[HISTORY]', this.props.history);
     this.setState({deviceCode: DeviceInfo.getUniqueId()})
-    this.getTheme()
-    this.focusListener = this.props.navigation.addListener('didFocus', () => {
-      this.onFocusFunction()
-    })
     if((await AsyncStorage.getItem('username') != null && await AsyncStorage.getItem('password') != null)){
       await this.setState({showFingerPrint: true})
       await this.setState({notEmpty: true})
+      await this.getTheme()
     }
 
     this.getData();
     this.checkInternetConnection();
   }
 
-  componentWillUnmount() {
-    this.focusListener.remove()
-  }
+  // componentWillUnmount() {
+  //   this.focusListener.remove()
+  // }
   
   
   handleOpenURL = (event) => { // D
@@ -139,14 +132,18 @@ class Login extends Component {
       const secondary = await AsyncStorage.getItem(Helper.APP_NAME + 'secondary');
       const tertiary = await AsyncStorage.getItem(Helper.APP_NAME + 'tertiary');
       const fourth = await AsyncStorage.getItem(Helper.APP_NAME + 'fourth');
+      const index = await AsyncStorage.getItem(Helper.APP_NAME + 'index');
+      console.log({index: index})
       if(primary != null && secondary != null && tertiary != null) {
         const { setTheme } = this.props;
         setTheme({
           primary: primary,
           secondary: secondary,
           tertiary: tertiary,
-          fourth: fourth
+          fourth: fourth,
+          index: parseInt(index)
         })
+        console.log('[sadfasdf>>>>>>>>>]', this.props.state.theme)
       }
     } catch (e) {
       console.log(e)
