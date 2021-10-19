@@ -397,7 +397,7 @@ class Login extends Component {
       this.setState({isLoading: true, error: 0});
       Api.authenticate(username, password, (response) => {
         if(response.error){
-          this.setState({error: 2});
+          this.setState({error: 2, isLoading: false});
         }
         if(response.token){
           const token = response.token;
@@ -410,7 +410,7 @@ class Login extends Component {
                 this.openModal(username, password);
               }
               login(response, token);
-            this.firebaseNotification()
+              this.firebaseNotification()
             }
           }, error => {
             console.log('[ERROR]', error);
