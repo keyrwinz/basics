@@ -51,14 +51,19 @@ class ForgotPassword extends Component {
     let parameter = {
       email: email
     }
-    
-    this.setState({isLoading: true})
-    Api.request(config.IS_DEV + '/accounts/request_reset', parameter, userInfo => {
-      this.setState({
-        isLoading: false,
-        successMessage: 'Successfully sent! Please check your e-mail address to continue.',
-        errorMessage: null
-      })
+    // Api.request(config.IS_DEV + '/accounts/request_reset', parameter, userInfo => {
+    Api.request(config.IS_DEV + '/accounts/request_reset_via_otp', parameter, userInfo => {
+      // this.setState({
+      //   isLoading: false,
+      //   successMessage: 'Successfully sent! Please check your e-mail address to continue.',
+      //   errorMessage: null
+      // })
+      this.props.navigation.navigate('otpStack', {
+        data: {
+          payload: 'change_password',
+          data: parameter
+        }
+      });
     }, error => {
       //
     })
@@ -76,7 +81,6 @@ class ForgotPassword extends Component {
     }
     this.setState({isLoading: true})
     Api.request(Routes.accountRetrieve, parameter, userInfo => {
-      console.log('userInfo', userInfo);
       this.setState({responseErrorTitle: null})
       this.setState({responseErrorMessage: null})
       this.setState({isResponseError: false})
@@ -89,7 +93,6 @@ class ForgotPassword extends Component {
         this.setState({responseErrorMessage: null})
         this.setState({isResponseError: false})
         Api.request(Routes.notificationSettingOtp, otpParameter, response => {
-          console.log('otp', response)
           this.setState({otpData: response})
           this.setState({isLoading: false})
           if(response.error == null){
@@ -142,7 +145,6 @@ class ForgotPassword extends Component {
       code: user.code,
       password: this.state.password
     }
-    console.log('parameter', parameter);
     this.setState({isResponseError: false})
     Api.request(Routes.accountUpdate, parameter, response => {
       this.setState({isLoading: false})
