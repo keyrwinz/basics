@@ -556,6 +556,7 @@ class Login extends Component {
                  />*/}
                  <TouchableOpacity
                   onPress={() => {
+                    this.props.viewChangePass(0)
                     this.props.navigation.navigate('forgotPasswordStack')
                   }}>
                     <Text style={{
