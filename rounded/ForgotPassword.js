@@ -156,6 +156,36 @@ class ForgotPassword extends Component {
     })
   }
 
+  resetPasswordByEmail = () => {
+    const { password, confirmPassword, email } = this.state;
+    if(password == null || password == '' || confirmPassword == null || confirmPassword == ''){
+      this.setState({errorMessage: 'Please fill up the required fields.'})
+      return false
+    }
+    if(password.length < 6){
+       this.setState({errorMessage: 'Password must be atleast 6 characters.'})
+       return false
+    }
+    if(password.localeCompare(confirmPassword) !== 0){
+      this.setState({errorMessage: 'Password did not match.'})
+      return false
+    }
+    this.setState({isLoading: true})
+    let parameter = {
+      email: email,
+      password: this.state.password
+    }
+    this.setState({isResponseError: false})
+    Api.request(Routes.accountUpdateByEmail, parameter, response => {
+      this.setState({isLoading: false})
+      this.props.navigation.navigate('loginStack')
+    }, error => {
+      console.log(error)
+      this.setState({isLoading: false})
+      this.setState({isResponseError: true})
+    })
+  }
+
   _changePassword = () => {
     // this.setState({successMessage: false})
     const { theme } = this.props.state;
@@ -184,7 +214,7 @@ class ForgotPassword extends Component {
         />
 
         <Button
-          onClick={() => this.resetPassword()}
+          onClick={() => this.resetPasswordByEmail()}
           title={'Reset'}
           style={{
             backgroundColor: theme ? theme.secondary : Color.secondary,
