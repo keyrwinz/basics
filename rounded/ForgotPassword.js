@@ -11,6 +11,7 @@ import Header from './../HeaderWithoutName';
 import config from 'src/config';
 import OtpModal from 'components/Modal/Otp.js';
 import Button from 'components/Form/Button';
+import PasswordWithIcon from 'components/InputField/Password.js';
 const width = Math.round(Dimensions.get('window').width);
 const height = Math.round(Dimensions.get('window').height);
 class ForgotPassword extends Component {
@@ -53,11 +54,12 @@ class ForgotPassword extends Component {
     }
     // Api.request(config.IS_DEV + '/accounts/request_reset', parameter, userInfo => {
     Api.request(config.IS_DEV + '/accounts/request_reset_via_otp', parameter, userInfo => {
-      // this.setState({
-      //   isLoading: false,
-      //   successMessage: 'Successfully sent! Please check your e-mail address to continue.',
-      //   errorMessage: null
-      // })
+      this.setState({
+        isLoading: false,
+        successMessage: 'Successfully sent! Please check your e-mail address to continue.',
+        errorMessage: null
+      })
+
       this.props.navigation.navigate('otpStack', {
         data: {
           payload: 'change_password',
@@ -158,6 +160,7 @@ class ForgotPassword extends Component {
 
   resetPasswordByEmail = () => {
     const { password, confirmPassword, email } = this.state;
+    console.log('[>>>>>>>>>>>>>>>>>]', password, confirmPassword, email)
     if(password == null || password == '' || confirmPassword == null || confirmPassword == ''){
       this.setState({errorMessage: 'Please fill up the required fields.'})
       return false
@@ -170,6 +173,9 @@ class ForgotPassword extends Component {
       this.setState({errorMessage: 'Password did not match.'})
       return false
     }
+    if(password.localeCompare(confirmPassword) === 0){
+      this.setState({errorMessage: ''})
+    }
     this.setState({isLoading: true})
     let parameter = {
       email: email,
@@ -178,6 +184,7 @@ class ForgotPassword extends Component {
     this.setState({isResponseError: false})
     Api.request(Routes.accountUpdateByEmail, parameter, response => {
       this.setState({isLoading: false})
+      this.setState({errorMessage: ''})
       this.props.navigation.navigate('loginStack')
     }, error => {
       console.log(error)
@@ -191,7 +198,25 @@ class ForgotPassword extends Component {
     const { theme } = this.props.state;
     return (
       <View>
-        <TextInput
+        <PasswordWithIcon
+          onTyping={(input) => this.setState({
+            password: input
+          })}
+          placeholder={'New Password'} />
+
+        <View style={{
+          marginTop: 10,
+          marginBottom: 20,
+        }}>
+          <PasswordWithIcon
+            onTyping={(input) => this.setState({
+              confirmPassword: input
+            })}
+            placeholder={'Confirm Password'}
+          />
+        </View>
+
+        {/* <TextInput
           style={{
             ...BasicStyles.standardFormControl,
             marginBottom: 20
@@ -211,7 +236,7 @@ class ForgotPassword extends Component {
           value={this.state.confirmPassword}
           placeholder={'Confirm new password'}
           secureTextEntry={true}
-        />
+        /> */}
 
         <Button
           onClick={() => this.resetPasswordByEmail()}
