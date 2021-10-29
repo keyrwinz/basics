@@ -99,6 +99,7 @@ class Register extends Component {
           errorMessage: response.error
         })
       }else{
+        this.setState({errorMessage: null})
         Alert.alert(
           "Email Code Notification",
           "We sent a code to your email address specified.",
