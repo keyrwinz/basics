@@ -94,6 +94,7 @@ class Register extends Component {
       isLoading: true
     })
     Api.request(Routes.preVerify, parameter, response => {
+      console.log('[>>>>>>>>>>>]', response)
       if(response.data == null && response.error  != null){
         this.setState({
           errorMessage: response.error
