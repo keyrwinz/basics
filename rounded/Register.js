@@ -94,11 +94,13 @@ class Register extends Component {
       isLoading: true
     })
     Api.request(Routes.preVerify, parameter, response => {
+      console.log('[>>>>>>>>>>>]', response)
       if(response.data == null && response.error  != null){
         this.setState({
           errorMessage: response.error
         })
       }else{
+        this.setState({errorMessage: null})
         Alert.alert(
           "Email Code Notification",
           "We sent a code to your email address specified.",
