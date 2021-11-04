@@ -183,6 +183,7 @@ class ForgotPassword extends Component {
     }
     this.setState({isResponseError: false})
     Api.request(Routes.accountUpdateByEmail, parameter, response => {
+      console.log('[asdfasdf]', response)
       this.setState({isLoading: false})
       this.setState({errorMessage: null})
       this.props.navigation.navigate('loginStack')
