@@ -195,7 +195,6 @@ class ForgotPassword extends Component {
   }
 
   _changePassword = () => {
-    this.setState({successMessage: false})
     const { theme } = this.props.state;
     return (
       <View>
