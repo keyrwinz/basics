@@ -83,25 +83,19 @@ class ForgotPassword extends Component {
     }
     this.setState({isLoading: true})
     Api.request(Routes.accountRetrieve, parameter, userInfo => {
-      this.setState({responseErrorTitle: null})
-      this.setState({responseErrorMessage: null})
-      this.setState({isResponseError: false})
+      this.setState({responseErrorTitle: null, responseErrorMessage: null, isResponseError: false})
       if(userInfo.data.length > 0){
         let otpParameter = {
           account_id: userInfo.data[0].id
         }
         login(userInfo.data[0], null);
-        this.setState({responseErrorTitle: null})
-        this.setState({responseErrorMessage: null})
-        this.setState({isResponseError: false})
+        this.setState({responseErrorTitle: null, responseErrorMessage: null, isResponseError: false})
         Api.request(Routes.notificationSettingOtp, otpParameter, response => {
-          this.setState({otpData: response})
-          this.setState({isLoading: false})
+          this.setState({otpData: response, isLoading: false})
           if(response.error == null){
             this.setState({blockedFlag: false, errorMessage: null})
           }else{
-            this.setState({blockedFlag: true})
-            this.setState({errorMessage: response.error})
+            this.setState({blockedFlag: true, errorMessage: response.error})
           }
           setTimeout(() => {
             this.setState({isOtpModal: true})
@@ -111,10 +105,7 @@ class ForgotPassword extends Component {
           this.setState({isResponseError: true})
         })
       }else{
-        this.setState({isLoading: false})
-        this.setState({responseErrorTitle: 'Error!'})
-        this.setState({responseErrorMessage: 'Email address not found!'})
-        this.setState({isResponseError: true})
+        this.setState({isLoading: false, responseErrorTitle: 'Error!', responseErrorMessage: 'Email address not found!', isResponseError: true})
       }
     }, error => {
       this.setState({isResponseError: true})
@@ -153,14 +144,12 @@ class ForgotPassword extends Component {
       this.props.navigation.navigate('loginStack')
     }, error => {
       console.log(error)
-      this.setState({isLoading: false})
-      this.setState({isResponseError: true})
+      this.setState({isLoading: false, isResponseError: true})
     })
   }
 
   resetPasswordByEmail = () => {
     const { password, confirmPassword, email } = this.state;
-    console.log('[>>>>>>>>>>>>>>>>>]', password, confirmPassword, email)
     if(password == null || password == '' || confirmPassword == null || confirmPassword == ''){
       this.setState({errorMessage: 'Please fill up the required fields.'})
       return false
@@ -184,13 +173,11 @@ class ForgotPassword extends Component {
     this.setState({isResponseError: false})
     Api.request(Routes.accountUpdateByEmail, parameter, response => {
       console.log('[asdfasdf]', response)
-      this.setState({isLoading: false})
-      this.setState({errorMessage: null})
+      this.setState({isLoading: false, errorMessage: null})
       this.props.navigation.navigate('loginStack')
     }, error => {
       console.log(error)
-      this.setState({isLoading: false})
-      this.setState({isResponseError: true})
+      this.setState({isLoading: false, isResponseError: true})
     })
   }
 
