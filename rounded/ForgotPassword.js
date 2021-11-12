@@ -11,6 +11,7 @@ import Header from './../HeaderWithoutName';
 import config from 'src/config';
 import OtpModal from 'components/Modal/Otp.js';
 import Button from 'components/Form/Button';
+import PasswordWithIcon from 'components/InputField/Password.js';
 const width = Math.round(Dimensions.get('window').width);
 const height = Math.round(Dimensions.get('window').height);
 class ForgotPassword extends Component {
@@ -51,14 +52,20 @@ class ForgotPassword extends Component {
     let parameter = {
       email: email
     }
-    
-    this.setState({isLoading: true})
-    Api.request(config.IS_DEV + '/accounts/request_reset', parameter, userInfo => {
+    // Api.request(config.IS_DEV + '/accounts/request_reset', parameter, userInfo => {
+    Api.request(config.IS_DEV + '/accounts/request_reset_via_otp', parameter, userInfo => {
       this.setState({
         isLoading: false,
         successMessage: 'Successfully sent! Please check your e-mail address to continue.',
         errorMessage: null
       })
+
+      this.props.navigation.navigate('otpStack', {
+        data: {
+          payload: 'change_password',
+          data: parameter
+        }
+      });
     }, error => {
       //
     })
@@ -76,27 +83,19 @@ class ForgotPassword extends Component {
     }
     this.setState({isLoading: true})
     Api.request(Routes.accountRetrieve, parameter, userInfo => {
-      console.log('userInfo', userInfo);
-      this.setState({responseErrorTitle: null})
-      this.setState({responseErrorMessage: null})
-      this.setState({isResponseError: false})
+      this.setState({responseErrorTitle: null, responseErrorMessage: null, isResponseError: false})
       if(userInfo.data.length > 0){
         let otpParameter = {
           account_id: userInfo.data[0].id
         }
         login(userInfo.data[0], null);
-        this.setState({responseErrorTitle: null})
-        this.setState({responseErrorMessage: null})
-        this.setState({isResponseError: false})
+        this.setState({responseErrorTitle: null, responseErrorMessage: null, isResponseError: false})
         Api.request(Routes.notificationSettingOtp, otpParameter, response => {
-          console.log('otp', response)
-          this.setState({otpData: response})
-          this.setState({isLoading: false})
+          this.setState({otpData: response, isLoading: false})
           if(response.error == null){
             this.setState({blockedFlag: false, errorMessage: null})
           }else{
-            this.setState({blockedFlag: true})
-            this.setState({errorMessage: response.error})
+            this.setState({blockedFlag: true, errorMessage: response.error})
           }
           setTimeout(() => {
             this.setState({isOtpModal: true})
@@ -106,10 +105,7 @@ class ForgotPassword extends Component {
           this.setState({isResponseError: true})
         })
       }else{
-        this.setState({isLoading: false})
-        this.setState({responseErrorTitle: 'Error!'})
-        this.setState({responseErrorMessage: 'Email address not found!'})
-        this.setState({isResponseError: true})
+        this.setState({isLoading: false, responseErrorTitle: 'Error!', responseErrorMessage: 'Email address not found!', isResponseError: true})
       }
     }, error => {
       this.setState({isResponseError: true})
@@ -142,24 +138,72 @@ class ForgotPassword extends Component {
       code: user.code,
       password: this.state.password
     }
-    console.log('parameter', parameter);
     this.setState({isResponseError: false})
     Api.request(Routes.accountUpdate, parameter, response => {
       this.setState({isLoading: false})
       this.props.navigation.navigate('loginStack')
     }, error => {
       console.log(error)
-      this.setState({isLoading: false})
-      this.setState({isResponseError: true})
+      this.setState({isLoading: false, isResponseError: true})
+    })
+  }
+
+  resetPasswordByEmail = () => {
+    const { password, confirmPassword, email } = this.state;
+    if(password == null || password == '' || confirmPassword == null || confirmPassword == ''){
+      this.setState({errorMessage: 'Please fill up the required fields.'})
+      return false
+    }
+    if(password.length < 6){
+       this.setState({errorMessage: 'Password must be atleast 6 characters.'})
+       return false
+    }
+    if(password.localeCompare(confirmPassword) !== 0){
+      this.setState({errorMessage: 'Password did not match.'})
+      return false
+    }
+    if(password.localeCompare(confirmPassword) === 0){
+      this.setState({errorMessage: null})
+    }
+    this.setState({isLoading: true})
+    let parameter = {
+      email: email,
+      password: this.state.password
+    }
+    this.setState({isResponseError: false})
+    Api.request(Routes.accountUpdateByEmail, parameter, response => {
+      console.log('[asdfasdf]', response)
+      this.setState({isLoading: false, errorMessage: null})
+      this.props.navigation.navigate('loginStack')
+    }, error => {
+      console.log(error)
+      this.setState({isLoading: false, isResponseError: true})
     })
   }
 
   _changePassword = () => {
-    // this.setState({successMessage: false})
     const { theme } = this.props.state;
     return (
       <View>
-        <TextInput
+        <PasswordWithIcon
+          onTyping={(input) => this.setState({
+            password: input
+          })}
+          placeholder={'New Password'} />
+
+        <View style={{
+          marginTop: 10,
+          marginBottom: 20,
+        }}>
+          <PasswordWithIcon
+            onTyping={(input) => this.setState({
+              confirmPassword: input
+            })}
+            placeholder={'Confirm Password'}
+          />
+        </View>
+
+        {/* <TextInput
           style={{
             ...BasicStyles.standardFormControl,
             marginBottom: 20
@@ -179,10 +223,10 @@ class ForgotPassword extends Component {
           value={this.state.confirmPassword}
           placeholder={'Confirm new password'}
           secureTextEntry={true}
-        />
+        /> */}
 
         <Button
-          onClick={() => this.resetPassword()}
+          onClick={() => this.resetPasswordByEmail()}
           title={'Reset'}
           style={{
             backgroundColor: theme ? theme.secondary : Color.secondary,
@@ -306,7 +350,7 @@ class ForgotPassword extends Component {
                 <Text style={{
                   paddingTop: 10,
                   paddingBottom: 10,
-                  color: Color.gray
+                  color: '#949699'
                 }}>Have an account Already?</Text>
               </View>
               <Button
