@@ -373,7 +373,7 @@ class ForgotPassword extends Component {
             no: 'Cancel'
           }}
           onCancel={() => viewChangePass(changePassword = 0) && this.setState({isOtpModal: false})}
-          onSuccess={() => viewChangePass(changePassword = 1) && this.setState({isOtpModal: false})}
+          onSuccess={() => viewChangePass(changePassword = 1) && this.setState({successMessage: null, isOtpModal: false})}
           onResend={() => this.updateOtp()}
           error={errorMessage}
           blockedFlag={blockedFlag}
