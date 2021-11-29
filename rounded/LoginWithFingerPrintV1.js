@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import AsyncStorage from '@react-native-community/async-storage';
-import { View , TextInput, Text, ScrollView, TouchableOpacity, Dimensions, SafeAreaView, Linking, Platform} from 'react-native';
+import { KeyboardAvoidingView, View , TextInput, Text, ScrollView, TouchableOpacity, Dimensions, SafeAreaView, Linking, Platform} from 'react-native';
 import Style from './../Style.js';
 import { Spinner } from 'components';
 import PasswordWithIcon from 'components/InputField/Password.js';
@@ -441,45 +441,48 @@ class Login extends Component {
     const {  blockedFlag, isOtpModal } = this.state;
     const { theme } = this.props.state;
     return (
-      <SafeAreaView>
-        <ScrollView
-          style={{
-            backgroundColor: theme ? theme.primary : Color.primary
-          }}
-          showsVerticalScrollIndicator={false}>
-          <View style={{
-            flex: 1
-          }}>
-            
-            <NotificationsHandler notificationHandler={ref => (this.notificationHandler = ref)} />
-            <Header params={"Login"} textColor={{color: Color.white}}></Header>
+      <KeyboardAvoidingView
+        style = {{ flex: 1 }}
+        behavior={Platform.OS === "ios" ? "padding" : null}>
+        <SafeAreaView>
+          <ScrollView
+            style={{
+              backgroundColor: theme ? theme.primary : Color.primary
+            }}
+            showsVerticalScrollIndicator={false}>
             <View style={{
-              backgroundColor: Color.white,
-              width: '100%',
-              paddingTop: 50,
-              marginTop: 10,
-              borderTopLeftRadius: 60,
-              borderTopRightRadius: 60,
-              height: height * 1.5,
-              ...BasicStyles.loginShadow
+              flex: 1
             }}>
-              <Text style={{
+              
+              <NotificationsHandler notificationHandler={ref => (this.notificationHandler = ref)} />
+              <Header params={"Login"} textColor={{color: Color.white}}></Header>
+              <View style={{
+                backgroundColor: Color.white,
                 width: '100%',
-                textAlign: 'center',
-                paddingBottom: 20,
-                fontSize: BasicStyles.standardFontSize,
-                fontWeight: 'bold',
-                color: theme ? theme.primary : Color.primary
-              }}>Login to {Helper.APP_NAME_BASIC}</Text>
-              {error > 0 ? <View style={{
-                ...Style.messageContainer
+                paddingTop: 50,
+                marginTop: 10,
+                borderTopLeftRadius: 60,
+                borderTopRightRadius: 60,
+                height: height * 1.5,
+                ...BasicStyles.loginShadow
               }}>
-                {error == 1 ? (
-                  <Text style={{
-                    ...Style.messageText,
-                    fontSize: BasicStyles.standardFontSize
-                  }}>Please fill up the required fields.</Text>
-                ) : null}
+                <Text style={{
+                  width: '100%',
+                  textAlign: 'center',
+                  paddingBottom: 20,
+                  fontSize: BasicStyles.standardFontSize,
+                  fontWeight: 'bold',
+                  color: theme ? theme.primary : Color.primary
+                }}>Login to {Helper.APP_NAME_BASIC}</Text>
+                {error > 0 ? <View style={{
+                  ...Style.messageContainer
+                }}>
+                  {error == 1 ? (
+                    <Text style={{
+                      ...Style.messageText,
+                      fontSize: BasicStyles.standardFontSize
+                    }}>Please fill up the required fields.</Text>
+                  ) : null}
 
                 {error == 2 ? (
                   <Text style={{
@@ -513,126 +516,136 @@ class Login extends Component {
                   }}
                   />
 
+                  <PasswordWithIcon
+                    onTyping={(input) => this.setState({
+                      password: input
+                    })}
+                    style={{
+                      borderRadius: 25
+                    }}
+                    />
 
-                <View style={{
-                  width: '100%',
-                  marginTop: 20,
-                  minHeight: 50
-                }}>
-                {
-                  this.state.showFingerPrint == true && (
-                    <FingerPrintScanner navigate={() => this.redirect('drawerStack')} login={() => this.onPressFingerPrint(null, null)} onSubmit={(username, password)=>this.handleFingerPrintSubmit(username, password)}/>
-                  )
-                }
-                </View>
 
-                <Button
-                  onClick={() => this.submit()}
-                  title={'Login'}
-                  style={{
-                    backgroundColor: theme ? theme.secondary : Color.secondary,
+                  <View style={{
                     width: '100%',
-                    marginBottom: 20,
-                    borderRadius: 25
-                  }}
-                />
-
-                {/* <Confirm visible={this.state.visible} message={'Do you want to enable finger print scanning for easier login?'}
-                    onConfirm={() => {
-                        this.openModal(this.state.username, this.state.password)
-                    }}
-                    onCLose={() => {
-                        this.setState({visible: false})
-                    }}
-                /> */}
-
-               {/*<Button
-                   onClick={() => this.redirect('forgotPasswordStack')}
-                   title={'Forgot your Password?'}
-                   style={{
-                     backgroundColor: Color.warning,
-                     width: '100%',
-                     marginBottom: 20,
-                     borderRadius: 25
-                   }}
-                 />*/}
-                 <TouchableOpacity
-                  onPress={() => {
-                    this.props.viewChangePass(0)
-                    this.props.navigation.navigate('forgotPasswordStack')
+                    marginTop: 20,
+                    minHeight: 50
                   }}>
-                    <Text style={{
-                      width: '100%',
-                      textAlign: 'center',
-                      paddingBottom: 20,
-                      fontSize: BasicStyles.standardFontSize + 1,
-                      fontWeight: 'bold',
-                      color: theme ? theme.primary : Color.primary,
-                      textDecorationLine: 'underline'
-                    }}>Forgot your Password?</Text>
-                 </TouchableOpacity>
-                  
+                  {
+                    this.state.showFingerPrint == true && (
+                      <FingerPrintScanner navigate={() => this.redirect('drawerStack')} login={() => this.onPressFingerPrint(null, null)} onSubmit={(username, password)=>this.handleFingerPrintSubmit(username, password)}/>
+                    )
+                  }
+                  </View>
 
-                <Text style={{
-                  width: '100%',
-                  textAlign: 'center',
-                  paddingBottom: 10,
-                  fontSize: BasicStyles.standardFontSize,
-                  fontWeight: 'bold',
-                  color: theme ? theme.primary : Color.primary
-                }}>OR</Text>
-                <View style={{
-                  justifyContent: 'center',
-                  alignItems: 'center'
-                }}>
+                  <Button
+                    onClick={() => this.submit()}
+                    title={'Login'}
+                    style={{
+                      backgroundColor: theme ? theme.secondary : Color.secondary,
+                      width: '100%',
+                      marginBottom: 20,
+                      borderRadius: 25
+                    }}
+                  />
+
+                  {/* <Confirm visible={this.state.visible} message={'Do you want to enable finger print scanning for easier login?'}
+                      onConfirm={() => {
+                          this.openModal(this.state.username, this.state.password)
+                      }}
+                      onCLose={() => {
+                          this.setState({visible: false})
+                      }}
+                  /> */}
+
+                 {/*<Button
+                     onClick={() => this.redirect('forgotPasswordStack')}
+                     title={'Forgot your Password?'}
+                     style={{
+                       backgroundColor: Color.warning,
+                       width: '100%',
+                       marginBottom: 20,
+                       borderRadius: 25
+                     }}
+                   />*/}
+                   <TouchableOpacity
+                    onPress={() => {
+                      this.props.viewChangePass(0)
+                      this.props.navigation.navigate('forgotPasswordStack')
+                    }}>
+                      <Text style={{
+                        width: '100%',
+                        textAlign: 'center',
+                        paddingBottom: 20,
+                        fontSize: BasicStyles.standardFontSize + 1,
+                        fontWeight: 'bold',
+                        color: theme ? theme.primary : Color.primary,
+                        textDecorationLine: 'underline'
+                      }}>Forgot your Password?</Text>
+                   </TouchableOpacity>
+                    
+
                   <Text style={{
-                    paddingTop: 10,
-                    paddingBottom: 20,
+                    width: '100%',
+                    textAlign: 'center',
+                    paddingBottom: 10,
                     fontSize: BasicStyles.standardFontSize,
                     fontWeight: 'bold',
                     color: theme ? theme.primary : Color.primary
-                  }}>Don't have an account?</Text>
+                  }}>OR</Text>
+                  <View style={{
+                    justifyContent: 'center',
+                    alignItems: 'center'
+                  }}>
+                    <Text style={{
+                      paddingTop: 10,
+                      paddingBottom: 20,
+                      fontSize: BasicStyles.standardFontSize,
+                      fontWeight: 'bold',
+                      color: theme ? theme.primary : Color.primary
+                    }}>Don't have an account?</Text>
+                  </View>
+
+                  <Button
+                    onClick={() => this.props.navigation.navigate('registerStack')}
+                    title={'Register Now!'}
+                    style={{
+                      backgroundColor: Color.warning,
+                      width: '100%',
+                      marginBottom: 100,
+                      borderRadius: 25
+                    }}
+                  />
+
                 </View>
-
-                <Button
-                  onClick={() => this.props.navigation.navigate('registerStack')}
-                  title={'Register Now!'}
-                  style={{
-                    backgroundColor: Color.warning,
-                    width: '100%',
-                    marginBottom: 100,
-                    borderRadius: 25
-                  }}
-                />
-
               </View>
             </View>
-          </View>
 
-        </ScrollView>
-        <OtpModal
-          visible={isOtpModal}
-          title={blockedFlag == false ? 'Authentication via OTP' : 'Blocked Account'}
-          actionLabel={{
-            yes: 'Authenticate',
-            no: 'Cancel'
-          }}
-          onCancel={() => this.setState({isOtpModal: false})}
-          onSuccess={() => this.onSuccessOtp()}
-          onResend={() => {
-            this.setState({isOtpModal: false})
-            this.submit()
-          }}
-          error={''}
-          blockedFlag={blockedFlag}
-        ></OtpModal>
+          </ScrollView>
+          <OtpModal
+            visible={isOtpModal}
+            title={blockedFlag == false ? 'Authentication via OTP' : 'Blocked Account'}
+            actionLabel={{
+              yes: 'Authenticate',
+              no: 'Cancel'
+            }}
+            onCancel={() => this.setState({isOtpModal: false})}
+            onSuccess={() => this.onSuccessOtp()}
+            onResend={() => {
+              this.setState({isOtpModal: false})
+              this.submit()
+            }}
+            error={''}
+            blockedFlag={blockedFlag}
+          ></OtpModal>
 
-        {isLoading ? <LoaderModal isLoading={isLoading}/> : null }
-        {isResponseError ? <CustomError visible={isResponseError} message={this.state.isConnected == true ? 'You have no internet connection' : null}
-        onCLose={() => {
-          this.setState({isResponseError: false, isLoading: false})
-        }}/> : null}
-      </SafeAreaView>
+          {isLoading ? <LoaderModal isLoading={isLoading}/> : null }
+          {isResponseError ? <CustomError visible={isResponseError} message={this.state.isConnected == true ? 'You have no internet connection' : null}
+          onCLose={() => {
+            this.setState({isResponseError: false, isLoading: false})
+          }}/> : null}
+        </SafeAreaView>
+      </KeyboardAvoidingView>
     );
   }
 }
