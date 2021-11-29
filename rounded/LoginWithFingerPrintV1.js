@@ -133,7 +133,6 @@ class Login extends Component {
       const tertiary = await AsyncStorage.getItem(Helper.APP_NAME + 'tertiary');
       const fourth = await AsyncStorage.getItem(Helper.APP_NAME + 'fourth');
       const index = await AsyncStorage.getItem(Helper.APP_NAME + 'index');
-      console.log({index: index})
       if(primary != null && secondary != null && tertiary != null) {
         const { setTheme } = this.props;
         setTheme({
@@ -143,7 +142,6 @@ class Login extends Component {
           fourth: fourth,
           index: parseInt(index)
         })
-        console.log('[sadfasdf>>>>>>>>>]', this.props.state.theme)
       }
     } catch (e) {
       console.log(e)
@@ -396,12 +394,14 @@ class Login extends Component {
     if((username != null && username != '') && (password != null && password != '')){
       this.setState({isLoading: true, error: 0});
       Api.authenticate(username, password, (response) => {
+        console.log('[ty>>>>>>>>>]', response)
         if(response.error){
           this.setState({error: 2, isLoading: false});
         }
         if(response.token){
           const token = response.token;
           Api.getAuthUser(response.token, (response) => {
+            console.log('[hi]', response)
             if(response !== null){
               this.setState({error: 0});
               if(this.state.notEmpty == true){
@@ -484,8 +484,10 @@ class Login extends Component {
                 {error == 2 ? (
                   <Text style={{
                     ...Style.messageText,
-                    fontSize: BasicStyles.standardFontSize
-                  }}>Username and password didn't match.</Text>
+                    fontSize: BasicStyles.standardFontSize,
+                    marginRight: 30,
+                    marginLeft: 50
+                  }}>Username and password didn't match or your account is blocked. Please contact payhiramph@gmail.com</Text>
                 ) : null}
               </View> : null}
               
