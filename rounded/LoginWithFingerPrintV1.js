@@ -516,16 +516,6 @@ class Login extends Component {
                   }}
                   />
 
-                  <PasswordWithIcon
-                    onTyping={(input) => this.setState({
-                      password: input
-                    })}
-                    style={{
-                      borderRadius: 25
-                    }}
-                    />
-
-
                   <View style={{
                     width: '100%',
                     marginTop: 20,
