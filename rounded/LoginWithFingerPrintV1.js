@@ -105,11 +105,7 @@ class Login extends Component {
       const routeName = route.split('/')[0];
       if (routeName === 'payhiram.ph' || 'admin.payhiram.ph')
       {
-
-        console.log('ROUTE: ', route.split('/')[2])
-        // console.log('/.....1stIF.......')
         if(route.split('/')[2] === 'profile') {
-          // console.log('/.....2ndIF.......')
           const {setDeepLinkRoute} = this.props;
           setDeepLinkRoute(route);
         }else if(route.split('/')[2] === 'reset_password') {
@@ -167,7 +163,7 @@ class Login extends Component {
 
   test = () => {
     if(config.TEST == true){
-      this.props.navigation.navigate('drawerStack');
+      this.props.navigation.navigate('dashboardStack');
       return true;
     }
   }
@@ -176,12 +172,13 @@ class Login extends Component {
     const {user} = this.props.state;
     setTimeout(() => {
       if(user?.devices?.length > 0 && user?.devices?.includes(this.state.deviceCode)){
+        console.log('[asdfasdf]');
         this.props.navigation.navigate(route);
         setInterval(() => {
           this.setState({isLoading: false});
         }, 10000)
       }else{
-        this.props.navigation.navigate(config.TEST_DEVICE_FLAG == true ? 'drawerStack' : 'checkDeviceStack');
+        this.props.navigation.navigate(config.TEST_DEVICE_FLAG == true ? 'dashboardStack' : 'checkDeviceStack');
         this.setState({isLoading: false});
       }
       
@@ -203,9 +200,8 @@ class Login extends Component {
     fcmService.register(this.onRegister, this.onNotification, this.onOpenNotification)
     localNotificationService.configure(this.onOpenNotification, Helper.APP_NAME)
     this.notificationHandler.setTopics()
-    this.redirect('drawerStack')
+    this.redirect('dashboardStack')
     return () => {
-      console.log("[App] unRegister")
       fcmService.unRegister()
       localNotificationService.unRegister()
     }
@@ -300,12 +296,12 @@ class Login extends Component {
         return
       }
     }
-    this.props.navigation.navigate('drawerStack');
+    this.props.navigation.navigate('dashboardStack');
   }
 
   onSuccessOtp = () => {
     this.setState({isOtpModal: false})
-    this.props.navigation.navigate('drawerStack');
+    this.props.navigation.navigate('dashboardStack');
   }
 
   accountRetrieve(parameter){
@@ -394,26 +390,26 @@ class Login extends Component {
     if((username != null && username != '') && (password != null && password != '')){
       this.setState({isLoading: true, error: 0});
       Api.authenticate(username, password, (response) => {
-        console.log('[ty>>>>>>>>>]', response)
         if(response.error){
           this.setState({error: 2, isLoading: false});
         }
         if(response.token){
           const token = response.token;
           Api.getAuthUser(response.token, (response) => {
-            console.log('[hi]', response)
             if(response !== null){
-              this.setState({error: 0});
-              if(this.state.notEmpty == true){
-                console.log("[notEmpty]", this.state.notEmpty);
+              if(response.status != 'BLOCKED'){
+                this.setState({error: 0});
+                if(this.state.notEmpty == true){
+                }else{
+                  this.openModal(username, password);
+                }
+                login(response, token);
+                this.firebaseNotification()
               }else{
-                this.openModal(username, password);
+                this.setState({error: 2, isLoading: false});
               }
-              login(response, token);
-              this.firebaseNotification()
             }
           }, error => {
-            console.log('[ERROR]', error);
             if(error.message === 'Network request failed'){
               this.setState({isResponseError: true, isLoading: false})
             }else{
@@ -422,7 +418,6 @@ class Login extends Component {
           })
         }
       }, error => {
-        console.log('errorLogin', error)
         if(error.message === 'Network request failed'){
           this.setState({isResponseError: true, isLoading: false})
         }else{
@@ -523,7 +518,7 @@ class Login extends Component {
                   }}>
                   {
                     this.state.showFingerPrint == true && (
-                      <FingerPrintScanner navigate={() => this.redirect('drawerStack')} login={() => this.onPressFingerPrint(null, null)} onSubmit={(username, password)=>this.handleFingerPrintSubmit(username, password)}/>
+                      <FingerPrintScanner navigate={() => this.redirect('dashboardStack')} login={() => this.onPressFingerPrint(null, null)} onSubmit={(username, password)=>this.handleFingerPrintSubmit(username, password)}/>
                     )
                   }
                   </View>

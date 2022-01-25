@@ -3,7 +3,6 @@ import { connect } from 'react-redux';
 import { Alert, View , TextInput , Image, TouchableHighlight, Text, ScrollView, Dimensions, TouchableOpacity, ActivityIndicator, KeyboardAvoidingView} from 'react-native';
 import Style from './../Style.js';
 import { Platform } from 'react-native';
-import { Spinner } from 'components';
 import Api from 'services/api/index.js';
 import { Routes, Color, Helper, BasicStyles } from 'common';
 import CustomError from 'components/Modal/Error.js';
@@ -14,15 +13,18 @@ import {FontAwesomeIcon} from '@fortawesome/react-native-fontawesome';
 import { faCheck, faEdit } from '@fortawesome/free-solid-svg-icons';
 const width = Math.round(Dimensions.get('window').width);
 const height = Math.round(Dimensions.get('window').height);
-
+const selectedItem = {
+  title: 'Selected item title',
+  description: 'Secondary long descriptive text ...',
+};
 class Register extends Component {
-  //Screen1 Component
   constructor(props){
     super(props);
     this.state = {
       username: '',
       email: '',
       password: '',
+      cellular_number: '',
       emailCode: null,
       confirmPassword: '',
       isLoading: false,
@@ -33,7 +35,8 @@ class Register extends Component {
       referral_code: null,
       continueFlag: false,
       getCodeFlag: false,
-      isEmailLoading: false
+      isEmailLoading: false,
+      step: 1
     };
   }
   
@@ -45,12 +48,13 @@ class Register extends Component {
   }
   
   submit(){
-    const { username, email, password, referral_code } = this.state;
+    const { username, email, password, referral_code, cellular_number } = this.state;
     if(this.validate() == false){
       return
     }
     let parameter = {
       username: username,
+      cellular_number: cellular_number,
       email: email,
       password: password,
       config: null,
@@ -100,7 +104,6 @@ class Register extends Component {
       isEmailLoading: true
     })
     Api.request(Routes.preVerify, parameter, response => {
-      console.log('[>>>>>>>>>>>]', response)
       if(response.data == null && response.error  != null){
         this.setState({
           errorMessage: response.error
@@ -156,9 +159,11 @@ class Register extends Component {
           isLoading: false
         })
         if(response.data && response.data.length > 0){
+          // start here
           this.setState({
             continueFlag: true
           })
+          // end here
         }else{
           this.setState({
             continueFlag: false
@@ -208,7 +213,7 @@ class Register extends Component {
   }
 
   render() {
-    const { isLoading, errorMessage, isResponseError, continueFlag, getCodeFlag, isEmailLoading } = this.state;
+    const { isLoading, errorMessage, isResponseError, continueFlag, getCodeFlag, isEmailLoading, step } = this.state;
     const { theme } = this.props.state;
     return (
       <KeyboardAvoidingView
@@ -259,10 +264,7 @@ class Register extends Component {
                     )
                   }
                   
-                  
                   <View style={Style.TextContainerRounded}>
-                    
-                    
                     <View style={{
                       flexDirection: 'row',
                       width: '100%',
@@ -402,6 +404,16 @@ class Register extends Component {
                             placeholder={'Username'}
                             placeholderTextColor={Color.darkGray}
                           />
+                          <TextInput
+                            style={{
+                              ...BasicStyles.standardFormControl,
+                              marginBottom: 20
+                            }}
+                            onChangeText={(cellular_number) => this.setState({cellular_number})}
+                            value={this.state.cellular_number}
+                            placeholder={'Cellular'}
+                            placeholderTextColor={Color.darkGray}
+                          />
 
                           <PasswordWithIcon onTyping={(input) => this.setState({
                             password: input
@@ -435,7 +447,7 @@ class Register extends Component {
                       placeholderTextColor={Color.darkGray}
                     /> */}
 
-                    {
+                    {/* {
                       continueFlag && (
                         <Button
                           onClick={() => this.submit()}
@@ -447,9 +459,7 @@ class Register extends Component {
                           }}
                         />
                       )
-                    }
-
-                    
+                    } */}
 
                     <View style={{
                       height: 1,
