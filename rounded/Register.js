@@ -360,8 +360,6 @@ class Register extends Component {
                           editable={!continueFlag}
                         />
     
-                        
-    
                         <TouchableOpacity style={{
                           borderTopRightRadius: 25,
                           borderBottomRightRadius: 25,
