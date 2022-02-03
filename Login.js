@@ -17,6 +17,7 @@ import SystemVersion from 'services/System.js';
 import { Player } from '@react-native-community/audio-toolkit';
 import OtpModal from 'components/Modal/Otp.js';
 import {Notifications, NotificationAction, NotificationCategory} from 'react-native-notifications';
+import Button from 'components/Form/Button';
 class Login extends Component {
   //Screen1 Component
   constructor(props){
@@ -37,6 +38,7 @@ class Login extends Component {
   }
   
   async componentDidMount(){
+    this.getTheme()
     if(config.versionChecker == 'store'){
       this.setState({isLoading: true})
       SystemVersion.checkVersion(response => {
@@ -52,6 +54,26 @@ class Login extends Component {
     const initialNotification = await Notifications.getInitialNotification();
     if (initialNotification) {
       this.setState({notifications: [initialNotification, ...this.state.notifications]});
+    }
+  }
+
+  getTheme = async () => {
+    try {
+      const primary = await AsyncStorage.getItem(Helper.APP_NAME + 'primary');
+      const secondary = await AsyncStorage.getItem(Helper.APP_NAME + 'secondary');
+      const tertiary = await AsyncStorage.getItem(Helper.APP_NAME + 'tertiary');
+      const fourth = await AsyncStorage.getItem(Helper.APP_NAME + 'fourth');
+      if(primary != null && secondary != null && tertiary != null) {
+        const { setTheme } = this.props;
+        setTheme({
+          primary: primary,
+          secondary: secondary,
+          tertiary: tertiary,
+          fourth: fourth
+        })
+      }
+    } catch (e) {
+      console.log(e)
     }
   }
 
@@ -355,24 +377,37 @@ class Login extends Component {
   render() {
     const { isLoading, error, isResponseError } = this.state;
     const {  blockedFlag, isOtpModal } = this.state;
+    const { theme } = this.props.state;
     return (
-      <ScrollView style={Style.ScrollView}>
-        <View style={Style.MainContainer}>
+      <ScrollView style={Style.ScrollView}
+        showsVerticalScrollIndicator={false}>
+        <View style={[Style.MainContainer, {backgroundColor: '#F5F5F5'}]}>
           <Header params={"Login"}></Header>
 
-          {error > 0 ? <View style={Style.messageContainer}>
+          {error > 0 ? <View style={{
+            ...Style.messageContainer
+          }}>
             {error == 1 ? (
-              <Text style={Style.messageText}>Please fill up the required fields.</Text>
+              <Text style={{
+                ...Style.messageText,
+                fontSize: BasicStyles.standardFontSize
+              }}>Please fill up the required fields.</Text>
             ) : null}
 
             {error == 2 ? (
-              <Text style={Style.messageText}>Username and password didn't match.</Text>
+              <Text style={{
+                ...Style.messageText,
+                fontSize: BasicStyles.standardFontSize
+              }}>Username and password didn't match.</Text>
             ) : null}
           </View> : null}
           
-          <View style={Style.TextContainer}>
+          <View style={[Style.TextContainer]}>
             <TextInput
-              style={BasicStyles.formControl}
+              style={{
+                ...BasicStyles.standardFormControl,
+                marginBottom: 20,
+              }}
               onChangeText={(username) => this.setState({username})}
               value={this.state.username}
               placeholder={'Username or Email'}
@@ -387,24 +422,33 @@ class Login extends Component {
             <PasswordWithIcon onTyping={(input) => this.setState({
               password: input
             })}/>
-            <TouchableHighlight
-              style={[BasicStyles.btn, BasicStyles.btnPrimary]}
-              onPress={() => this.submit()}
-              underlayColor={Color.gray}>
-              <Text style={BasicStyles.textWhite}>
-                Login
-              </Text>
-            </TouchableHighlight>
+            
+
+            <Button
+              onClick={() => this.submit()}
+              textStyle={{color:'black'}}
+              title={'Login'}
+              style={{
+                backgroundColor: theme ? theme.primary : Color.primary,
+                width: '100%',
+                marginBottom: 20,
+                marginTop: 20,
+                borderRadius: BasicStyles.standardBorderRadius,
+                ...BasicStyles.standardShadow,
+              }}
+            />
 
             
-            <TouchableHighlight
-              style={[BasicStyles.btn, BasicStyles.btnWarning]}
-              onPress={() => this.redirect('forgotPasswordStack')}
-              underlayColor={Color.gray}>
-              <Text style={BasicStyles.textWhite}>
-                Forgot your Password?
-              </Text>
-            </TouchableHighlight>
+            <Button
+              onClick={() => this.redirect('forgotPasswordStack')}
+              title={'Forgot your Password?'}
+              textStyle={{color:'black'}}
+              style={{
+                backgroundColor: 'transparent',
+                width: '100%',
+                marginBottom: 20
+              }}
+            />
             
 
             <View style={{
@@ -423,14 +467,18 @@ class Login extends Component {
                 color: Color.gray
               }}>Don't have an account?</Text>
             </View>
-            <TouchableHighlight
-              style={[BasicStyles.btn, BasicStyles.btnSecondary]}
-              onPress={() => this.redirect('registerStack')}
-              underlayColor={Color.gray}>
-              <Text style={BasicStyles.textWhite}>
-                Register Now!
-              </Text>
-            </TouchableHighlight>
+            
+            <Button
+              onClick={() => this.redirect('registerStack')}
+              title={'Register Now!'}
+              style={{
+                backgroundColor: theme ? theme.secondary : Color.secondary,
+                width: '100%',
+                marginBottom: 100,
+                borderRadius: BasicStyles.standardBorderRadius,
+                ...BasicStyles.standardShadow,
+              }}
+            />
           </View>
         </View>
 
@@ -467,6 +515,7 @@ const mapDispatchToProps = dispatch => {
   return {
     login: (user, token) => dispatch(actions.login(user, token)),
     logout: () => dispatch(actions.logout()),
+    setTheme: (theme) => dispatch(actions.setTheme(theme)),
     setNotifications: (unread, notifications) => dispatch(actions.setNotifications(unread, notifications)),
     updateNotifications: (unread, notification) => dispatch(actions.updateNotifications(unread, notification)),
     updateMessagesOnGroup: (message) => dispatch(actions.updateMessagesOnGroup(message)),

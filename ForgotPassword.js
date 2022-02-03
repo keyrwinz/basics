@@ -10,6 +10,7 @@ import CustomError from 'components/Modal/Error.js';
 import Header from './Header';
 import config from 'src/config';
 import OtpModal from 'components/Modal/Otp.js';
+import Button from 'components/Form/Button';
 class ForgotPassword extends Component {
   //Screen1 Component
   constructor(props){
@@ -153,7 +154,10 @@ class ForgotPassword extends Component {
     return (
       <View>
         <TextInput
-          style={BasicStyles.formControl}
+          style={{
+            ...BasicStyles.standardFormControl,
+            marginBottom: 20
+          }}
           onChangeText={(password) => this.setState({password})}
           value={this.state.password}
           placeholder={'New password'}
@@ -161,23 +165,25 @@ class ForgotPassword extends Component {
         />
 
         <TextInput
-          style={BasicStyles.formControl}
+          style={{
+            ...BasicStyles.standardFormControl,
+            marginBottom: 20
+          }}
           onChangeText={(confirmPassword) => this.setState({confirmPassword})}
           value={this.state.confirmPassword}
           placeholder={'Confirm new password'}
           secureTextEntry={true}
         />
 
-        <TouchableHighlight
-          style={[BasicStyles.btn, {
-            backgroundColor: theme ? theme.primary : Color.primary
-          }]}
-          onPress={() => this.resetPassword()}
-          underlayColor={Color.gray}>
-          <Text style={BasicStyles.textWhite}>
-            Reset
-          </Text>
-        </TouchableHighlight>
+        <Button
+          onClick={() => this.resetPassword()}
+          title={'Reset'}
+          style={{
+            backgroundColor: theme ? theme.primary : Color.primary,
+            width: '100%',
+            marginBottom: 10
+          }}
+        />
       </View>
     );    
   }
@@ -187,23 +193,25 @@ class ForgotPassword extends Component {
     return (
       <View>
         <TextInput
-          style={BasicStyles.formControl}
+          style={{
+            ...BasicStyles.standardFormControl,
+            marginBottom: 20
+          }}
           onChangeText={(email) => this.setState({email})}
           value={this.state.email}
           placeholder={'Email Address'}
           keyboardType={'email-address'}
         />
 
-        <TouchableHighlight
-          style={[BasicStyles.btn, {
-            backgroundColor: theme ? theme.primary : Color.primary
-          }]}
-          onPress={() => this.requestReset()}
-          underlayColor={Color.gray}>
-          <Text style={BasicStyles.textWhite}>
-            Request change
-          </Text>
-        </TouchableHighlight>
+        <Button
+          onClick={() => this.requestReset()}
+          title={'Request change'}
+          style={{
+            backgroundColor: theme ? theme.primary : Color.primary,
+            width: '100%',
+            marginBottom: 10
+          }}
+        />
       </View>
     );
   }
@@ -222,10 +230,14 @@ class ForgotPassword extends Component {
                   paddingTop: 10,
                   paddingBottom: 10,
               }}>
-                <Text style={[Style.messageText, {
+                <Text style={{
+                  ...Style.messageText,
+                  fontSize: BasicStyles.standardFontSize,
                   fontWeight: 'bold'
-                }]}>Oops! </Text>
-                <Text style={Style.messageText}>{errorMessage}</Text>
+                }}>Oops! </Text>
+                <Text style={{
+                  ...Style.messageText,
+                  fontSize: BasicStyles.standardFontSize}}>{errorMessage}</Text>
               </View>
             )
           }
@@ -245,7 +257,7 @@ class ForgotPassword extends Component {
             )
           }
           
-          <View style={Style.TextContainer}>
+          <View style={{...Style.TextContainer, ...BasicStyles.standardLoginContainer}}>
             { changeStep == 0 && (this._sendRequest()) }
             { changeStep == 1 && (this._changePassword()) }
              <View style={{
@@ -258,16 +270,15 @@ class ForgotPassword extends Component {
                 color: Color.gray
               }}>Have an account Already?</Text>
             </View>
-            <TouchableHighlight
-              style={[BasicStyles.btn, {
-                backgroundColor: theme ? theme.secondary : Color.secondary
-              }]}
-              onPress={() => this.redirect('loginStack')}
-              underlayColor={Color.gray}>
-              <Text style={BasicStyles.textWhite}>
-                Login Now!
-              </Text>
-            </TouchableHighlight>
+            <Button
+              onClick={() => this.redirect('loginStack')}
+              title={'Login Now!'}
+              style={{
+                backgroundColor: theme ? theme.secondary : Color.secondary,
+                width: '100%',
+                marginBottom: 100
+              }}
+            />
           </View>
         </View>
         <OtpModal
