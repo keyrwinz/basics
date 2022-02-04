@@ -19,11 +19,13 @@ import NetInfo from "@react-native-community/netinfo";
 import NotificationsHandler from 'services/NotificationHandler';
 import LoaderModal from '../../generic/LoaderModal.js';
 import DeviceInfo from 'react-native-device-info';
+import {NavigationActions, StackActions} from 'react-navigation';
 const height = Math.round(Dimensions.get('window').height);
 class Login extends Component {
   constructor(props){
     super(props);
     this.notificationHandler = React.createRef();
+    // this.BackEnd = new Api();
     this.state = {
       username: null,
       password: null,
@@ -44,6 +46,24 @@ class Login extends Component {
       deviceCode: null
     };
     this.audio = null;
+  }
+
+  navigateToScreen = (route) => {
+    this.setState({isLoading: false})
+    const navigateAction = NavigationActions.navigate({
+      routeName: 'drawerStack',
+      action: StackActions.reset({
+        index: 0,
+        key: null,
+        actions: [
+            NavigationActions.navigate({routeName: route, params: {
+              initialRouteName: route,
+              index: 0
+            }}),
+        ]
+      })
+    });
+    this.props.navigation.dispatch(navigateAction);
   }
 
   onRegister = () => {
@@ -78,6 +98,7 @@ class Login extends Component {
   }
   
   async componentDidMount(){
+    // console.log('[api>>>>>>]', this.BackEnd)
     this.setState({deviceCode: DeviceInfo.getUniqueId()})
     if((await AsyncStorage.getItem('username') != null && await AsyncStorage.getItem('password') != null)){
       await this.setState({showFingerPrint: true})
@@ -162,7 +183,7 @@ class Login extends Component {
 
   test = () => {
     if(config.TEST == true){
-      this.props.navigation.navigate('dashboardStack');
+      this.navigateToScreen('Dashboard')
       return true;
     }
   }
@@ -171,13 +192,17 @@ class Login extends Component {
     const {user} = this.props.state;
     setTimeout(() => {
       if(user?.devices?.length > 0 && user?.devices?.includes(this.state.deviceCode)){
-        console.log('[asdfasdf]');
+        console.log('[asdfasdf]', user);
         this.props.navigation.navigate(route);
         setInterval(() => {
           this.setState({isLoading: false});
         }, 10000)
       }else{
-        this.props.navigation.navigate(config.TEST_DEVICE_FLAG == true ? 'dashboardStack' : 'checkDeviceStack');
+        if(config.TEST_DEVICE_FLAG === true) {
+          this.navigateToScreen('Dashboard')
+        } else {
+          this.props.navigation.navigate('checkDeviceStack');
+        }
         this.setState({isLoading: false});
       }
       
@@ -199,7 +224,7 @@ class Login extends Component {
     fcmService.register(this.onRegister, this.onNotification, this.onOpenNotification)
     localNotificationService.configure(this.onOpenNotification, Helper.APP_NAME)
     this.notificationHandler.setTopics()
-    this.redirect('dashboardStack')
+    this.navigateToScreen('Dashboard')
     return () => {
       fcmService.unRegister()
       localNotificationService.unRegister()
@@ -295,12 +320,12 @@ class Login extends Component {
         return
       }
     }
-    this.props.navigation.navigate('dashboardStack');
+    this.navigateToScreen('Dashboard')
   }
 
   onSuccessOtp = () => {
     this.setState({isOtpModal: false})
-    this.props.navigation.navigate('dashboardStack');
+    this.navigateToScreen('Dashboard')
   }
 
   accountRetrieve(parameter){
@@ -388,7 +413,7 @@ class Login extends Component {
     }
     if((username != null && username != '') && (password != null && password != '')){
       this.setState({isLoading: true, error: 0});
-      Api.authenticate(username, password, (response) => {
+        Api.authenticate(username, password, (response) => {
         if(response.error){
           this.setState({error: 2, isLoading: false});
         }
@@ -517,7 +542,7 @@ class Login extends Component {
                   }}>
                   {
                     this.state.showFingerPrint == true && (
-                      <FingerPrintScanner navigate={() => this.redirect('dashboardStack')} login={() => this.onPressFingerPrint(null, null)} onSubmit={(username, password)=>this.handleFingerPrintSubmit(username, password)}/>
+                      <FingerPrintScanner navigate={() => this.navigateToScreen('Dashboard')} login={() => this.onPressFingerPrint(null, null)} onSubmit={(username, password)=>this.handleFingerPrintSubmit(username, password)}/>
                     )
                   }
                   </View>
