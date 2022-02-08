@@ -359,6 +359,7 @@ class Register extends Component {
                           placeholderTextColor={Color.darkGray}
                           editable={!continueFlag}
                         />
+                        
     
                         <TouchableOpacity style={{
                           borderTopRightRadius: 25,
@@ -372,8 +373,8 @@ class Register extends Component {
                         }}
                         >
                           {
-                            (continueFlag == true && isLoading == false) && (
-                              <FontAwesomeIcon icon={faCheck} color={Color.secondary}/>
+                            (continueFlag == true) && (
+                              <FontAwesomeIcon icon={faCheck} style={{marginLeft: '-10%'}} color={Color.secondary}/>
                             )
                           }
     
@@ -409,7 +410,7 @@ class Register extends Component {
                             }}
                             onChangeText={(cellular_number) => this.setState({cellular_number})}
                             value={this.state.cellular_number}
-                            placeholder={'Cellular'}
+                            placeholder={'Phone Number'}
                             placeholderTextColor={Color.darkGray}
                           />
 
@@ -445,8 +446,8 @@ class Register extends Component {
                       placeholderTextColor={Color.darkGray}
                     /> */}
 
-                    {/* {
-                      continueFlag && (
+                    {
+                      (continueFlag && this.state.cellular_number !== '' && this.state.password !== '' && this.state.confirmPassword !== '' ) && (
                         <Button
                           onClick={() => this.submit()}
                           title={'Register'}
@@ -457,7 +458,7 @@ class Register extends Component {
                           }}
                         />
                       )
-                    } */}
+                    }
 
                     <View style={{
                       height: 1,

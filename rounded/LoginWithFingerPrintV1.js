@@ -3,7 +3,6 @@ import { connect } from 'react-redux';
 import AsyncStorage from '@react-native-community/async-storage';
 import { KeyboardAvoidingView, View , TextInput, Text, ScrollView, TouchableOpacity, Dimensions, SafeAreaView, Linking, Platform} from 'react-native';
 import Style from './../Style.js';
-import { Spinner } from 'components';
 import PasswordWithIcon from 'components/InputField/Password.js';
 import CustomError from 'components/Modal/Error.js';
 import Api from 'services/api/index.js';
@@ -51,20 +50,50 @@ class Login extends Component {
 
   navigateToScreen = (route) => {
     this.setState({isLoading: false})
-    const navigateAction = NavigationActions.navigate({
-      routeName: 'drawerStack',
-      action: StackActions.reset({
-        index: 0,
-        key: null,
-        actions: [
-            NavigationActions.navigate({routeName: route, params: {
-              initialRouteName: route,
-              index: 0
-            }}),
-        ]
-      })
-    });
-    this.props.navigation.dispatch(navigateAction);
+    const {user} = this.props.state;
+    setTimeout(() => {
+      if(user?.devices?.length > 0 && user?.devices?.includes(this.state.deviceCode)){
+        console.log('[asdfasdf]', user);
+        const navigateAction = NavigationActions.navigate({
+          routeName: 'drawerStack',
+          action: StackActions.reset({
+            index: 0,
+            key: null,
+            actions: [
+                NavigationActions.navigate({routeName: route, params: {
+                  initialRouteName: route,
+                  index: 0
+                }}),
+            ]
+          })
+        });
+        this.props.navigation.dispatch(navigateAction);
+        setInterval(() => {
+          this.setState({isLoading: false});
+        }, 10000)
+      }else{
+        if(config.TEST_DEVICE_FLAG === true) {
+          const navigateAction = NavigationActions.navigate({
+            routeName: 'drawerStack',
+            action: StackActions.reset({
+              index: 0,
+              key: null,
+              actions: [
+                  NavigationActions.navigate({routeName: route, params: {
+                    initialRouteName: route,
+                    index: 0
+                  }}),
+              ]
+            })
+          });
+          this.props.navigation.dispatch(navigateAction);
+        } else {
+          this.props.navigation.navigate('checkDeviceStack');
+        }
+        this.setState({isLoading: false});
+      }
+      
+    }, 1000)
   }
 
   onRegister = () => {
