@@ -54,7 +54,7 @@ class Register extends Component {
     }
     let parameter = {
       username: username,
-      cellular_number: cellular_number,
+      // cellular_number: cellular_number,
       email: email,
       password: password,
       config: null,
@@ -349,7 +349,7 @@ class Register extends Component {
     
                         <TextInput
                           style={{
-                            width: isLoading ? '70%' : '100%'
+                            width: continueFlag ? '70%' : '100%'
                           }}
                           onChangeText={(code) => {
                             this.verifyCode(code)
@@ -374,7 +374,7 @@ class Register extends Component {
                         >
                           {
                             (continueFlag == true) && (
-                              <FontAwesomeIcon icon={faCheck} style={{marginLeft: '-10%'}} color={Color.secondary}/>
+                              <FontAwesomeIcon icon={faCheck} color={Color.secondary}/>
                             )
                           }
     
@@ -403,7 +403,7 @@ class Register extends Component {
                             placeholder={'Username'}
                             placeholderTextColor={Color.darkGray}
                           />
-                          <TextInput
+                          {/* <TextInput
                             style={{
                               ...BasicStyles.standardFormControl,
                               marginBottom: 20
@@ -412,7 +412,7 @@ class Register extends Component {
                             value={this.state.cellular_number}
                             placeholder={'Phone Number'}
                             placeholderTextColor={Color.darkGray}
-                          />
+                          /> */}
 
                           <PasswordWithIcon onTyping={(input) => this.setState({
                             password: input
@@ -447,7 +447,8 @@ class Register extends Component {
                     /> */}
 
                     {
-                      (continueFlag && this.state.cellular_number !== '' && this.state.password !== '' && this.state.confirmPassword !== '' ) && (
+                      (continueFlag && this.state.password !== '' && this.state.confirmPassword !== '' ) && (
+                      // (continueFlag && this.state.cellular_number !== '' && this.state.password !== '' && this.state.confirmPassword !== '' ) && (
                         <Button
                           onClick={() => this.submit()}
                           title={'Register'}
