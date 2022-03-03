@@ -53,7 +53,6 @@ class Login extends Component {
     const {user} = this.props.state;
     setTimeout(() => {
       if(user?.devices?.length > 0 && user?.devices?.includes(this.state.deviceCode)){
-        console.log('[asdfasdf]', user);
         const navigateAction = NavigationActions.navigate({
           routeName: 'drawerStack',
           action: StackActions.reset({
