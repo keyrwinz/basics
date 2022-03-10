@@ -606,6 +606,7 @@ class Login extends Component {
                        borderRadius: 25
                      }}
                    />*/}
+                   
                    <TouchableOpacity
                     onPress={() => {
                       this.props.viewChangePass(0)
