@@ -229,6 +229,7 @@ class ForgotPassword extends Component {
                 flexDirection: 'row',
                   paddingTop: 10,
                   paddingBottom: 10,
+                  justifyContent: 'center'
               }}>
                 <Text style={{
                   ...Style.messageText,
