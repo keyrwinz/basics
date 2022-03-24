@@ -56,7 +56,7 @@ class ForgotPassword extends Component {
     Api.request(config.IS_DEV + '/accounts/request_reset_via_otp', parameter, userInfo => {
       this.setState({
         isLoading: false,
-        successMessage: 'Successfully sent! Please check your e-mail address to continue.',
+        // successMessage: 'Successfully sent! Please check your e-mail address to continue.',
         errorMessage: null
       })
 

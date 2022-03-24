@@ -51,7 +51,7 @@ class ForgotPassword extends Component {
     }
     Api.request(config.IS_DEV + '/accounts/request_reset', parameter, userInfo => {
       this.setState({
-        successMessage: 'Successfully sent! Please check your e-mail address to continue.',
+        // successMessage: 'Successfully sent! Please check your e-mail address to continue.',
         errorMessage: null
       })
     }, error => {
@@ -229,6 +229,7 @@ class ForgotPassword extends Component {
                 flexDirection: 'row',
                   paddingTop: 10,
                   paddingBottom: 10,
+                  justifyContent: 'center'
               }}>
                 <Text style={{
                   ...Style.messageText,
