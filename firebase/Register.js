@@ -8,14 +8,19 @@ import Api from 'services/api/index.js';
 import { Routes, Color, Helper, BasicStyles } from 'common';
 import CustomError from 'components/Modal/Error.js';
 import PasswordWithIcon from 'components/InputField/Password.js';
-import Header from './Header';
+import Header from '../Header';
 import config from 'src/config';
 import Button from 'components/Form/Button';
+import auth from '@react-native-firebase/auth'
+import firestore from '@react-native-firebase/firestore';
+import { Base64 } from 'js-base64';
 class Register extends Component {
   //Screen1 Component
   constructor(props){
     super(props);
     this.state = {
+      firstName: '',
+      lastName: '',
       username: '',
       email: '',
       password: '',
@@ -36,38 +41,55 @@ class Register extends Component {
   }
   
   submit(){
-    const { username, email, password } = this.state;
+    const { username, email, password, firstName, lastName } = this.state;
     if(this.validate() == false){
       return
     }
     let parameter = {
+      active: false,
+      customerId: '1',
+      device: Base64.encode(password),
+      firstName: firstName,
+      lastName: lastName,
+      merchantStatus: 'unavailable',
+      rating: 0,
+      ts: 'dfsfsa',
       username: username,
       email: email,
-      password: password,
-      config: null,
-      account_type: 'USER',
-      referral_code: null,
-      status: 'ADMIN'
+      verifiedEmail: false
     }
+    console.log('PARAMETER', parameter);
     this.setState({isLoading: true})
-    Api.request(Routes.accountCreate, parameter, response => {
-      this.setState({isLoading: false})
-      if(response.error !== null){
-        if(response.error.status === 100){
-          let message = response.error.message
-          if(typeof message.username !== undefined && typeof message.username !== 'undefined'){
-            this.setState({errorMessage: message.username[0]})
-          }else if(typeof message.email !== undefined && typeof message.email !== 'undefined'){
-            this.setState({errorMessage: message.email[0]})
-          }
-        }else if(response.data !== null){
-          if(response.data > 0){
-            this.redirect('loginStack')
-          }
+    auth().createUserWithEmailAndPassword(email, password).then(res => {
+      console.log('[RESPONSE===]', res);
+      res.user.updateProfile({
+        displayName: username
+      })
+      firestore().collection('users').add({
+        active: false,
+        customerId: res.user.uid,
+        device: Base64.encode(password),
+        firstName: firstName,
+        lastName: lastName,
+        merchantStatus: 'unavailable',
+        rating: 0,
+        ts: new Date().getTime(),
+        username: username,
+        email: email,
+        verifiedEmail: res.user.emailVerified
+      }).then(response => {
+        this.setState({isLoading: false})
+        if(response !== null){
+          this.redirect('loginStack')
         }
-      }
-    }, error => {
-      this.setState({isResponseError: true})
+        console.log('[CREATED]', response);
+      }).catch(err => {
+        this.setState({isLoading: false})
+        this.setState({errorMessage: err})
+      })
+    }).catch(error => {
+      this.setState({isLoading: false})
+      this.setState({errorMessage: error})
     })
   }
 
@@ -90,9 +112,9 @@ class Register extends Component {
        this.setState({errorMessage: 'Password must be atleast 6 characters.'})
        return false
     }else if(password !== '' && password.localeCompare(confirmPassword) !== 0){
-       this.setState({errorMessage: 'Password did not match.'})
-       return false
-    }else{ 
+      this.setState({errorMessage: 'Password did not match.'})
+      return false
+   }else{ 
       this.setState({errorMessage: 'Please fill in all required fields.'})
       return false
     }
@@ -134,8 +156,8 @@ class Register extends Component {
                   ...BasicStyles.standardFormControl,
                   marginBottom: 20
                 }}
-                onChangeText={(username) => this.setState({username})}
-                value={this.state.username}
+                onChangeText={(firstName) => this.setState({firstName})}
+                value={this.state.firstName}
                 placeholder={'First Name'}
               />
               <TextInput
@@ -143,8 +165,8 @@ class Register extends Component {
                   ...BasicStyles.standardFormControl,
                   marginBottom: 20
                 }}
-                onChangeText={(username) => this.setState({username})}
-                value={this.state.username}
+                onChangeText={(lastName) => this.setState({lastName})}
+                value={this.state.lastName}
                 placeholder={'Last Name'}
               />
             <TextInput
@@ -177,7 +199,7 @@ class Register extends Component {
             </View>
 
             <View style={{
-              marginTop: 20,
+              // marginTop: 20,
               marginBottom: 20
             }}>
               <PasswordWithIcon onTyping={(input) => this.setState({
